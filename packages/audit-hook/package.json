@@ -1,5 +1,5 @@
 {
-  "name": "@civicteam/audit-hook",
+  "name": "@civic/audit-hook",
   "version": "0.0.1",
   "private": true,
   "main": "./dist/index.js",
@@ -18,7 +18,7 @@
   "dependencies": {
     "@trpc/server": "^11.1.2",
     "dotenv": "^16.3.1",
-    "@civicteam/hook-common": "workspace:^",
+    "@civic/hook-common": "workspace:^",
     "pg": "^8.11.3"
   },
   "devDependencies": {

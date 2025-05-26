@@ -1,4 +1,4 @@
-import type { HookResponse, ToolCall } from "@civicteam/hook-common/types";
+import type { HookResponse, ToolCall } from "@civic/hook-common/types";
 import { describe, expect, it, vi } from "vitest";
 import {
   processRequestThroughHooks,

@@ -1,5 +1,5 @@
 {
-  "name": "@civicteam/fetch-docs",
+  "name": "@civic/fetch-docs",
   "version": "0.0.1",
   "private": true,
   "main": "./dist/index.js",

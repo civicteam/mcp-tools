@@ -8,7 +8,7 @@ import type {
   Hook,
   HookResponse,
   ToolCall,
-} from "@civicteam/hook-common/types";
+} from "@civic/hook-common/types";
 
 export class GuardrailHook implements Hook {
   // Example: Domain allowlist for fetch-docs MCP server

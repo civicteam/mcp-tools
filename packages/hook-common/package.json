@@ -1,5 +1,5 @@
 {
-  "name": "@civicteam/hook-common",
+  "name": "@civic/hook-common",
   "version": "0.0.1",
   "private": true,
   "main": "./dist/index.js",

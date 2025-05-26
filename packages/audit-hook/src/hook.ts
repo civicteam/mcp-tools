@@ -8,7 +8,7 @@ import type {
   Hook,
   HookResponse,
   ToolCall,
-} from "@civicteam/hook-common/types";
+} from "@civic/hook-common/types";
 import type { AuditEntry, AuditLogger } from "./audit/types.js";
 
 export class AuditHook implements Hook {

@@ -4,8 +4,8 @@
  * Handles processing of tool calls through hook chains
  */
 
-import type { HookClient } from "@civicteam/hook-common/client";
-import type { HookResponse, ToolCall } from "@civicteam/hook-common/types";
+import type { HookClient } from "@civic/hook-common/client";
+import type { HookResponse, ToolCall } from "@civic/hook-common/types";
 
 export interface ProcessRequestResult {
   toolCall: ToolCall;

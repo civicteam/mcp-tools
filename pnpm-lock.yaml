@@ -20,7 +20,7 @@ importers:
 
   packages/audit-hook:
     dependencies:
-      '@civicteam/hook-common':
+      '@civic/hook-common':
         specifier: workspace:^
         version: link:../hook-common
       '@trpc/server':
@@ -76,7 +76,7 @@ importers:
 
   packages/guardrail-hook:
     dependencies:
-      '@civicteam/hook-common':
+      '@civic/hook-common':
         specifier: workspace:^
         version: link:../hook-common
       '@trpc/server':
@@ -117,7 +117,7 @@ importers:
 
   packages/passthrough-mcp-server:
     dependencies:
-      '@civicteam/hook-common':
+      '@civic/hook-common':
         specifier: workspace:^
         version: link:../hook-common
       '@modelcontextprotocol/sdk':
@@ -148,7 +148,7 @@ importers:
 
   packages/simple-log-hook:
     dependencies:
-      '@civicteam/hook-common':
+      '@civic/hook-common':
         specifier: workspace:^
         version: link:../hook-common
       '@trpc/server':

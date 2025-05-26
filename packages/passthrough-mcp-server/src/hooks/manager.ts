@@ -7,7 +7,7 @@
 import {
   type HookClient,
   createHookClients,
-} from "@civicteam/hook-common/client";
+} from "@civic/hook-common/client";
 import type { Config } from "../utils/config.js";
 
 // Cache for hook clients

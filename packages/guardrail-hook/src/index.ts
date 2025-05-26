@@ -8,7 +8,7 @@
  */
 
 import * as process from "node:process";
-import { createHookRouter } from "@civicteam/hook-common/router";
+import { createHookRouter } from "@civic/hook-common/router";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { GuardrailHook } from "./hook.js";
 

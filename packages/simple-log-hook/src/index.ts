@@ -6,12 +6,12 @@
  */
 
 import * as process from "node:process";
-import { createHookRouter } from "@civicteam/hook-common/router";
+import { createHookRouter } from "@civic/hook-common/router";
 import type {
   Hook,
   HookResponse,
   ToolCall,
-} from "@civicteam/hook-common/types";
+} from "@civic/hook-common/types";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 
 /**

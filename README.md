@@ -1,25 +1,25 @@
-# @civicteam/mcp-tools
+# @civic/mcp-tools
 
 A collection of Model Context Protocol (MCP) tools including a passthrough server and hook system for request/response interception and modification.
 
 ## Packages
 
-### @civicteam/passthrough-mcp-server
+### @civic/passthrough-mcp-server
 A passthrough MCP server that proxies requests to other MCP servers while applying configurable hooks.
 
-### @civicteam/hook-common
+### @civic/hook-common
 Common utilities and types for building MCP hooks.
 
-### @civicteam/audit-hook
+### @civic/audit-hook
 An audit hook that logs all MCP requests and responses for monitoring and debugging.
 
-### @civicteam/guardrail-hook
+### @civic/guardrail-hook
 A guardrail hook that can filter and modify MCP requests/responses based on configurable rules. Includes an example domain filtering implementation for the fetch-docs server.
 
-### @civicteam/simple-log-hook
+### @civic/simple-log-hook
 A minimal hook implementation that logs requests and responses to console. Great for understanding the hook interface.
 
-### @civicteam/fetch-docs
+### @civic/fetch-docs
 An MCP server that fetches and converts web pages to markdown. Useful for testing the passthrough server and hooks.
 
 ## Setup

@@ -1,5 +1,5 @@
 {
-  "name": "@civicteam/guardrail-hook",
+  "name": "@civic/guardrail-hook",
   "version": "0.0.1",
   "private": true,
   "main": "./dist/index.js",
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@trpc/server": "^11.1.2",
-    "@civicteam/hook-common": "workspace:^"
+    "@civic/hook-common": "workspace:^"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
