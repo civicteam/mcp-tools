@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
-    "fastmcp": "^1.25.0",
+    "fastmcp": "^2.1.3",
     "@civic/hook-common": "workspace:^",
     "zod": "^3.24.3"
   },
