@@ -29,6 +29,6 @@ ALLOWED_TOOLS_STRING=$(echo "$ALLOWED_TOOLS" | jq -r 'join(",")')
 
 # Run claude with extracted configuration
 claude --verbose --output-format stream-json \
-  --mcp-config "$MCP_SERVERS" \
+  --mcp-config "{ \"mcpServers\": $MCP_SERVERS }" \
   --allowedTools "$ALLOWED_TOOLS_STRING" \
   -p "$PROMPT" | jq

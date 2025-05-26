@@ -70,3 +70,71 @@ jobs:
       
       - name: Run type check
         run: pnpm turbo run typecheck
+
+  integration-test:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build all packages
+        run: pnpm build
+      
+      - name: Install Claude Code CLI
+        run: pnpm install -g @anthropic-ai/claude-code
+      
+      - name: Start fetch-docs server
+        run: |
+          cd packages/fetch-docs
+          PORT=33003 pnpm dev &
+          echo "FETCH_DOCS_PID=$!" >> $GITHUB_ENV
+          sleep 5
+      
+      - name: Start simple-log-hook
+        run: |
+          cd packages/simple-log-hook
+          PORT=33006 pnpm dev &
+          echo "SIMPLE_LOG_PID=$!" >> $GITHUB_ENV
+          sleep 5
+      
+      - name: Run integration test
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          cd test
+          chmod +x test.sh
+          # Run test with timeout and capture output
+          timeout 60 ./test.sh simple-log-passthrough.json > test-output.txt 2>&1 || true
+          
+          echo "Test output:"
+          cat test-output.txt
+          
+          # Check for successful fetch of Civic docs
+          if grep -q '"type":"tool_result"' test-output.txt && grep -q "Getting Started with Civic" test-output.txt; then
+            echo "✅ Integration test passed - found expected tool_result with Civic content"
+            exit 0
+          else
+            echo "❌ Integration test failed - expected content not found"
+            echo "Looking for: type=tool_result and 'Getting Started with Civic'"
+            exit 1
+          fi
+      
+      - name: Cleanup background processes
+        if: always()
+        run: |
+          if [ ! -z "$FETCH_DOCS_PID" ]; then kill $FETCH_DOCS_PID || true; fi
+          if [ ! -z "$SIMPLE_LOG_PID" ]; then kill $SIMPLE_LOG_PID || true; fi
