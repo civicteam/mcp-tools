@@ -1,6 +1,13 @@
 # @civic/hook-common
 
-Common utilities and types for implementing MCP (Model Context Protocol) hooks. This package provides the core functionality for creating hooks that can intercept and modify tool calls in MCP servers.
+Common utilities and types for implementing MCP (Model Context Protocol) server hooks.
+
+This package provides the core functionality for creating hooks that can intercept and modify tool calls in MCP servers.
+
+Think of it as a middleware layer that allows you to analyze, modify, or validate tool calls before they are executed,
+and to process the responses from those tool calls after execution.
+
+It is designed to be used in combination with the Passthrough Proxy MCP server.
 
 ## Installation
 

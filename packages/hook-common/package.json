@@ -1,9 +1,23 @@
 {
   "name": "@civic/hook-common",
   "version": "0.0.1",
-  "private": true,
+  "description": "Common utilities and types for implementing MCP server hooks",
+  "keywords": ["mcp", "hooks", "middleware", "toolcall", "interceptor"],
+  "homepage": "https://github.com/civicteam/mcp-tools/tree/main/packages/hook-common",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/civicteam/mcp-tools.git",
+    "directory": "packages/hook-common"
+  },
+  "license": "MIT",
+  "author": "Civic Technologies, Inc.",
   "main": "./dist/index.js",
   "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "package.json"
+  ],
   "exports": {
     "./types": "./dist/types.js",
     "./router": "./dist/router.js",
@@ -16,7 +30,12 @@
     "lint": "biome check .",
     "lint:fix": "biome check --fix .",
     "test": "vitest",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "prepublishOnly": "pnpm run build"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
     "@trpc/server": "^11.1.2",

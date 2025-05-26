@@ -1,0 +1,60 @@
+# Add 'documentation' label to any change in docs files
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: 
+      - '**/*.md'
+      - 'docs/**'
+
+# Add 'hook-common' label to changes in the hook-common package
+hook-common:
+  - changed-files:
+    - any-glob-to-any-file: 'packages/hook-common/**'
+
+# Add 'passthrough-mcp-server' label to changes in the passthrough-mcp-server package
+passthrough-mcp-server:
+  - changed-files:
+    - any-glob-to-any-file: 'packages/passthrough-mcp-server/**'
+
+# Add 'audit-hook' label to changes in the audit-hook package
+audit-hook:
+  - changed-files:
+    - any-glob-to-any-file: 'packages/audit-hook/**'
+
+# Add 'guardrail-hook' label to changes in the guardrail-hook package
+guardrail-hook:
+  - changed-files:
+    - any-glob-to-any-file: 'packages/guardrail-hook/**'
+
+# Add 'simple-log-hook' label to changes in the simple-log-hook package
+simple-log-hook:
+  - changed-files:
+    - any-glob-to-any-file: 'packages/simple-log-hook/**'
+
+# Add 'fetch-docs' label to changes in the fetch-docs package
+fetch-docs:
+  - changed-files:
+    - any-glob-to-any-file: 'packages/fetch-docs/**'
+
+# Add 'dependencies' label to dependency updates
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/package.json'
+      - '**/pnpm-lock.yaml'
+      - '.npmrc'
+
+# Add 'ci' label to CI/CD changes
+ci:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/**'
+      - 'turbo.json'
+
+# Add 'test' label to test changes
+test:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.test.ts'
+      - '**/*.spec.ts'
+      - '**/vitest.config.ts'
+      - '**/test/**'
