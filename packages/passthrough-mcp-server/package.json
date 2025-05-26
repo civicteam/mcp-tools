@@ -8,6 +8,7 @@
     "dev": "tsx watch src/index.ts",
     "dev:stdio": "tsx watch src/index.ts -- --stdio",
     "build": "tsc",
+    "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --fix .",
     "start": "node dist/index.js",
