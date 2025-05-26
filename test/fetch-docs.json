@@ -1,0 +1,12 @@
+{
+  "prompt": "fetch docs.civic.com using the fetch-docs MCP server",
+  "allowedTools": ["mcp__fetch-docs__fetch"],
+  "mcpServers": {
+    "fetch-docs": {
+      "type": "stdio",
+      "command": "../packages/fetch-docs/run.sh",
+      "args": [],
+      "env": {}
+    }
+  }
+}
