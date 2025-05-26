@@ -14,7 +14,9 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
-    "lint:fix": "biome check --fix ."
+    "lint:fix": "biome check --fix .",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@trpc/server": "^11.1.2",
@@ -24,6 +26,8 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vitest": "^2.1.8",
+    "@vitest/coverage-v8": "^2.1.8"
   }
 }
