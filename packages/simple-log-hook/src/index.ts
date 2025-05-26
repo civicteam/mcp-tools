@@ -1,14 +1,18 @@
 /**
  * Simple Log Hook - Minimal logging hook implementation
- * 
+ *
  * Demonstrates the simplest possible hook implementation
  * that just logs tool calls to console.
  */
 
 import * as process from "node:process";
-import { createHTTPServer } from '@trpc/server/adapters/standalone';
-import { createHookRouter } from '@civicteam/hook-common/router';
-import type { Hook, ToolCall, HookResponse } from '@civicteam/hook-common/types';
+import { createHookRouter } from "@civicteam/hook-common/router";
+import type {
+  Hook,
+  HookResponse,
+  ToolCall,
+} from "@civicteam/hook-common/types";
+import { createHTTPServer } from "@trpc/server/adapters/standalone";
 
 /**
  * Minimal hook implementation that logs to console
@@ -16,18 +20,21 @@ import type { Hook, ToolCall, HookResponse } from '@civicteam/hook-common/types'
 class SimpleLogHook implements Hook {
   async processRequest(toolCall: ToolCall): Promise<HookResponse> {
     console.log(`[REQUEST] ${toolCall.name}`, toolCall.arguments);
-    
+
     return {
-      response: 'continue',
+      response: "continue",
       body: toolCall,
     };
   }
 
-  async processResponse(response: any, originalToolCall: ToolCall): Promise<HookResponse> {
+  async processResponse(
+    response: unknown,
+    originalToolCall: ToolCall,
+  ): Promise<HookResponse> {
     console.log(`[RESPONSE] ${originalToolCall.name}`, response);
-    
+
     return {
-      response: 'continue',
+      response: "continue",
       body: response,
     };
   }

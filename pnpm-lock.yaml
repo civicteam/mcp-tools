@@ -40,7 +40,7 @@ importers:
         specifier: ^8.10.9
         version: 8.15.2
       tsx:
-        specifier: ^4.5.0
+        specifier: ^4.19.4
         version: 4.19.4
       typescript:
         specifier: ^5.2.2
@@ -68,7 +68,7 @@ importers:
         specifier: ^5.0.4
         version: 5.0.5
       tsx:
-        specifier: ^4.5.0
+        specifier: ^4.19.4
         version: 4.19.4
       typescript:
         specifier: ^5.2.2
@@ -87,7 +87,7 @@ importers:
         specifier: ^20.10.0
         version: 20.17.50
       tsx:
-        specifier: ^4.5.0
+        specifier: ^4.19.4
         version: 4.19.4
       typescript:
         specifier: ^5.2.2
@@ -137,7 +137,7 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(vitest@2.1.9(@types/node@20.17.50))
       tsx:
-        specifier: ^4.5.0
+        specifier: ^4.19.4
         version: 4.19.4
       typescript:
         specifier: ^5.2.2
@@ -159,7 +159,7 @@ importers:
         specifier: ^20.10.0
         version: 20.17.50
       tsx:
-        specifier: ^4.5.0
+        specifier: ^4.19.4
         version: 4.19.4
       typescript:
         specifier: ^5.2.2

@@ -8,13 +8,16 @@
  * Uses tRPC-based hooks instead of MCP for hook communication.
  */
 
-import { getOrCreateSession } from "../utils/session.js";
-import { createTargetClient } from "../client/client.js";
-import { Config } from "../utils/config.js";
-import { Context } from "fastmcp";
 import type { ToolCall } from "@civicteam/hook-common/types";
+import type { Context } from "fastmcp";
+import { createTargetClient } from "../client/client.js";
 import { getHookClients } from "../hooks/manager.js";
-import { processRequestThroughHooks, processResponseThroughHooks } from "../hooks/processor.js";
+import {
+  processRequestThroughHooks,
+  processResponseThroughHooks,
+} from "../hooks/processor.js";
+import type { Config } from "../utils/config.js";
+import { getOrCreateSession } from "../utils/session.js";
 
 /**
  * Create a passthrough handler for a specific tool
@@ -27,16 +30,15 @@ import { processRequestThroughHooks, processResponseThroughHooks } from "../hook
  */
 export function createPassthroughHandler(config: Config, toolName: string) {
   return async function passthrough(
-    args: any,
-    context: Context<{ id: string }>
-  ): Promise<any> {
+    args: unknown,
+    context: Context<{ id: string }>,
+  ): Promise<unknown> {
     const { log, session } = context;
     const sessionId = session?.id || "default";
 
     // Get or create session with target client
-    const sessionData = await getOrCreateSession(
-      sessionId,
-      () => createTargetClient(config.client, sessionId)
+    const sessionData = await getOrCreateSession(sessionId, () =>
+      createTargetClient(config.client, sessionId),
     );
 
     // Increment request counter
@@ -49,8 +51,8 @@ export function createPassthroughHandler(config: Config, toolName: string) {
       metadata: {
         sessionId,
         timestamp: new Date().toISOString(),
-        source: 'passthrough-server',
-      }
+        source: "passthrough-server",
+      },
     };
 
     // Get hook clients
@@ -60,37 +62,49 @@ export function createPassthroughHandler(config: Config, toolName: string) {
     const requestResult = await processRequestThroughHooks(
       toolCall,
       hookClients,
-      log
+      log,
     );
 
     // Initialize response
-    let response: any;
+    let response: unknown;
 
     // If no hook rejected and we should call the target service
     if (!requestResult.wasRejected) {
       // Log the request to target server
-      log.info(`Passing through request #${sessionData.requestCount} for tool '${requestResult.toolCall.name}' from session ${sessionId}`);
+      log.info(
+        `Passing through request #${sessionData.requestCount} for tool '${requestResult.toolCall.name}' from session ${sessionId}`,
+      );
 
       // Call the target client's tool with arguments (potentially modified by hook)
-      response = await sessionData.targetClient.callTool(requestResult.toolCall);
+      const toolCallWithArgs = {
+        ...requestResult.toolCall,
+        arguments:
+          typeof requestResult.toolCall.arguments === "object" &&
+          requestResult.toolCall.arguments !== null
+            ? (requestResult.toolCall.arguments as Record<string, unknown>)
+            : undefined,
+      };
+      response = await sessionData.targetClient.callTool(toolCallWithArgs);
     } else {
       // Use the rejection response
       response = requestResult.rejectionResponse;
-      log.info(`Request rejected by hook, skipping target service call. Using rejection response.`);
+      log.info(
+        "Request rejected by hook, skipping target service call. Using rejection response.",
+      );
     }
 
     // Process responses through hooks in reverse order if configured
     if (hookClients.length > 0) {
-      const startIndex = requestResult.wasRejected 
-        ? requestResult.lastProcessedIndex  // Start from the hook that rejected
+      const startIndex = requestResult.wasRejected
+        ? requestResult.lastProcessedIndex // Start from the hook that rejected
         : hookClients.length - 1; // Start from the last hook
-      
+
       response = await processResponseThroughHooks(
         response,
         requestResult.toolCall,
         hookClients,
         startIndex,
-        log
+        log,
       );
     }
 

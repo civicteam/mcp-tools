@@ -9,14 +9,14 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { ClientConfig } from "../utils/config.js";
+import type { ClientConfig } from "../utils/config.js";
 
 /**
  * Create a client that connects to the target MCP server
  */
 export async function createTargetClient(
   clientConfig: ClientConfig,
-  clientId: string
+  clientId: string,
 ): Promise<Client> {
   // Create MCP client
   const client = new Client(
@@ -26,18 +26,21 @@ export async function createTargetClient(
     },
     {
       capabilities: {}, // No special capabilities needed
-    }
+    },
   );
 
   // Create appropriate transport based on configuration
   const url = new URL(clientConfig.url);
-  const transport = clientConfig.type === "sse"
-    ? new SSEClientTransport(url)
-    : new StreamableHTTPClientTransport(url);
+  const transport =
+    clientConfig.type === "sse"
+      ? new SSEClientTransport(url)
+      : new StreamableHTTPClientTransport(url);
 
   // Connect the client to the target server
   await client.connect(transport);
-  console.log(`Client ${clientId} connected to target server at ${url.toString()}`);
-  
+  console.log(
+    `Client ${clientId} connected to target server at ${url.toString()}`,
+  );
+
   return client;
 }

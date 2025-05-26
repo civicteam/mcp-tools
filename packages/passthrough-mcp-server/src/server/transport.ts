@@ -5,18 +5,18 @@
  * the server configuration. Supports stdio, SSE, and HTTP Stream transports.
  */
 
-import { ServerConfig } from "../utils/config.js";
+import type { ServerConfig } from "../utils/config.js";
 
 /**
  * Get server transport configuration based on type
  */
 export function getServerTransportConfig(config: ServerConfig) {
   if (config.transportType === "stdio") {
-    return { 
-      transportType: "stdio" as const 
+    return {
+      transportType: "stdio" as const,
     };
   }
-  
+
   if (config.transportType === "sse") {
     return {
       transportType: "sse" as const,
@@ -26,7 +26,7 @@ export function getServerTransportConfig(config: ServerConfig) {
       },
     };
   }
-  
+
   // Default to HTTP stream
   return {
     transportType: "httpStream" as const,

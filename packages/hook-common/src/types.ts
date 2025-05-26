@@ -1,20 +1,22 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Schema for tool call metadata
  */
-export const ToolCallMetadataSchema = z.object({
-  sessionId: z.string(),
-  timestamp: z.string(),
-  source: z.string().optional(),
-}).passthrough();
+export const ToolCallMetadataSchema = z
+  .object({
+    sessionId: z.string(),
+    timestamp: z.string(),
+    source: z.string().optional(),
+  })
+  .passthrough();
 
 /**
  * Schema for a tool call
  */
 export const ToolCallSchema = z.object({
   name: z.string(),
-  arguments: z.any(),
+  arguments: z.unknown(),
   metadata: ToolCallMetadataSchema.optional(),
 });
 
@@ -22,8 +24,8 @@ export const ToolCallSchema = z.object({
  * Schema for hook response
  */
 export const HookResponseSchema = z.object({
-  response: z.enum(['continue', 'abort']),
-  body: z.any(),
+  response: z.enum(["continue", "abort"]),
+  body: z.unknown(),
   reason: z.string().optional(),
 });
 
@@ -42,9 +44,12 @@ export interface Hook {
    * Process an incoming tool call request
    */
   processRequest(toolCall: ToolCall): Promise<HookResponse>;
-  
+
   /**
    * Process a tool call response
    */
-  processResponse(response: any, originalToolCall: ToolCall): Promise<HookResponse>;
+  processResponse(
+    response: unknown,
+    originalToolCall: ToolCall,
+  ): Promise<HookResponse>;
 }

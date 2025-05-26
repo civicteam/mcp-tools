@@ -9,10 +9,9 @@
 
 import * as path from "node:path";
 import * as process from "node:process";
+import { createHookRouter } from "@civicteam/hook-common/router";
+import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import dotenv from "dotenv";
-import { createHTTPServer } from '@trpc/server/adapters/standalone';
-import { createHookRouter } from '@civicteam/hook-common/router';
-import { AuditHook } from './hook.js';
 import {
   type AuditLogger,
   CompositeAuditLogger,
@@ -20,6 +19,7 @@ import {
   FileAuditLogger,
   PostgresAuditLogger,
 } from "./audit/index.js";
+import { AuditHook } from "./hook.js";
 
 // Load environment variables from .env file if it exists
 dotenv.config();

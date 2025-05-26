@@ -1,7 +1,7 @@
-import { createTRPCClient, httpBatchLink } from '@trpc/client';
-import superjson from 'superjson';
-import type { HookRouter } from './router.js';
-import type { ToolCall, HookResponse } from './types.js';
+import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import superjson from "superjson";
+import type { HookRouter } from "./router.js";
+import type { HookResponse, ToolCall } from "./types.js";
 
 /**
  * Configuration for a hook client
@@ -40,7 +40,7 @@ export class HookClient {
       console.error(`Hook ${this.name} request processing failed:`, error);
       // On error, continue with unmodified request
       return {
-        response: 'continue',
+        response: "continue",
         body: toolCall,
       };
     }
@@ -49,14 +49,20 @@ export class HookClient {
   /**
    * Process a response through the hook
    */
-  async processResponse(response: any, originalToolCall: ToolCall): Promise<HookResponse> {
+  async processResponse(
+    response: unknown,
+    originalToolCall: ToolCall,
+  ): Promise<HookResponse> {
     try {
-      return await this.client.processResponse.mutate({ response, originalToolCall });
+      return await this.client.processResponse.mutate({
+        response,
+        originalToolCall,
+      });
     } catch (error) {
       console.error(`Hook ${this.name} response processing failed:`, error);
       // On error, continue with unmodified response
       return {
-        response: 'continue',
+        response: "continue",
         body: response,
       };
     }
@@ -67,5 +73,5 @@ export class HookClient {
  * Create hook clients from configuration
  */
 export function createHookClients(configs: HookClientConfig[]): HookClient[] {
-  return configs.map(config => new HookClient(config));
+  return configs.map((config) => new HookClient(config));
 }

@@ -15,9 +15,11 @@ export class FileAuditLogger implements AuditLogger {
 
   async log(entry: AuditEntry): Promise<void> {
     try {
-      const responseClause = `${entry.response ? ", Response: " + JSON.stringify(entry.response) : ""}`;
+      const responseClause = `${entry.response ? `, Response: ${JSON.stringify(entry.response)}` : ""}`;
       const argumentsClause = `, Arguments: ${JSON.stringify(entry.arguments)}`;
-      const metadataClause = entry.metadata ? `, Metadata: ${JSON.stringify(entry.metadata)}` : '';
+      const metadataClause = entry.metadata
+        ? `, Metadata: ${JSON.stringify(entry.metadata)}`
+        : "";
       const logEntry = `[${entry.timestamp}] Session: ${entry.sessionId}, Tool: ${entry.tool}${argumentsClause}${responseClause}${metadataClause}\n`;
 
       await fs.appendFile(this.filePath, logEntry, { encoding: "utf8" });

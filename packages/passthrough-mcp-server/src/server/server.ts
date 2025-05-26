@@ -6,13 +6,29 @@
  * registers all available tools from the target server.
  */
 
-import { FastMCP } from "fastmcp";
-import { generateSessionId } from "../utils/session.js";
+import type { AudioContent } from "@modelcontextprotocol/sdk/types.js";
+import {
+  type ContentResult,
+  type Context,
+  FastMCP,
+  type ImageContent,
+  type TextContent,
+  Tool,
+} from "fastmcp";
 import { createTargetClient } from "../client/client.js";
-import { createPassthroughHandler } from "./passthrough.js";
-import { Config } from "../utils/config.js";
+import type { Config } from "../utils/config.js";
 import { extractToolParameters } from "../utils/schemaConverter.js";
+import { generateSessionId } from "../utils/session.js";
+import { createPassthroughHandler } from "./passthrough.js";
 
+type ToolHandler = (
+  args: unknown,
+  context: Context<{
+    id: string;
+  }>,
+) => Promise<
+  string | AudioContent | ContentResult | ImageContent | TextContent
+>;
 /**
  * Create a FastMCP server instance
  */
@@ -33,13 +49,10 @@ export function createServer(): FastMCP<{ id: string }> {
  */
 export async function discoverAndRegisterTools(
   server: FastMCP<{ id: string }>,
-  config: Config
+  config: Config,
 ): Promise<void> {
   // Create a temporary client to discover available tools
-  const tempClient = await createTargetClient(
-    config.client,
-    "discovery"
-  );
+  const tempClient = await createTargetClient(config.client, "discovery");
 
   // Get list of tools from the target server
   const { tools } = await tempClient.listTools();
@@ -63,9 +76,10 @@ export async function discoverAndRegisterTools(
 
     server.addTool({
       name: tool.name,
-      description: tool.description || `Passthrough to ${tool.name} on target server`,
+      description:
+        tool.description || `Passthrough to ${tool.name} on target server`,
       parameters,
-      execute: toolHandler,
+      execute: toolHandler as ToolHandler,
     });
 
     console.log(`Registered passthrough for tool: ${tool.name}`);

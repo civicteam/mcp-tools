@@ -6,7 +6,7 @@
  * Each session maintains its own connection to the target MCP server.
  */
 
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
 
 export interface SessionData {
   id: string;
@@ -22,18 +22,22 @@ const sessions = new Map<string, SessionData>();
  */
 export async function getOrCreateSession(
   sessionId: string,
-  createClient: () => Promise<Client>
+  createClient: () => Promise<Client>,
 ): Promise<SessionData> {
   if (!sessions.has(sessionId)) {
     const targetClient = await createClient();
-    sessions.set(sessionId, { 
+    sessions.set(sessionId, {
       id: sessionId,
-      targetClient, 
-      requestCount: 0 
+      targetClient,
+      requestCount: 0,
     });
   }
-  
-  return sessions.get(sessionId)!;
+
+  const session = sessions.get(sessionId);
+  if (!session) {
+    throw new Error("Session should exist after creation");
+  }
+  return session;
 }
 
 /**

@@ -1,16 +1,16 @@
 /**
  * Guardrail Hook tRPC Server
- * 
+ *
  * This server provides guardrails for tool calls, allowing validation,
  * modification, or rejection of tool calls before they reach the target server.
- * 
+ *
  * It implements the hook interface for the passthrough-mcp-server.
  */
 
 import * as process from "node:process";
-import { createHTTPServer } from '@trpc/server/adapters/standalone';
-import { createHookRouter } from '@civicteam/hook-common/router';
-import { GuardrailHook } from './hook.js';
+import { createHookRouter } from "@civicteam/hook-common/router";
+import { createHTTPServer } from "@trpc/server/adapters/standalone";
+import { GuardrailHook } from "./hook.js";
 
 // Configuration
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT) : 33005;

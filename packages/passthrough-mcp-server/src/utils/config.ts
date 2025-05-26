@@ -16,7 +16,7 @@ export interface ServerConfig {
 }
 
 export interface ClientConfig {
-  type: 'sse' | 'stream';
+  type: "sse" | "stream";
   url: string;
 }
 
@@ -43,7 +43,7 @@ export function parseServerTransport(args: string[]): TransportType {
 /**
  * Parse client transport type from environment
  */
-export function parseClientTransport(env: NodeJS.ProcessEnv): 'sse' | 'stream' {
+export function parseClientTransport(env: NodeJS.ProcessEnv): "sse" | "stream" {
   return env.TARGET_SERVER_TRANSPORT === "sse" ? "sse" : "stream";
 }
 
@@ -52,14 +52,17 @@ export function parseClientTransport(env: NodeJS.ProcessEnv): 'sse' | 'stream' {
  */
 export function parseHookUrls(hooksEnv?: string): string[] {
   if (!hooksEnv) return [];
-  return hooksEnv.split(',').map(url => url.trim()).filter(url => url.length > 0);
+  return hooksEnv
+    .split(",")
+    .map((url) => url.trim())
+    .filter((url) => url.length > 0);
 }
 
 /**
  * Convert hook URLs to hook configurations
  */
 export function createHookConfigs(urls: string[]): HookConfig[] {
-  return urls.map(url => {
+  return urls.map((url) => {
     try {
       const urlObj = new URL(url);
       return {
@@ -90,7 +93,7 @@ export function loadConfig(): Config {
 
   // Hooks configuration
   const hookUrls = parseHookUrls(process.env.HOOKS);
-  
+
   const config: Config = {
     server: {
       port,
