@@ -1,0 +1,15 @@
+{
+  "prompt": "use the passthrough MCP server to fetch https://docs.civic.com/auth",
+  "allowedTools": ["mcp__passthrough-mcp-server__fetch"],
+  "mcpServers": {
+    "passthrough-mcp-server": {
+      "type": "stdio",
+      "command": "../packages/passthrough-mcp-server/run.sh",
+      "args": [],
+      "env": {
+        "TARGET_SERVER_URL": "http://localhost:33003/stream",
+        "HOOKS": "http://localhost:3200/hook?threshold=0.2"
+      }
+    }
+  }
+}
