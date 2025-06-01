@@ -206,7 +206,12 @@ describe("Hook Processor", () => {
         0,
       );
 
-      expect(result).toBe("Response filtered");
+      expect(result).toEqual({
+        response: { content: "sensitive data" },
+        wasRejected: true,
+        rejectionResponse: "Response filtered",
+        lastProcessedIndex: 0,
+      });
     });
 
     it("should allow hooks to modify response", async () => {
@@ -230,7 +235,12 @@ describe("Hook Processor", () => {
         0,
       );
 
-      expect(result).toEqual(modifiedResponse);
+      expect(result).toEqual({
+        response: modifiedResponse,
+        wasRejected: false,
+        rejectionResponse: null,
+        lastProcessedIndex: 0,
+      });
     });
   });
 });

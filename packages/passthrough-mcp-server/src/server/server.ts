@@ -6,7 +6,7 @@
  * registers all available tools from the target server.
  */
 
-import type { AudioContent } from "@modelcontextprotocol/sdk/types.js";
+import type { AudioContent, Tool as MCPTool } from "@modelcontextprotocol/sdk/types.js";
 import {
   type ContentResult,
   type Context,
@@ -17,6 +17,7 @@ import {
 } from "fastmcp";
 import { createTargetClient } from "../client/client.js";
 import type { Config } from "../utils/config.js";
+import { logger } from "../utils/logger.js";
 import { extractToolParameters } from "../utils/schemaConverter.js";
 import { generateSessionId } from "../utils/session.js";
 import { createPassthroughHandler } from "./passthrough.js";
@@ -29,6 +30,16 @@ type ToolHandler = (
 ) => Promise<
   string | AudioContent | ContentResult | ImageContent | TextContent
 >;
+
+// Store discovered tools in memory
+let discoveredTools: MCPTool[] = [];
+
+/**
+ * Get the list of discovered tools
+ */
+export function getDiscoveredTools(): MCPTool[] {
+  return discoveredTools;
+}
 /**
  * Create a FastMCP server instance
  */
@@ -56,15 +67,18 @@ export async function discoverAndRegisterTools(
 
   // Get list of tools from the target server
   const { tools } = await tempClient.listTools();
-  console.log(`Discovered ${tools.length} tools from target server`);
-  console.log("Raw: ", JSON.stringify(tools));
+  logger.info(`Discovered ${tools.length} tools from target server`);
+  logger.debug("Raw: " + JSON.stringify(tools));
 
   if (!tools || !Array.isArray(tools) || tools.length === 0) {
-    console.warn("No tools found on target server");
+    logger.warn("No tools found on target server");
     return;
   }
 
-  console.log(`Discovered ${tools.length} tools from target server`);
+  // Store tools in memory
+  discoveredTools = tools;
+
+  logger.info(`Discovered ${tools.length} tools from target server`);
 
   // Register each tool as a passthrough with its own handler
   for (const tool of tools) {
@@ -82,6 +96,6 @@ export async function discoverAndRegisterTools(
       execute: toolHandler as ToolHandler,
     });
 
-    console.log(`Registered passthrough for tool: ${tool.name}`);
+    logger.info(`Registered passthrough for tool: ${tool.name}`);
   }
 }

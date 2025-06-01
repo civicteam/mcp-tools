@@ -18,6 +18,13 @@ export const ToolCallSchema = z.object({
   name: z.string(),
   arguments: z.unknown(),
   metadata: ToolCallMetadataSchema.optional(),
+  toolDefinition: z
+    .object({
+      name: z.string(),
+      description: z.string().optional(),
+      inputSchema: z.unknown().optional(),
+    })
+    .optional(),
 });
 
 /**

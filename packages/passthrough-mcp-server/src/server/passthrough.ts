@@ -17,7 +17,9 @@ import {
   processResponseThroughHooks,
 } from "../hooks/processor.js";
 import type { Config } from "../utils/config.js";
+import { logger } from "../utils/logger.js";
 import { getOrCreateSession } from "../utils/session.js";
+import { getDiscoveredTools } from "./server.js";
 
 /**
  * Create a passthrough handler for a specific tool
@@ -33,7 +35,7 @@ export function createPassthroughHandler(config: Config, toolName: string) {
     args: unknown,
     context: Context<{ id: string }>,
   ): Promise<unknown> {
-    const { log, session } = context;
+    const { session } = context;
     const sessionId = session?.id || "default";
 
     // Get or create session with target client
@@ -44,7 +46,11 @@ export function createPassthroughHandler(config: Config, toolName: string) {
     // Increment request counter
     sessionData.requestCount += 1;
 
-    // Create the tool call object with metadata
+    // Find the tool definition from cached tools
+    const discoveredTools = getDiscoveredTools();
+    const toolDefinition = discoveredTools.find((tool) => tool.name === toolName);
+
+    // Create the tool call object with metadata and tool definition
     const toolCall: ToolCall = {
       name: toolName,
       arguments: args,
@@ -53,6 +59,13 @@ export function createPassthroughHandler(config: Config, toolName: string) {
         timestamp: new Date().toISOString(),
         source: "passthrough-server",
       },
+      toolDefinition: toolDefinition
+        ? {
+            name: toolDefinition.name,
+            description: toolDefinition.description,
+            inputSchema: toolDefinition.inputSchema,
+          }
+        : undefined,
     };
 
     // Get hook clients
@@ -62,7 +75,6 @@ export function createPassthroughHandler(config: Config, toolName: string) {
     const requestResult = await processRequestThroughHooks(
       toolCall,
       hookClients,
-      log,
     );
 
     // Initialize response
@@ -71,7 +83,7 @@ export function createPassthroughHandler(config: Config, toolName: string) {
     // If no hook rejected and we should call the target service
     if (!requestResult.wasRejected) {
       // Log the request to target server
-      log.info(
+      logger.info(
         `Passing through request #${sessionData.requestCount} for tool '${requestResult.toolCall.name}' from session ${sessionId}`,
       );
 
@@ -88,7 +100,7 @@ export function createPassthroughHandler(config: Config, toolName: string) {
     } else {
       // Use the rejection response
       response = requestResult.rejectionResponse;
-      log.info(
+      logger.info(
         "Request rejected by hook, skipping target service call. Using rejection response.",
       );
     }
@@ -99,15 +111,29 @@ export function createPassthroughHandler(config: Config, toolName: string) {
         ? requestResult.lastProcessedIndex // Start from the hook that rejected
         : hookClients.length - 1; // Start from the last hook
 
-      response = await processResponseThroughHooks(
+      const responseResult = await processResponseThroughHooks(
         response,
         requestResult.toolCall,
         hookClients,
         startIndex,
-        log,
       );
+
+      logger.info(`Response result: ${JSON.stringify(responseResult)}`)
+
+      // Use the final response or rejection response
+      if (responseResult.wasRejected) {
+        response = {
+          content: [{
+            type: "text",
+            text: responseResult.rejectionResponse
+          }]
+        };
+      } else {
+        response = responseResult.response;
+      }
     }
 
+    logger.info(`Response for tool '${toolName}': ${JSON.stringify(response)}`);
     return response;
   };
 }

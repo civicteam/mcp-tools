@@ -7,6 +7,7 @@
  */
 
 import * as process from "node:process";
+import { configureLoggerForStdio, logger } from "./logger.js";
 
 export type TransportType = "stdio" | "sse" | "httpStream";
 
@@ -87,6 +88,11 @@ export function loadConfig(): Config {
   const port = process.env.PORT ? Number.parseInt(process.env.PORT) : 34000;
   const serverTransport = parseServerTransport(process.argv);
 
+  // Configure logger for stdio mode to avoid interfering with stdout
+  if (serverTransport === "stdio") {
+    configureLoggerForStdio();
+  }
+
   // Client configuration
   const targetUrl = process.env.TARGET_SERVER_URL || "http://localhost:33000";
   const clientTransport = parseClientTransport(process.env);
@@ -109,9 +115,9 @@ export function loadConfig(): Config {
   if (hookUrls.length > 0) {
     config.hooks = createHookConfigs(hookUrls);
 
-    console.log(`${hookUrls.length} tRPC hooks enabled:`);
+    logger.info(`${hookUrls.length} tRPC hooks enabled:`);
     hookUrls.forEach((url, index) => {
-      console.log(`  ${index + 1}. ${url}`);
+      logger.info(`  ${index + 1}. ${url}`);
     });
   }
 

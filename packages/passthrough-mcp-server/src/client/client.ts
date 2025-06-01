@@ -10,6 +10,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { ClientConfig } from "../utils/config.js";
+import { logger } from "../utils/logger.js";
 
 /**
  * Create a client that connects to the target MCP server
@@ -38,7 +39,7 @@ export async function createTargetClient(
 
   // Connect the client to the target server
   await client.connect(transport);
-  console.log(
+  logger.info(
     `Client ${clientId} connected to target server at ${url.toString()}`,
   );
 

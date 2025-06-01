@@ -7,6 +7,7 @@
 
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
+import { logger } from "./logger.js";
 
 /**
  * Convert JSON Schema to Zod schema
@@ -70,7 +71,7 @@ export function convertJsonSchemaToZod(
 
     return z.object(zodSchema);
   } catch (error) {
-    console.warn("Error converting JSON schema to Zod:", error);
+    logger.warn("Error converting JSON schema to Zod: " + error);
     return z.object({});
   }
 }
