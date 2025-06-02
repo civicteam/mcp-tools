@@ -7,11 +7,7 @@
 
 import * as process from "node:process";
 import { createHookRouter } from "@civic/hook-common/router";
-import type {
-  Hook,
-  HookResponse,
-  ToolCall,
-} from "@civic/hook-common/types";
+import type { Hook, HookResponse, ToolCall } from "@civic/hook-common/types";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 
 /**

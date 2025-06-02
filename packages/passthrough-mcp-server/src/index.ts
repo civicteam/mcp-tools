@@ -9,7 +9,11 @@
  * to a target MCP server and relaying the responses back to the client.
  */
 
-import { createServer, discoverAndRegisterTools, getDiscoveredTools } from "./server/server.js";
+import {
+  createServer,
+  discoverAndRegisterTools,
+  getDiscoveredTools,
+} from "./server/server.js";
 import { getServerTransportConfig } from "./server/transport.js";
 import { loadConfig } from "./utils/config.js";
 import { logger } from "./utils/logger.js";
@@ -41,13 +45,13 @@ async function main() {
       `Passthrough MCP Server running with ${config.server.transportType} transport${config.server.transportType !== "stdio" ? ` on port ${config.server.port}` : ""}, connecting to target at ${config.client.url}`,
     );
   } catch (error) {
-    logger.error("Failed to start server: " + error);
+    logger.error(`Failed to start server: ${error}`);
     process.exit(1);
   }
 }
 
 // Start the server
 main().catch((error) => {
-  logger.error("Unhandled error: " + error);
+  logger.error(`Unhandled error: ${error}`);
   process.exit(1);
 });

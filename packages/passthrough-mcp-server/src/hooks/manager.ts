@@ -4,10 +4,7 @@
  * Manages hook clients and caching for the passthrough server
  */
 
-import {
-  type HookClient,
-  createHookClients,
-} from "@civic/hook-common/client";
+import { type HookClient, createHookClients } from "@civic/hook-common/client";
 import type { Config } from "../utils/config.js";
 
 // Cache for hook clients

@@ -71,7 +71,7 @@ export function convertJsonSchemaToZod(
 
     return z.object(zodSchema);
   } catch (error) {
-    logger.warn("Error converting JSON schema to Zod: " + error);
+    logger.warn(`Error converting JSON schema to Zod: ${error}`);
     return z.object({});
   }
 }

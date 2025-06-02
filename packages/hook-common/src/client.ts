@@ -1,7 +1,8 @@
+import type { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
 import type { HookRouter } from "./router.js";
-import type { HookResponse, ToolCall } from "./types.js";
+import type { HookResponse, ToolCall, ToolsListRequest } from "./types.js";
 
 /**
  * Configuration for a hook client
@@ -61,6 +62,66 @@ export class HookClient {
     } catch (error) {
       console.error(`Hook ${this.name} response processing failed:`, error);
       // On error, continue with unmodified response
+      return {
+        response: "continue",
+        body: response,
+      };
+    }
+  }
+
+  /**
+   * Process a tools/list request through the hook
+   */
+  async processToolsList(request: ToolsListRequest): Promise<HookResponse> {
+    try {
+      return await this.client.processToolsList.mutate(request);
+    } catch (error) {
+      // Check if it's a "not implemented" error
+      if (error instanceof Error && error.message.includes("not implemented")) {
+        // Hook doesn't support this method, continue with unmodified request
+        return {
+          response: "continue",
+          body: request,
+        };
+      }
+      console.error(
+        `Hook ${this.name} tools/list request processing failed:`,
+        error,
+      );
+      // On other errors, continue with unmodified request
+      return {
+        response: "continue",
+        body: request,
+      };
+    }
+  }
+
+  /**
+   * Process a tools/list response through the hook
+   */
+  async processToolsListResponse(
+    response: ListToolsResult,
+    originalRequest: ToolsListRequest,
+  ): Promise<HookResponse> {
+    try {
+      return await this.client.processToolsListResponse.mutate({
+        response,
+        originalRequest,
+      });
+    } catch (error) {
+      // Check if it's a "not implemented" error
+      if (error instanceof Error && error.message.includes("not implemented")) {
+        // Hook doesn't support this method, continue with unmodified response
+        return {
+          response: "continue",
+          body: response,
+        };
+      }
+      console.error(
+        `Hook ${this.name} tools/list response processing failed:`,
+        error,
+      );
+      // On other errors, continue with unmodified response
       return {
         response: "continue",
         body: response,

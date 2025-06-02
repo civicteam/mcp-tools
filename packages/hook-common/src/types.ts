@@ -1,3 +1,7 @@
+import {
+  type ListToolsResult,
+  ToolSchema,
+} from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 
 /**
@@ -18,13 +22,15 @@ export const ToolCallSchema = z.object({
   name: z.string(),
   arguments: z.unknown(),
   metadata: ToolCallMetadataSchema.optional(),
-  toolDefinition: z
-    .object({
-      name: z.string(),
-      description: z.string().optional(),
-      inputSchema: z.unknown().optional(),
-    })
-    .optional(),
+  toolDefinition: ToolSchema.optional(),
+});
+
+/**
+ * Schema for tools list request
+ */
+export const ToolsListRequestSchema = z.object({
+  method: z.literal("tools/list"),
+  metadata: ToolCallMetadataSchema.optional(),
 });
 
 /**
@@ -40,6 +46,7 @@ export const HookResponseSchema = z.object({
  * Type definitions
  */
 export type ToolCall = z.infer<typeof ToolCallSchema>;
+export type ToolsListRequest = z.infer<typeof ToolsListRequestSchema>;
 export type HookResponse = z.infer<typeof HookResponseSchema>;
 export type ToolCallMetadata = z.infer<typeof ToolCallMetadataSchema>;
 
@@ -58,5 +65,18 @@ export interface Hook {
   processResponse(
     response: unknown,
     originalToolCall: ToolCall,
+  ): Promise<HookResponse>;
+
+  /**
+   * Process a tools/list request (optional)
+   */
+  processToolsList?(request: ToolsListRequest): Promise<HookResponse>;
+
+  /**
+   * Process a tools/list response (optional)
+   */
+  processToolsListResponse?(
+    response: ListToolsResult,
+    originalRequest: ToolsListRequest,
   ): Promise<HookResponse>;
 }
