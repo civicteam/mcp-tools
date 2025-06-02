@@ -8,7 +8,7 @@
  * Uses tRPC-based hooks instead of MCP for hook communication.
  */
 
-import type { ToolCall } from "@civic/hook-common/types";
+import type { ToolCall } from "@civic/hook-common";
 import type { Context } from "fastmcp";
 import { createTargetClient } from "../client/client.js";
 import { getHookClients } from "../hooks/manager.js";

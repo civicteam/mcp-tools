@@ -6,7 +6,7 @@
  * registers all available tools from the target server.
  */
 
-import type { ToolsListRequest } from "@civic/hook-common/types";
+import type { ToolsListRequest } from "@civic/hook-common";
 import type {
   AudioContent,
   ListToolsResult,

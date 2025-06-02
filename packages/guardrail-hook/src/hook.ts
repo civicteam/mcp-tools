@@ -4,7 +4,7 @@
  * Implements the Hook interface for request validation and guardrails
  */
 
-import type { Hook, HookResponse, ToolCall } from "@civic/hook-common/types";
+import type { Hook, HookResponse, ToolCall } from "@civic/hook-common";
 
 export class GuardrailHook implements Hook {
   // Example: Domain allowlist for fetch-docs MCP server

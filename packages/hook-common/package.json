@@ -14,12 +14,7 @@
   "main": "./dist/index.js",
   "type": "module",
   "files": ["dist", "README.md", "package.json"],
-  "exports": {
-    "./types": "./dist/types.js",
-    "./router": "./dist/router.js",
-    "./client": "./dist/client.js",
-    "./server": "./dist/server.js"
-  },
+  "exports": "./dist/index.js",
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",

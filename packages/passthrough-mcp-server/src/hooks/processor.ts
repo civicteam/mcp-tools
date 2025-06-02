@@ -4,12 +4,12 @@
  * Handles processing of tool calls through hook chains
  */
 
-import type { HookClient } from "@civic/hook-common/client";
 import type {
+  HookClient,
   HookResponse,
   ToolCall,
   ToolsListRequest,
-} from "@civic/hook-common/types";
+} from "@civic/hook-common";
 import type { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
 import { logger } from "../utils/logger.js";
 

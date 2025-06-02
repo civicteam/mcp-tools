@@ -3,7 +3,7 @@ import type { Config } from "../utils/config.js";
 import { clearHookClientsCache, getHookClients } from "./manager.js";
 
 // Mock the hook-common module
-vi.mock("@civic/hook-common/client", () => ({
+vi.mock("@civic/hook-common", () => ({
   createHookClients: vi.fn((configs) =>
     configs.map((config: { name: string; url: string }) => ({
       name: config.name,

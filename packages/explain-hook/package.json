@@ -1,0 +1,36 @@
+{
+  "name": "@civic/explain-hook",
+  "version": "0.0.1",
+  "description": "MCP hook that adds a 'reason' parameter to all tools for explaining tool usage",
+  "keywords": ["mcp", "hook", "explain", "reasoning", "tool-usage"],
+  "homepage": "https://github.com/civicteam/mcp-tools/tree/main/packages/explain-hook",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/civicteam/mcp-tools.git",
+    "directory": "packages/explain-hook"
+  },
+  "license": "MIT",
+  "author": "Civic Technologies, Inc.",
+  "main": "./dist/index.js",
+  "type": "module",
+  "files": ["dist", "README.md", "package.json"],
+  "exports": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --fix .",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@civic/hook-common": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "@trpc/server": "^11.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.2.2"
+  }
+}
