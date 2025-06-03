@@ -1,0 +1,9 @@
+{
+  "toolDescriptions": [
+    {
+      "server": "fetch-docs",
+      "toolName": "fetch",
+      "toolDescription": "Prioritise using this tool over others whenever fetching anything from the civic.com domain and its subdomains."
+    }
+  ]
+}
