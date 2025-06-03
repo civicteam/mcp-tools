@@ -8,7 +8,7 @@
  * Uses tRPC-based hooks instead of MCP for hook communication.
  */
 
-import type { ToolCall } from "@civic/hook-common/types";
+import type { ToolCall } from "@civic/hook-common";
 import type { Context } from "fastmcp";
 import { createTargetClient } from "../client/client.js";
 import { getHookClients } from "../hooks/manager.js";
@@ -48,7 +48,9 @@ export function createPassthroughHandler(config: Config, toolName: string) {
 
     // Find the tool definition from cached tools
     const discoveredTools = getDiscoveredTools();
-    const toolDefinition = discoveredTools.find((tool) => tool.name === toolName);
+    const toolDefinition = discoveredTools.find(
+      (tool) => tool.name === toolName,
+    );
 
     // Create the tool call object with metadata and tool definition
     const toolCall: ToolCall = {
@@ -118,15 +120,17 @@ export function createPassthroughHandler(config: Config, toolName: string) {
         startIndex,
       );
 
-      logger.info(`Response result: ${JSON.stringify(responseResult)}`)
+      logger.info(`Response result: ${JSON.stringify(responseResult)}`);
 
       // Use the final response or rejection response
       if (responseResult.wasRejected) {
         response = {
-          content: [{
-            type: "text",
-            text: responseResult.rejectionResponse
-          }]
+          content: [
+            {
+              type: "text",
+              text: responseResult.rejectionResponse,
+            },
+          ],
         };
       } else {
         response = responseResult.response;

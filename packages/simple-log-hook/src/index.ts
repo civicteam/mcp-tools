@@ -6,25 +6,23 @@
  */
 
 import * as process from "node:process";
-import { createHookRouter } from "@civic/hook-common/router";
-import type {
-  Hook,
-  HookResponse,
-  ToolCall,
-} from "@civic/hook-common/types";
+import {
+  AbstractHook,
+  type HookResponse,
+  type ToolCall,
+  createHookRouter,
+} from "@civic/hook-common";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 
 /**
  * Minimal hook implementation that logs to console
  */
-class SimpleLogHook implements Hook {
+class SimpleLogHook extends AbstractHook {
   async processRequest(toolCall: ToolCall): Promise<HookResponse> {
     console.log(`[REQUEST] ${toolCall.name}`, toolCall.arguments);
 
-    return {
-      response: "continue",
-      body: toolCall,
-    };
+    // Call parent implementation to continue with unmodified tool call
+    return super.processRequest(toolCall);
   }
 
   async processResponse(
@@ -33,10 +31,8 @@ class SimpleLogHook implements Hook {
   ): Promise<HookResponse> {
     console.log(`[RESPONSE] ${originalToolCall.name}`, response);
 
-    return {
-      response: "continue",
-      body: response,
-    };
+    // Call parent implementation to continue with unmodified response
+    return super.processResponse(response, originalToolCall);
   }
 }
 

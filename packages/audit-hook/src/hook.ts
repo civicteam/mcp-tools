@@ -4,11 +4,7 @@
  * Implements the Hook interface for audit logging
  */
 
-import type {
-  Hook,
-  HookResponse,
-  ToolCall,
-} from "@civic/hook-common/types";
+import type { Hook, HookResponse, ToolCall } from "@civic/hook-common";
 import type { AuditEntry, AuditLogger } from "./audit/types.js";
 
 export class AuditHook implements Hook {
