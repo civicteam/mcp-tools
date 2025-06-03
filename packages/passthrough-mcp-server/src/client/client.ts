@@ -10,6 +10,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { ClientConfig } from "../utils/config.js";
+import type { PassthroughClient } from "../types/client.js";
 import { logger } from "../utils/logger.js";
 
 /**
@@ -19,7 +20,7 @@ export async function createTargetClient(
   clientConfig: ClientConfig,
   clientId: string,
   clientInfo?: { name: string; version: string },
-): Promise<Client> {
+): Promise<PassthroughClient> {
   // Create MCP client
   const client = new Client(
     {
@@ -44,5 +45,5 @@ export async function createTargetClient(
     `Client ${clientId} connected to target server at ${url.toString()}`,
   );
 
-  return client;
+  return client as PassthroughClient;
 }
