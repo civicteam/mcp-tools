@@ -18,8 +18,16 @@ import { getServerTransportConfig } from "./server/transport.js";
 import { loadConfig } from "./utils/config.js";
 import { logger } from "./utils/logger.js";
 
-// Export the getDiscoveredTools function for external use
-export { getDiscoveredTools };
+// Export types and functions for external use
+export {
+  getDiscoveredTools,
+  createServer,
+  discoverAndRegisterTools,
+  getServerTransportConfig,
+};
+export type { Config, ClientConfig } from "./utils/config.js";
+export type { ClientFactory, PassthroughClient } from "./types/client.js";
+export { createTargetClient } from "./client/client.js";
 
 /**
  * Main function to start the passthrough MCP server

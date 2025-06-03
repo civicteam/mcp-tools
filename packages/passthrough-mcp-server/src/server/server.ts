@@ -18,7 +18,6 @@ import {
   FastMCP,
   type ImageContent,
   type TextContent,
-  Tool,
 } from "fastmcp";
 import { createTargetClient } from "../client/client.js";
 import { getHookClients } from "../hooks/manager.js";
@@ -26,6 +25,7 @@ import {
   processToolsListRequestThroughHooks,
   processToolsListResponseThroughHooks,
 } from "../hooks/processor.js";
+import type { ClientFactory } from "../types/client.js";
 import type { Config } from "../utils/config.js";
 import { logger } from "../utils/logger.js";
 import { extractToolParameters } from "../utils/schemaConverter.js";
@@ -75,13 +75,12 @@ export function createServer(serverInfo?: {
 export async function discoverAndRegisterTools(
   server: FastMCP<{ id: string }>,
   config: Config,
+  clientFactory?: ClientFactory,
 ): Promise<void> {
   // Create a temporary client to discover available tools
-  const tempClient = await createTargetClient(
-    config.client,
-    "discovery",
-    config.clientInfo,
-  );
+  const tempClient = clientFactory
+    ? await clientFactory(config.client, "discovery", config.clientInfo)
+    : await createTargetClient(config.client, "discovery", config.clientInfo);
 
   // Create tools/list request
   const toolsListRequest: ToolsListRequest = {
@@ -153,7 +152,11 @@ export async function discoverAndRegisterTools(
   // Register each tool as a passthrough with its own handler
   for (const tool of discoveredTools) {
     // Create a passthrough handler specifically for this tool
-    const toolHandler = createPassthroughHandler(config, tool.name);
+    const toolHandler = createPassthroughHandler(
+      config,
+      tool.name,
+      clientFactory,
+    );
 
     // Extract parameters from the tool definition
     const parameters = extractToolParameters(tool);

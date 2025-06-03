@@ -4,11 +4,7 @@
   "private": true,
   "main": "./dist/index.js",
   "type": "module",
-  "files": [
-    "dist/",
-    "README.md",
-    "run.sh"
-  ],
+  "files": ["dist/", "README.md", "run.sh"],
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "dev:stdio": "tsx watch src/index.ts -- --stdio",

@@ -9,8 +9,8 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import type { ClientConfig } from "../utils/config.js";
 import type { PassthroughClient } from "../types/client.js";
+import type { ClientConfig } from "../utils/config.js";
 import { logger } from "../utils/logger.js";
 
 /**
