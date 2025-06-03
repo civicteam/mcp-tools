@@ -30,7 +30,7 @@ async function main() {
     const config = loadConfig();
 
     // Create the server
-    const server = createServer();
+    const server = createServer(config.serverInfo);
 
     // Discover and register tools from the target server
     await discoverAndRegisterTools(server, config);

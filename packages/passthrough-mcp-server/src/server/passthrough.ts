@@ -40,7 +40,7 @@ export function createPassthroughHandler(config: Config, toolName: string) {
 
     // Get or create session with target client
     const sessionData = await getOrCreateSession(sessionId, () =>
-      createTargetClient(config.client, sessionId),
+      createTargetClient(config.client, sessionId, config.clientInfo),
     );
 
     // Increment request counter

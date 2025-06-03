@@ -30,6 +30,14 @@ export interface Config {
   server: ServerConfig;
   client: ClientConfig;
   hooks?: HookConfig[];
+  serverInfo?: {
+    name: string;
+    version: string;
+  };
+  clientInfo?: {
+    name: string;
+    version: string;
+  };
 }
 
 /**
@@ -78,6 +86,26 @@ export function createHookConfigs(urls: string[]): HookConfig[] {
       };
     }
   });
+}
+
+/**
+ * Create server info configuration
+ */
+export function createServerInfo(
+  name: string,
+  version: string,
+): { name: string; version: string } {
+  return { name, version };
+}
+
+/**
+ * Create client info configuration
+ */
+export function createClientInfo(
+  name: string,
+  version: string,
+): { name: string; version: string } {
+  return { name, version };
 }
 
 /**

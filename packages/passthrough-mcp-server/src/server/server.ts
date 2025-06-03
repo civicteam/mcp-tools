@@ -53,10 +53,14 @@ export function getDiscoveredTools(): MCPTool[] {
 /**
  * Create a FastMCP server instance
  */
-export function createServer(): FastMCP<{ id: string }> {
+export function createServer(serverInfo?: {
+  name: string;
+  version: string;
+}): FastMCP<{ id: string }> {
   return new FastMCP<{ id: string }>({
-    name: "passthrough-mcp-server",
-    version: "0.0.1",
+    name: serverInfo?.name || "passthrough-mcp-server",
+    version: (serverInfo?.version ||
+      "0.0.1") as `${number}.${number}.${number}`,
     authenticate: async () => {
       return {
         id: generateSessionId(),
@@ -73,7 +77,11 @@ export async function discoverAndRegisterTools(
   config: Config,
 ): Promise<void> {
   // Create a temporary client to discover available tools
-  const tempClient = await createTargetClient(config.client, "discovery");
+  const tempClient = await createTargetClient(
+    config.client,
+    "discovery",
+    config.clientInfo,
+  );
 
   // Create tools/list request
   const toolsListRequest: ToolsListRequest = {

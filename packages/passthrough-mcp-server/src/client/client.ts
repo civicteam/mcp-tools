@@ -18,12 +18,13 @@ import { logger } from "../utils/logger.js";
 export async function createTargetClient(
   clientConfig: ClientConfig,
   clientId: string,
+  clientInfo?: { name: string; version: string },
 ): Promise<Client> {
   // Create MCP client
   const client = new Client(
     {
-      name: "passthrough-mcp-client",
-      version: "0.0.1",
+      name: clientInfo?.name || "passthrough-mcp-client",
+      version: clientInfo?.version || "0.0.1",
     },
     {
       capabilities: {}, // No special capabilities needed
