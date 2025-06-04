@@ -16,6 +16,7 @@ import {
   processRequestThroughHooks,
   processResponseThroughHooks,
 } from "../hooks/processor.js";
+import type { ClientFactory } from "../types/client.js";
 import type { Config } from "../utils/config.js";
 import { logger } from "../utils/logger.js";
 import { getOrCreateSession } from "../utils/session.js";
@@ -30,7 +31,11 @@ import { getDiscoveredTools } from "./server.js";
  * If hooks are configured, tool calls will be sent to the hooks for processing
  * before being forwarded to the target server.
  */
-export function createPassthroughHandler(config: Config, toolName: string) {
+export function createPassthroughHandler(
+  config: Config,
+  toolName: string,
+  clientFactory?: ClientFactory,
+) {
   return async function passthrough(
     args: unknown,
     context: Context<{ id: string }>,
@@ -40,7 +45,9 @@ export function createPassthroughHandler(config: Config, toolName: string) {
 
     // Get or create session with target client
     const sessionData = await getOrCreateSession(sessionId, () =>
-      createTargetClient(config.client, sessionId),
+      clientFactory
+        ? clientFactory(config.client, sessionId, config.clientInfo)
+        : createTargetClient(config.client, sessionId, config.clientInfo),
     );
 
     // Increment request counter

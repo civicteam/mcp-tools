@@ -6,11 +6,11 @@
  * Each session maintains its own connection to the target MCP server.
  */
 
-import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import type { PassthroughClient } from "../types/client.js";
 
 export interface SessionData {
   id: string;
-  targetClient: Client;
+  targetClient: PassthroughClient;
   requestCount: number;
 }
 
@@ -22,7 +22,7 @@ const sessions = new Map<string, SessionData>();
  */
 export async function getOrCreateSession(
   sessionId: string,
-  createClient: () => Promise<Client>,
+  createClient: () => Promise<PassthroughClient>,
 ): Promise<SessionData> {
   if (!sessions.has(sessionId)) {
     const targetClient = await createClient();
