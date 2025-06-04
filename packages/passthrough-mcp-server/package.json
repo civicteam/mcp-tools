@@ -42,6 +42,7 @@
     "dev": "tsx watch src/cli.ts",
     "dev:stdio": "tsx watch src/cli.ts -- --stdio",
     "build": "tsc",
+    "postbuild": "chmod +x dist/cli.js",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
