@@ -1,0 +1,36 @@
+# Source files
+src/
+examples/
+
+# Test files
+*.test.ts
+*.test.js
+vitest.config.ts
+coverage/
+
+# Development files
+.env
+.env.*
+*.log
+err.log
+
+# TypeScript config
+tsconfig.json
+tsconfig.*.json
+
+# Build artifacts that shouldn't be published
+*.tsbuildinfo
+
+# Editor directories
+.vscode/
+.idea/
+
+# Development scripts
+run.sh
+
+# Other
+.DS_Store
+node_modules/
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
