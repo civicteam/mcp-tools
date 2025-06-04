@@ -150,7 +150,7 @@ describe("Config Utils", () => {
 
       const config = loadConfig();
 
-      expect(config.transportType).toBe('httpStream');
+      expect(config.transportType).toBe("httpStream");
       expect(config.target.url).toBe("http://example.com:3000");
       expect(config.target.type).toBe("sse");
     });

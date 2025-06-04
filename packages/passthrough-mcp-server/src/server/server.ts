@@ -8,18 +8,11 @@
 
 import type { ToolsListRequest } from "@civic/hook-common";
 import type {
-  AudioContent,
   ListToolsResult,
   Tool as MCPTool,
 } from "@modelcontextprotocol/sdk/types.js";
-import {
-  type ContentResult,
-  type Context,
-  FastMCP,
-  type ImageContent,
-  type TextContent,
-    type Tool as FastMCPTool,
-} from "fastmcp";
+import { FastMCP, type Tool as FastMCPTool } from "fastmcp";
+import type { ZodType, ZodTypeDef } from "zod";
 import { createTargetClient } from "../client/client.js";
 import { getHookClients } from "../hooks/manager.js";
 import {
@@ -32,11 +25,13 @@ import { logger } from "../utils/logger.js";
 import { extractToolParameters } from "../utils/schemaConverter.js";
 import { generateSessionId } from "../utils/session.js";
 import { createPassthroughHandler } from "./passthrough.js";
-import {ZodType, ZodTypeDef} from "zod";
 
-type FastMCPToolHandler = FastMCPTool<{
-  id: string;
-}, ZodType<any, ZodTypeDef, any>>["execute"]
+type FastMCPToolHandler = FastMCPTool<
+  {
+    id: string;
+  },
+  ZodType<unknown, ZodTypeDef, unknown>
+>["execute"];
 
 // Store discovered tools in memory
 let discoveredTools: MCPTool[] = [];
@@ -52,7 +47,7 @@ export function getDiscoveredTools(): MCPTool[] {
  */
 export function createServer(serverInfo?: {
   name: string;
-  version?: `${number}.${number}.${number}`
+  version?: `${number}.${number}.${number}`;
 }): FastMCP<{ id: string }> {
   return new FastMCP<{ id: string }>({
     name: serverInfo?.name || "passthrough-mcp-server",

@@ -1,7 +1,7 @@
 import type { Hook } from "@civic/hook-common";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Config } from "../utils/config.js";
-import { clearHookClientsCache, getHookClients } from "./manager.js";
+import { getHookClients } from "./manager.js";
 
 // Mock the hook-common module
 vi.mock("@civic/hook-common", () => ({
@@ -19,7 +19,6 @@ vi.mock("@civic/hook-common", () => ({
 
 describe("Hook Manager", () => {
   beforeEach(() => {
-    clearHookClientsCache();
     vi.clearAllMocks();
   });
 
@@ -103,20 +102,7 @@ describe("Hook Manager", () => {
       expect(clients[2].name).toBe("another-remote");
     });
 
-    it("should cache hook clients for same configuration", () => {
-      const config: Config = {
-        server: { port: 34000, transportType: "httpStream" },
-        client: { type: "stream", url: "http://localhost:3000" },
-        hooks: [{ url: "http://localhost:3001" }],
-      };
-
-      const clients1 = getHookClients(config);
-      const clients2 = getHookClients(config);
-
-      expect(clients1).toBe(clients2); // Same reference
-    });
-
-    it("should create new clients for different configuration", () => {
+    it("should create clients for different configurations", () => {
       const config1: Config = {
         server: { port: 34000, transportType: "httpStream" },
         client: { type: "stream", url: "http://localhost:3000" },
@@ -132,7 +118,6 @@ describe("Hook Manager", () => {
       const clients1 = getHookClients(config1);
       const clients2 = getHookClients(config2);
 
-      expect(clients1).not.toBe(clients2);
       expect(clients1[0].name).toBe("http://localhost:3001");
       expect(clients2[0].name).toBe("http://localhost:3002");
     });

@@ -96,11 +96,7 @@ export interface PassthroughProxy {
 export async function createPassthroughProxy(
   options: PassthroughProxyOptions,
 ): Promise<PassthroughProxy> {
-  const {
-    clientFactory,
-    autoStart = true,
-    ...config
-  } = options;
+  const { clientFactory, autoStart = true, ...config } = options;
 
   // Create the server
   const server = createServer(config.serverInfo);
@@ -109,9 +105,13 @@ export async function createPassthroughProxy(
   await discoverAndRegisterTools(server, config, clientFactory);
 
   // Get transport configuration based on transport type
-  const transportConfig = config.transportType === "stdio"
-    ? getServerTransportConfig({ transportType: "stdio" })
-    : getServerTransportConfig({ transportType: config.transportType, port: config.port });
+  const transportConfig =
+    config.transportType === "stdio"
+      ? getServerTransportConfig({ transportType: "stdio" })
+      : getServerTransportConfig({
+          transportType: config.transportType,
+          port: config.port,
+        });
 
   let isStarted = false;
 
@@ -124,10 +124,11 @@ export async function createPassthroughProxy(
     await server.start(transportConfig);
     isStarted = true;
 
-    const transportInfo = config.transportType === "stdio"
-      ? "stdio transport"
-      : `${config.transportType} transport on port ${config.port}`;
-    
+    const transportInfo =
+      config.transportType === "stdio"
+        ? "stdio transport"
+        : `${config.transportType} transport on port ${config.port}`;
+
     logger.info(
       `Passthrough MCP Server running with ${transportInfo}, connecting to target at ${config.target.url}`,
     );

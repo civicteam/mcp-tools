@@ -1,10 +1,14 @@
+import {
+  AbstractHook,
+  type HookResponse,
+  type ToolCall,
+} from "@civic/hook-common";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { AbstractHook, type HookResponse, type ToolCall } from "@civic/hook-common";
 import { FastMCP } from "fastmcp";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { z } from "zod";
 import { createPassthroughProxy } from "../createPassthroughProxy.js";
-import {z} from "zod";
 
 // Hook that records calls into arrays
 class RecordingHook extends AbstractHook {
@@ -26,7 +30,10 @@ class RecordingHook extends AbstractHook {
     };
   }
 
-  async processResponse(response: unknown, originalToolCall: ToolCall): Promise<HookResponse> {
+  async processResponse(
+    response: unknown,
+    originalToolCall: ToolCall,
+  ): Promise<HookResponse> {
     this.responses.push({
       toolName: originalToolCall.name,
       response,
@@ -75,7 +82,11 @@ describe("Full MCP Pipeline Integration", () => {
   }
 
   // Step B: Create and start passthrough server with recording hook
-  async function createPassthroughServer(port: number, targetUrl: string, hook: RecordingHook) {
+  async function createPassthroughServer(
+    port: number,
+    targetUrl: string,
+    hook: RecordingHook,
+  ) {
     return await createPassthroughProxy({
       transportType: "httpStream",
       port,
@@ -100,7 +111,7 @@ describe("Full MCP Pipeline Integration", () => {
       },
       {
         capabilities: {},
-      }
+      },
     );
 
     const transport = new StreamableHTTPClientTransport(new URL(serverUrl));
@@ -113,7 +124,7 @@ describe("Full MCP Pipeline Integration", () => {
     // Use random ports to avoid conflicts
     targetPort = 40000 + Math.floor(Math.random() * 1000);
     passthroughPort = 41000 + Math.floor(Math.random() * 1000);
-    
+
     // Create recording hook
     recordingHook = new RecordingHook();
 
@@ -122,7 +133,7 @@ describe("Full MCP Pipeline Integration", () => {
     proxy = await createPassthroughServer(
       passthroughPort,
       `http://localhost:${targetPort}/mcp`,
-      recordingHook
+      recordingHook,
     );
   });
 
@@ -138,10 +149,12 @@ describe("Full MCP Pipeline Integration", () => {
 
   it("should record tool calls through the passthrough server", async () => {
     // Wait a bit for servers to fully initialize
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Step C: Create MCP client pointing to passthrough server
-    const client = await createMCPClient(`http://localhost:${passthroughPort}/mcp`);
+    const client = await createMCPClient(
+      `http://localhost:${passthroughPort}/mcp`,
+    );
 
     // Verify we can list tools
     const { tools } = await client.listTools();
@@ -179,7 +192,9 @@ describe("Full MCP Pipeline Integration", () => {
   });
 
   it("should handle multiple sequential calls", async () => {
-    const client = await createMCPClient(`http://localhost:${passthroughPort}/mcp`);
+    const client = await createMCPClient(
+      `http://localhost:${passthroughPort}/mcp`,
+    );
 
     // Make multiple calls
     await client.callTool({
@@ -201,7 +216,7 @@ describe("Full MCP Pipeline Integration", () => {
     expect(recordingHook.requests).toHaveLength(3);
     expect(recordingHook.responses).toHaveLength(3);
 
-    expect(recordingHook.requests.map(r => r.arguments)).toEqual([
+    expect(recordingHook.requests.map((r) => r.arguments)).toEqual([
       { message: "First" },
       { message: "Second" },
       { message: "Third" },

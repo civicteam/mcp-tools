@@ -13,7 +13,7 @@ import { configureLoggerForStdio, logger } from "./logger.js";
 export type TransportType = "stdio" | "sse" | "httpStream";
 
 // Base configuration with discriminated union based on transport type
-export type BaseConfig = 
+export type BaseConfig =
   | {
       transportType: "stdio";
       // Port is not required for stdio
@@ -117,7 +117,7 @@ export function loadConfig(): Config {
 
   // Build config based on transport type
   let config: Config;
-  
+
   if (transportType === "stdio") {
     config = {
       transportType: "stdio",
