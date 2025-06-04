@@ -11,7 +11,13 @@
 export { createPassthroughProxy } from "./createPassthroughProxy.js";
 
 // Export types
-export type { ClientConfig } from "./utils/config.js";
+export type {
+  Config,
+  TargetConfig,
+  BaseConfig,
+  HookDefinition,
+  RemoteHookConfig,
+} from "./utils/config.js";
 export type { ClientFactory, PassthroughClient } from "./types/client.js";
 export type {
   PassthroughProxy,

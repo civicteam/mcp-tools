@@ -27,6 +27,13 @@ interface Config {
 export class CustomDescriptionHook extends AbstractHook {
   private config: Config | null = null;
 
+  /**
+   * The name of this hook
+   */
+  get name(): string {
+    return "CustomDescriptionHook";
+  }
+
   async loadConfig(): Promise<void> {
     if (this.config) return; // Already loaded
 

@@ -8,17 +8,11 @@
 
 import type { ToolsListRequest } from "@civic/hook-common";
 import type {
-  AudioContent,
   ListToolsResult,
   Tool as MCPTool,
 } from "@modelcontextprotocol/sdk/types.js";
-import {
-  type ContentResult,
-  type Context,
-  FastMCP,
-  type ImageContent,
-  type TextContent,
-} from "fastmcp";
+import { FastMCP, type Tool as FastMCPTool } from "fastmcp";
+import type { ZodType, ZodTypeDef } from "zod";
 import { createTargetClient } from "../client/client.js";
 import { getHookClients } from "../hooks/manager.js";
 import {
@@ -32,14 +26,12 @@ import { extractToolParameters } from "../utils/schemaConverter.js";
 import { generateSessionId } from "../utils/session.js";
 import { createPassthroughHandler } from "./passthrough.js";
 
-type ToolHandler = (
-  args: unknown,
-  context: Context<{
+type FastMCPToolHandler = FastMCPTool<
+  {
     id: string;
-  }>,
-) => Promise<
-  string | AudioContent | ContentResult | ImageContent | TextContent
->;
+  },
+  ZodType<unknown, ZodTypeDef, unknown>
+>["execute"];
 
 // Store discovered tools in memory
 let discoveredTools: MCPTool[] = [];
@@ -55,12 +47,11 @@ export function getDiscoveredTools(): MCPTool[] {
  */
 export function createServer(serverInfo?: {
   name: string;
-  version: string;
+  version?: `${number}.${number}.${number}`;
 }): FastMCP<{ id: string }> {
   return new FastMCP<{ id: string }>({
     name: serverInfo?.name || "passthrough-mcp-server",
-    version: (serverInfo?.version ||
-      "0.0.1") as `${number}.${number}.${number}`,
+    version: serverInfo?.version ?? "0.0.1",
     authenticate: async () => {
       return {
         id: generateSessionId(),
@@ -79,8 +70,8 @@ export async function discoverAndRegisterTools(
 ): Promise<void> {
   // Create a temporary client to discover available tools
   const tempClient = clientFactory
-    ? await clientFactory(config.client, "discovery", config.clientInfo)
-    : await createTargetClient(config.client, "discovery", config.clientInfo);
+    ? await clientFactory(config.target, "discovery", config.clientInfo)
+    : await createTargetClient(config.target, "discovery", config.clientInfo);
 
   // Create tools/list request
   const toolsListRequest: ToolsListRequest = {
@@ -166,7 +157,7 @@ export async function discoverAndRegisterTools(
       description:
         tool.description || `Passthrough to ${tool.name} on target server`,
       parameters,
-      execute: toolHandler as ToolHandler,
+      execute: toolHandler as FastMCPToolHandler,
     });
 
     logger.info(`Registered passthrough for tool: ${tool.name}`);

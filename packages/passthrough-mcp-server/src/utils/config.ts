@@ -7,38 +7,46 @@
  */
 
 import * as process from "node:process";
+import type { Hook } from "@civic/hook-common";
 import { configureLoggerForStdio, logger } from "./logger.js";
 
 export type TransportType = "stdio" | "sse" | "httpStream";
 
-export interface ServerConfig {
-  port: number;
-  transportType: TransportType;
-}
+// Base configuration with discriminated union based on transport type
+export type BaseConfig =
+  | {
+      transportType: "stdio";
+      // Port is not required for stdio
+    }
+  | {
+      transportType: "sse" | "httpStream";
+      port: number;
+    };
 
-export interface ClientConfig {
-  type: "sse" | "stream";
+export interface TargetConfig {
+  transportType: "sse" | "httpStream";
   url: string;
 }
 
-export interface HookConfig {
+export interface RemoteHookConfig {
   url: string;
   name?: string; // Optional name for the hook
 }
 
-export interface Config {
-  server: ServerConfig;
-  client: ClientConfig;
-  hooks?: HookConfig[];
+export type HookDefinition = RemoteHookConfig | Hook;
+
+export type Config = BaseConfig & {
+  target: TargetConfig;
+  hooks?: HookDefinition[];
   serverInfo?: {
     name: string;
-    version: string;
+    version: `${number}.${number}.${number}`;
   };
   clientInfo?: {
     name: string;
     version: string;
   };
-}
+};
 
 /**
  * Parse server transport type from command line arguments
@@ -52,8 +60,10 @@ export function parseServerTransport(args: string[]): TransportType {
 /**
  * Parse client transport type from environment
  */
-export function parseClientTransport(env: NodeJS.ProcessEnv): "sse" | "stream" {
-  return env.TARGET_SERVER_TRANSPORT === "sse" ? "sse" : "stream";
+export function parseClientTransport(
+  env: NodeJS.ProcessEnv,
+): "sse" | "httpStream" {
+  return env.TARGET_SERVER_TRANSPORT === "sse" ? "sse" : "httpStream";
 }
 
 /**
@@ -70,7 +80,7 @@ export function parseHookUrls(hooksEnv?: string): string[] {
 /**
  * Convert hook URLs to hook configurations
  */
-export function createHookConfigs(urls: string[]): HookConfig[] {
+export function createHookConfigs(urls: string[]): RemoteHookConfig[] {
   return urls.map((url) => {
     try {
       const urlObj = new URL(url);
@@ -89,55 +99,46 @@ export function createHookConfigs(urls: string[]): HookConfig[] {
 }
 
 /**
- * Create server info configuration
- */
-export function createServerInfo(
-  name: string,
-  version: string,
-): { name: string; version: string } {
-  return { name, version };
-}
-
-/**
- * Create client info configuration
- */
-export function createClientInfo(
-  name: string,
-  version: string,
-): { name: string; version: string } {
-  return { name, version };
-}
-
-/**
  * Load configuration from environment and command line
  */
 export function loadConfig(): Config {
   // Server configuration
-  const port = process.env.PORT ? Number.parseInt(process.env.PORT) : 34000;
-  const serverTransport = parseServerTransport(process.argv);
+  const transportType = parseServerTransport(process.argv);
 
   // Configure logger for stdio mode to avoid interfering with stdout
-  if (serverTransport === "stdio") {
+  if (transportType === "stdio") {
     configureLoggerForStdio();
   }
 
-  // Client configuration
+  // Target configuration
   const targetUrl = process.env.TARGET_SERVER_URL || "http://localhost:33000";
-  const clientTransport = parseClientTransport(process.env);
+  const targetTransport = parseClientTransport(process.env);
 
   // Hooks configuration
   const hookUrls = parseHookUrls(process.env.HOOKS);
 
-  const config: Config = {
-    server: {
+  // Build config based on transport type
+  let config: Config;
+
+  if (transportType === "stdio") {
+    config = {
+      transportType: "stdio",
+      target: {
+        url: targetUrl,
+        transportType: targetTransport,
+      },
+    };
+  } else {
+    const port = process.env.PORT ? Number.parseInt(process.env.PORT) : 34000;
+    config = {
+      transportType,
       port,
-      transportType: serverTransport,
-    },
-    client: {
-      url: targetUrl,
-      type: clientTransport,
-    },
-  };
+      target: {
+        url: targetUrl,
+        transportType: targetTransport,
+      },
+    };
+  }
 
   // Add hooks config if URLs are provided
   if (hookUrls.length > 0) {

@@ -14,6 +14,13 @@ import type { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
 
 export class ExplainHook extends AbstractHook {
   /**
+   * The name of this hook
+   */
+  get name(): string {
+    return "ExplainHook";
+  }
+
+  /**
    * Process an incoming tool call request to strip the reason parameter
    */
   async processRequest(toolCall: ToolCall): Promise<HookResponse> {

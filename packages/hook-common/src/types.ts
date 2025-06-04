@@ -55,6 +55,11 @@ export type ToolCallMetadata = z.infer<typeof ToolCallMetadataSchema>;
  */
 export interface Hook {
   /**
+   * The name of this hook
+   */
+  get name(): string;
+
+  /**
    * Process an incoming tool call request
    */
   processRequest(toolCall: ToolCall): Promise<HookResponse>;

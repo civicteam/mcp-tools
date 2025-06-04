@@ -1,9 +1,9 @@
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  HookClient,
-  type HookClientConfig,
-  createHookClients,
+  RemoteHookClient,
+  type RemoteHookConfig,
+  createRemoteHookClients,
 } from "./client.js";
 import type { HookResponse, ToolCall } from "./types.js";
 
@@ -28,11 +28,11 @@ vi.mock("superjson", () => ({
   },
 }));
 
-describe("HookClient", () => {
+describe("RemoteHookClient", () => {
   let mockProcessRequest: ReturnType<typeof vi.fn>;
   let mockProcessResponse: ReturnType<typeof vi.fn>;
-  let hookClient: HookClient;
-  const config: HookClientConfig = {
+  let hookClient: RemoteHookClient;
+  const config: RemoteHookConfig = {
     url: "http://localhost:3000",
     name: "test-hook",
   };
@@ -52,7 +52,7 @@ describe("HookClient", () => {
 
     (createTRPCClient as any).mockReturnValue(mockClient);
 
-    hookClient = new HookClient(config);
+    hookClient = new RemoteHookClient(config);
   });
 
   describe("constructor", () => {
@@ -279,13 +279,13 @@ describe("HookClient", () => {
   });
 });
 
-describe("createHookClients", () => {
+describe("createRemoteHookClients", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("should create multiple hook clients from configs", async () => {
-    const configs: HookClientConfig[] = [
+    const configs: RemoteHookConfig[] = [
       { url: "http://localhost:3001", name: "hook1" },
       { url: "http://localhost:3002", name: "hook2" },
       { url: "http://localhost:3003", name: "hook3" },
@@ -296,7 +296,7 @@ describe("createHookClients", () => {
       processResponse: { mutate: vi.fn() },
     });
 
-    const clients = createHookClients(configs);
+    const clients = createRemoteHookClients(configs);
 
     expect(clients).toHaveLength(3);
     expect(clients[0].name).toBe("hook1");
@@ -305,7 +305,7 @@ describe("createHookClients", () => {
   });
 
   it("should create empty array for empty configs", () => {
-    const clients = createHookClients([]);
+    const clients = createRemoteHookClients([]);
     expect(clients).toEqual([]);
   });
 });

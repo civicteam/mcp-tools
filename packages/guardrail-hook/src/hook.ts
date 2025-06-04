@@ -17,6 +17,13 @@ export class GuardrailHook implements Hook {
   ];
 
   /**
+   * The name of this hook
+   */
+  get name(): string {
+    return "GuardrailHook";
+  }
+
+  /**
    * Process an incoming tool call request
    */
   async processRequest(toolCall: ToolCall): Promise<HookResponse> {

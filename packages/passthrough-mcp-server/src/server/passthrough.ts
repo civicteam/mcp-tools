@@ -46,8 +46,8 @@ export function createPassthroughHandler(
     // Get or create session with target client
     const sessionData = await getOrCreateSession(sessionId, () =>
       clientFactory
-        ? clientFactory(config.client, sessionId, config.clientInfo)
-        : createTargetClient(config.client, sessionId, config.clientInfo),
+        ? clientFactory(config.target, sessionId, config.clientInfo)
+        : createTargetClient(config.target, sessionId, config.clientInfo),
     );
 
     // Increment request counter

@@ -5,21 +5,38 @@ import type { HookRouter } from "./router.js";
 import type { HookResponse, ToolCall, ToolsListRequest } from "./types.js";
 
 /**
- * Configuration for a hook client
+ * Hook client interface
  */
-export interface HookClientConfig {
+export interface HookClient {
+  readonly name: string;
+  processRequest(toolCall: ToolCall): Promise<HookResponse>;
+  processResponse(
+    response: unknown,
+    originalToolCall: ToolCall,
+  ): Promise<HookResponse>;
+  processToolsList?(request: ToolsListRequest): Promise<HookResponse>;
+  processToolsListResponse?(
+    response: ListToolsResult,
+    originalRequest: ToolsListRequest,
+  ): Promise<HookResponse>;
+}
+
+/**
+ * Configuration for a remote hook client
+ */
+export interface RemoteHookConfig {
   url: string;
   name: string;
 }
 
 /**
- * tRPC-based hook client
+ * Remote tRPC-based hook client
  */
-export class HookClient {
+export class RemoteHookClient implements HookClient {
   private client: ReturnType<typeof createTRPCClient<HookRouter>>;
   public readonly name: string;
 
-  constructor(config: HookClientConfig) {
+  constructor(config: RemoteHookConfig) {
     this.name = config.name;
     this.client = createTRPCClient<HookRouter>({
       links: [
@@ -131,8 +148,10 @@ export class HookClient {
 }
 
 /**
- * Create hook clients from configuration
+ * Create remote hook clients from configuration
  */
-export function createHookClients(configs: HookClientConfig[]): HookClient[] {
-  return configs.map((config) => new HookClient(config));
+export function createRemoteHookClients(
+  configs: RemoteHookConfig[],
+): RemoteHookClient[] {
+  return configs.map((config) => new RemoteHookClient(config));
 }
