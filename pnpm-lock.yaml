@@ -16,7 +16,7 @@ importers:
         version: 1.9.4
       turbo:
         specifier: ^2.5.2
-        version: 2.5.3
+        version: 2.5.4
 
   packages/audit-hook:
     dependencies:
@@ -24,8 +24,8 @@ importers:
         specifier: workspace:^
         version: link:../hook-common
       '@trpc/server':
-        specifier: ^11.1.2
-        version: 11.1.2(typescript@5.8.3)
+        specifier: ^11.2.0
+        version: 11.2.0(typescript@5.8.3)
       dotenv:
         specifier: ^16.3.1
         version: 16.5.0
@@ -35,10 +35,10 @@ importers:
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
-        version: 20.17.50
+        version: 20.17.57
       '@types/pg':
         specifier: ^8.10.9
-        version: 8.15.2
+        version: 8.15.4
       tsx:
         specifier: ^4.19.4
         version: 4.19.4
@@ -53,14 +53,14 @@ importers:
         version: link:../hook-common
       '@modelcontextprotocol/sdk':
         specifier: ^1.0.4
-        version: 1.12.0
+        version: 1.12.1
       '@trpc/server':
-        specifier: ^11.1.2
-        version: 11.1.2(typescript@5.8.3)
+        specifier: ^11.2.0
+        version: 11.2.0(typescript@5.8.3)
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
-        version: 20.17.50
+        version: 20.17.57
       tsx:
         specifier: ^4.19.4
         version: 4.19.4
@@ -75,14 +75,14 @@ importers:
         version: link:../hook-common
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.0
-        version: 1.12.0
+        version: 1.12.1
       '@trpc/server':
-        specifier: ^11.1.2
-        version: 11.1.2(typescript@5.8.3)
+        specifier: ^11.2.0
+        version: 11.2.0(typescript@5.8.3)
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
-        version: 20.17.50
+        version: 20.17.57
       tsx:
         specifier: ^4.0.0
         version: 4.19.4
@@ -94,20 +94,20 @@ importers:
     dependencies:
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.0
-        version: 1.12.0
+        version: 1.12.1
       fastmcp:
-        specifier: ^1.25.0
-        version: 1.27.7
+        specifier: ^2.2.1
+        version: 2.2.1
       turndown:
         specifier: ^7.1.2
         version: 7.2.0
       zod:
         specifier: ^3.24.3
-        version: 3.25.28
+        version: 3.25.51
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
-        version: 20.17.50
+        version: 20.17.57
       '@types/turndown':
         specifier: ^5.0.4
         version: 5.0.5
@@ -124,12 +124,12 @@ importers:
         specifier: workspace:^
         version: link:../hook-common
       '@trpc/server':
-        specifier: ^11.1.2
-        version: 11.1.2(typescript@5.8.3)
+        specifier: ^11.2.0
+        version: 11.2.0(typescript@5.8.3)
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
-        version: 20.17.50
+        version: 20.17.57
       tsx:
         specifier: ^4.19.4
         version: 4.19.4
@@ -141,32 +141,32 @@ importers:
     dependencies:
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.0
-        version: 1.12.0
+        version: 1.12.1
       '@trpc/client':
         specifier: ^11.1.2
-        version: 11.1.2(@trpc/server@11.1.2(typescript@5.8.3))(typescript@5.8.3)
+        version: 11.2.0(@trpc/server@11.2.0(typescript@5.8.3))(typescript@5.8.3)
       '@trpc/server':
-        specifier: ^11.1.2
-        version: 11.1.2(typescript@5.8.3)
+        specifier: ^11.2.0
+        version: 11.2.0(typescript@5.8.3)
       superjson:
         specifier: ^2.2.2
         version: 2.2.2
       zod:
         specifier: ^3.24.3
-        version: 3.25.28
+        version: 3.25.51
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
-        version: 20.17.50
+        version: 20.17.57
       '@vitest/coverage-v8':
         specifier: ^2.1.8
-        version: 2.1.9(vitest@2.1.9(@types/node@20.17.50))
+        version: 2.1.9(vitest@2.1.9(@types/node@20.17.57))
       typescript:
         specifier: ^5.2.2
         version: 5.8.3
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@20.17.50)
+        version: 2.1.9(@types/node@20.17.57)
 
   packages/passthrough-mcp-server:
     dependencies:
@@ -175,20 +175,20 @@ importers:
         version: link:../hook-common
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.0
-        version: 1.12.0
+        version: 1.12.1
       fastmcp:
-        specifier: ^1.25.0
-        version: 1.27.7
+        specifier: ^2.2.1
+        version: 2.2.1
       zod:
         specifier: ^3.24.3
-        version: 3.25.28
+        version: 3.25.51
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
-        version: 20.17.50
+        version: 20.17.57
       '@vitest/coverage-v8':
         specifier: ^2.1.8
-        version: 2.1.9(vitest@2.1.9(@types/node@20.17.50))
+        version: 2.1.9(vitest@2.1.9(@types/node@20.17.57))
       tsx:
         specifier: ^4.19.4
         version: 4.19.4
@@ -197,7 +197,7 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@20.17.50)
+        version: 2.1.9(@types/node@20.17.57)
 
   packages/simple-log-hook:
     dependencies:
@@ -205,12 +205,12 @@ importers:
         specifier: workspace:^
         version: link:../hook-common
       '@trpc/server':
-        specifier: ^11.1.2
-        version: 11.1.2(typescript@5.8.3)
+        specifier: ^11.2.0
+        version: 11.2.0(typescript@5.8.3)
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
-        version: 20.17.50
+        version: 20.17.57
       tsx:
         specifier: ^4.19.4
         version: 4.19.4
@@ -614,8 +614,8 @@ packages:
   '@mixmark-io/domino@2.2.0':
     resolution: {integrity: sha512-Y28PR25bHXUg88kCV7nivXrP2Nj2RueZ3/l/jdx6J9f8J4nsEGcgX0Qe6lt7Pa+J79+kPiJU3LguR6O/6zrLOw==}
 
-  '@modelcontextprotocol/sdk@1.12.0':
-    resolution: {integrity: sha512-m//7RlINx1F3sz3KqwY1WWzVgTcYX52HYk4bJ1hkBXV3zccAEth+jRvG8DBRrdaQuRsPAJOx2MH3zaHNCKL7Zg==}
+  '@modelcontextprotocol/sdk@1.12.1':
+    resolution: {integrity: sha512-KG1CZhZfWg+u8pxeM/mByJDScJSrjjxLc8fwQqbsS8xCjBmQfMNEBTotYdNanKekepnfRI85GtgQlctLFpcYPw==}
     engines: {node: '>=18'}
 
   '@pkgjs/parseargs@0.11.0':
@@ -739,25 +739,25 @@ packages:
   '@tokenizer/token@0.3.0':
     resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==}
 
-  '@trpc/client@11.1.2':
-    resolution: {integrity: sha512-RpifJOAv+ql9gF3oafa3dLCF01AzWu2DzejvehAPG2IlwHxopKoYXaImJ8zPwRkZokuWiKz5v65HjElmi8TlrQ==}
+  '@trpc/client@11.2.0':
+    resolution: {integrity: sha512-uGehc0QvK3+UmTZb1KmIwvMLtRW0I5ykiYQHA1Yqa7yHPzpF9zw7mbwna6gqZAgjclt0/S6jwxAMJizoaP8uqQ==}
     peerDependencies:
-      '@trpc/server': 11.1.2
+      '@trpc/server': 11.2.0
       typescript: '>=5.7.2'
 
-  '@trpc/server@11.1.2':
-    resolution: {integrity: sha512-Oi9zWHG0ZDkbDo4sYkduoV7q4sIe6UwjrRLC91vNMYQK+PVgpbTCmK1laRwewAGu0zaayqcGDosANjceOIC3GA==}
+  '@trpc/server@11.2.0':
+    resolution: {integrity: sha512-clESXvCT3rTRUavB3wjtmPDlbB+rayVPeaTeXEQVeQNdTrK5o6GnYfCdiJJSdQspUQAwkGgQFRnku5pckuISlw==}
     peerDependencies:
       typescript: '>=5.7.2'
 
   '@types/estree@1.0.7':
     resolution: {integrity: sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ==}
 
-  '@types/node@20.17.50':
-    resolution: {integrity: sha512-Mxiq0ULv/zo1OzOhwPqOA13I81CV/W3nvd3ChtQZRT5Cwz3cr0FKo/wMSsbTqL3EXpaBAEQhva2B8ByRkOIh9A==}
+  '@types/node@20.17.57':
+    resolution: {integrity: sha512-f3T4y6VU4fVQDKVqJV4Uppy8c1p/sVvS3peyqxyWnzkqXFJLRU7Y1Bl7rMS1Qe9z0v4M6McY0Fp9yBsgHJUsWQ==}
 
-  '@types/pg@8.15.2':
-    resolution: {integrity: sha512-+BKxo5mM6+/A1soSHBI7ufUglqYXntChLDyTbvcAn1Lawi9J7J9Ok3jt6w7I0+T/UDJ4CyhHk66+GZbwmkYxSg==}
+  '@types/pg@8.15.4':
+    resolution: {integrity: sha512-I6UNVBAoYbvuWkkU3oosC8yxqH21f4/Jc4DK71JLG3dT2mdlGe1z+ep/LQGXaKaOgcvUrsQoPRqfgtMcvZiJhg==}
 
   '@types/turndown@5.0.5':
     resolution: {integrity: sha512-TL2IgGgc7B5j78rIccBtlYAnkuv8nUQqhQc+DSYV5j9Be9XOcm/SKOVRuA47xAVI3680Tk9B1d8flK2GWT2+4w==}
@@ -992,8 +992,8 @@ packages:
     resolution: {integrity: sha512-fvIkb9qZzdMxgZrEQDyll+9oJsyaVvY92I2Re+qK0qEJ+w5s0X3dtz+M0VAPOjP1gtU3iqWyjQ0G3nvd5CLZ2g==}
     engines: {node: '>=20.0.0'}
 
-  execa@9.5.3:
-    resolution: {integrity: sha512-QFNnTvU3UjgWFy8Ef9iDHvIdcgZ344ebkwYx4/KLbR+CKQA4xBaHzv+iRpp86QfMHP8faFQLh8iOc57215y4Rg==}
+  execa@9.6.0:
+    resolution: {integrity: sha512-jpWzZ1ZhwUmeWRhS7Qv3mhpOhLfwI+uAX4e5fOcXqwMR7EcJ0pj2kV1CVzHVMX/LphnKWD3LObjZCoJ71lKpHw==}
     engines: {node: ^18.19.0 || >=20.5.0}
 
   expect-type@1.2.1:
@@ -1016,8 +1016,8 @@ packages:
   fast-json-stable-stringify@2.1.0:
     resolution: {integrity: sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==}
 
-  fastmcp@1.27.7:
-    resolution: {integrity: sha512-ozMJl5mTIWd2WMR6/hxBNEeSnFLUS9+PzzfLxQmejHOVg3A6IfRdCPVLGeNnXBhGjsK80JB2GPd4HDqd/szqLA==}
+  fastmcp@2.2.1:
+    resolution: {integrity: sha512-J89Z2VqNEkojQ2ID3+wBgp/X9iG0gSFlN4wpDaRTJthml5kRnhnbO60P5khvw9B6Wxs5A2zedrosVfa5uhuq3g==}
     hasBin: true
 
   fflate@0.8.2:
@@ -1191,8 +1191,8 @@ packages:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
 
-  mcp-proxy@2.14.3:
-    resolution: {integrity: sha512-2jmpBclH72z5ViXhdVWopKDLAyhnFGyIhR7MrjE3BLzgYv3pZwVMHKLOogu1aIWZN/J4OrlZp0jraHKjEPD1RQ==}
+  mcp-proxy@3.3.0:
+    resolution: {integrity: sha512-xyFKQEZ64HC7lxScBHjb5fxiPoyJjjkPhwH5hWUT0oL/ttCpMGZDJrYZRGFKVJiLLkrZPAkHnMGkI+WMlyD/cg==}
     hasBin: true
 
   media-typer@1.1.0:
@@ -1242,9 +1242,6 @@ packages:
   object-inspect@1.13.4:
     resolution: {integrity: sha512-W67iLl4J2EXEGTbfeHCffrjDfitvLANg0UlX3wFUUSTx92KXRFegMHUVgSqE+wvhAbi4WqjGg9czysTV2Epbew==}
     engines: {node: '>= 0.4'}
-
-  obuf@1.1.2:
-    resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
 
   on-finished@2.4.1:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
@@ -1301,10 +1298,6 @@ packages:
     resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
     engines: {node: '>=4.0.0'}
 
-  pg-numeric@1.0.2:
-    resolution: {integrity: sha512-BM/Thnrw5jm2kKLE5uJkXqqExRUY/toLHda65XgFTBTFYZyopbKjBe29Ii3RbkvlsMoFwD+tHeGaCjjv0gHlyw==}
-    engines: {node: '>=4'}
-
   pg-pool@3.10.0:
     resolution: {integrity: sha512-DzZ26On4sQ0KmqnO34muPcmKbhrjmyiO4lCCR0VwEd7MjmiKf5NTg/6+apUEu0NF7ESa37CGzFxH513CoUmWnA==}
     peerDependencies:
@@ -1316,10 +1309,6 @@ packages:
   pg-types@2.2.0:
     resolution: {integrity: sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA==}
     engines: {node: '>=4'}
-
-  pg-types@4.0.2:
-    resolution: {integrity: sha512-cRL3JpS3lKMGsKaWndugWQoLOCoP+Cic8oseVcbr0qhPzYD5DWXK+RZ9LY9wxRf7RQia4SCwQlXk0q6FCPrVng==}
-    engines: {node: '>=10'}
 
   pg@8.16.0:
     resolution: {integrity: sha512-7SKfdvP8CTNXjMUzfcVTaI+TDzBEeaUnVwiVGZQD1Hh33Kpev7liQba9uLd4CfN8r9mCVsD0JIpq03+Unpz+kg==}
@@ -1348,36 +1337,17 @@ packages:
     resolution: {integrity: sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==}
     engines: {node: '>=4'}
 
-  postgres-array@3.0.4:
-    resolution: {integrity: sha512-nAUSGfSDGOaOAEGwqsRY27GPOea7CNipJPOA7lPbdEpx5Kg3qzdP0AaWC5MlhTWV9s4hFX39nomVZ+C4tnGOJQ==}
-    engines: {node: '>=12'}
-
   postgres-bytea@1.0.0:
     resolution: {integrity: sha512-xy3pmLuQqRBZBXDULy7KbaitYqLcmxigw14Q5sj8QBVLqEwXfeybIKVWiqAXTlcvdvb0+xkOtDbfQMOf4lST1w==}
     engines: {node: '>=0.10.0'}
-
-  postgres-bytea@3.0.0:
-    resolution: {integrity: sha512-CNd4jim9RFPkObHSjVHlVrxoVQXz7quwNFpz7RY1okNNme49+sVyiTvTRobiLV548Hx/hb1BG+iE7h9493WzFw==}
-    engines: {node: '>= 6'}
 
   postgres-date@1.0.7:
     resolution: {integrity: sha512-suDmjLVQg78nMK2UZ454hAG+OAW+HQPZ6n++TNDUX+L0+uUlLywnoxJKDou51Zm+zTCjrCl0Nq6J9C5hP9vK/Q==}
     engines: {node: '>=0.10.0'}
 
-  postgres-date@2.1.0:
-    resolution: {integrity: sha512-K7Juri8gtgXVcDfZttFKVmhglp7epKb1K4pgrkLxehjqkrgPhfG6OO8LHLkfaqkbpjNRnra018XwAr1yQFWGcA==}
-    engines: {node: '>=12'}
-
   postgres-interval@1.2.0:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
-
-  postgres-interval@3.0.0:
-    resolution: {integrity: sha512-BSNDnbyZCXSxgA+1f5UU2GmwhoI0aU5yMxRGO8CdFEcY2BQF9xm/7MqKnYoM1nJDk8nONNWDk9WeSmePFhQdlw==}
-    engines: {node: '>=12'}
-
-  postgres-range@1.1.4:
-    resolution: {integrity: sha512-i/hbxIE9803Alj/6ytL7UHQxRvZkI9O4Sy+J3HGc4F4oo/2eQAjTSNJ0bfxyse3bH0nuVesCk+3IRLaMtG3H6w==}
 
   pretty-ms@9.2.0:
     resolution: {integrity: sha512-4yf0QO/sllf/1zbZWYnvWw3NxCQwLXKzIj0G849LSufP15BXKM0rbD2Z3wVnkMfjdn/CB0Dpp444gYAACdsplg==}
@@ -1560,38 +1530,38 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  turbo-darwin-64@2.5.3:
-    resolution: {integrity: sha512-YSItEVBUIvAGPUDpAB9etEmSqZI3T6BHrkBkeSErvICXn3dfqXUfeLx35LfptLDEbrzFUdwYFNmt8QXOwe9yaw==}
+  turbo-darwin-64@2.5.4:
+    resolution: {integrity: sha512-ah6YnH2dErojhFooxEzmvsoZQTMImaruZhFPfMKPBq8sb+hALRdvBNLqfc8NWlZq576FkfRZ/MSi4SHvVFT9PQ==}
     cpu: [x64]
     os: [darwin]
 
-  turbo-darwin-arm64@2.5.3:
-    resolution: {integrity: sha512-5PefrwHd42UiZX7YA9m1LPW6x9YJBDErXmsegCkVp+GjmWrADfEOxpFrGQNonH3ZMj77WZB2PVE5Aw3gA+IOhg==}
+  turbo-darwin-arm64@2.5.4:
+    resolution: {integrity: sha512-2+Nx6LAyuXw2MdXb7pxqle3MYignLvS7OwtsP9SgtSBaMlnNlxl9BovzqdYAgkUW3AsYiQMJ/wBRb7d+xemM5A==}
     cpu: [arm64]
     os: [darwin]
 
-  turbo-linux-64@2.5.3:
-    resolution: {integrity: sha512-M9xigFgawn5ofTmRzvjjLj3Lqc05O8VHKuOlWNUlnHPUltFquyEeSkpQNkE/vpPdOR14AzxqHbhhxtfS4qvb1w==}
+  turbo-linux-64@2.5.4:
+    resolution: {integrity: sha512-5May2kjWbc8w4XxswGAl74GZ5eM4Gr6IiroqdLhXeXyfvWEdm2mFYCSWOzz0/z5cAgqyGidF1jt1qzUR8hTmOA==}
     cpu: [x64]
     os: [linux]
 
-  turbo-linux-arm64@2.5.3:
-    resolution: {integrity: sha512-auJRbYZ8SGJVqvzTikpg1bsRAsiI9Tk0/SDkA5Xgg0GdiHDH/BOzv1ZjDE2mjmlrO/obr19Dw+39OlMhwLffrw==}
+  turbo-linux-arm64@2.5.4:
+    resolution: {integrity: sha512-/2yqFaS3TbfxV3P5yG2JUI79P7OUQKOUvAnx4MV9Bdz6jqHsHwc9WZPpO4QseQm+NvmgY6ICORnoVPODxGUiJg==}
     cpu: [arm64]
     os: [linux]
 
-  turbo-windows-64@2.5.3:
-    resolution: {integrity: sha512-arLQYohuHtIEKkmQSCU9vtrKUg+/1TTstWB9VYRSsz+khvg81eX6LYHtXJfH/dK7Ho6ck+JaEh5G+QrE1jEmCQ==}
+  turbo-windows-64@2.5.4:
+    resolution: {integrity: sha512-EQUO4SmaCDhO6zYohxIjJpOKRN3wlfU7jMAj3CgcyTPvQR/UFLEKAYHqJOnJtymbQmiiM/ihX6c6W6Uq0yC7mA==}
     cpu: [x64]
     os: [win32]
 
-  turbo-windows-arm64@2.5.3:
-    resolution: {integrity: sha512-3JPn66HAynJ0gtr6H+hjY4VHpu1RPKcEwGATvGUTmLmYSYBQieVlnGDRMMoYN066YfyPqnNGCfhYbXfH92Cm0g==}
+  turbo-windows-arm64@2.5.4:
+    resolution: {integrity: sha512-oQ8RrK1VS8lrxkLriotFq+PiF7iiGgkZtfLKF4DDKsmdbPo0O9R2mQxm7jHLuXraRCuIQDWMIw6dpcr7Iykf4A==}
     cpu: [arm64]
     os: [win32]
 
-  turbo@2.5.3:
-    resolution: {integrity: sha512-iHuaNcq5GZZnr3XDZNuu2LSyCzAOPwDuo5Qt+q64DfsTP1i3T2bKfxJhni2ZQxsvAoxRbuUK5QetJki4qc5aYA==}
+  turbo@2.5.4:
+    resolution: {integrity: sha512-kc8ZibdRcuWUG1pbYSBFWqmIjynlD8Lp7IB6U3vIzvOv9VG+6Sp8bzyeBWE3Oi8XV5KsQrznyRTBPvrf99E4mA==}
     hasBin: true
 
   turndown@7.2.0:
@@ -1717,12 +1687,14 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  xsschema@0.2.0-beta.3:
-    resolution: {integrity: sha512-ViOZ1a1kAPHvFjDJp4ITeutdlbnEs56lx/NotlvcitwN04eHnU3DhR+P5GvXT7A+69qKrXAx0YrccvmfwGnUGw==}
+  xsschema@0.3.0-beta.1:
+    resolution: {integrity: sha512-Z7ZlPKLTc8iUKVfic0Lr66NB777wJqZl3JVLIy1vaNxx6NNTuylYm4wbK78Sgg7kHwaPRqFnuT4IliQM1sDxvg==}
     peerDependencies:
       '@valibot/to-json-schema': ^1.0.0
       arktype: ^2.1.16
       effect: ^3.14.5
+      sury: ^10.0.0-rc
+      zod: ^3.25.0
       zod-to-json-schema: ^3.24.5
     peerDependenciesMeta:
       '@valibot/to-json-schema':
@@ -1730,6 +1702,10 @@ packages:
       arktype:
         optional: true
       effect:
+        optional: true
+      sury:
+        optional: true
+      zod:
         optional: true
       zod-to-json-schema:
         optional: true
@@ -1759,8 +1735,8 @@ packages:
     peerDependencies:
       zod: ^3.24.1
 
-  zod@3.25.28:
-    resolution: {integrity: sha512-/nt/67WYKnr5by3YS7LroZJbtcCBurDKKPBPWWzaxvVCGuG/NOsiKkrjoOhI8mJ+SQUXEbUzeB3S+6XDUEEj7Q==}
+  zod@3.25.51:
+    resolution: {integrity: sha512-TQSnBldh+XSGL+opiSIq0575wvDPqu09AqWe1F7JhUMKY+M91/aGlK4MhpVNO7MgYfHcVCB1ffwAUTJzllKJqg==}
 
 snapshots:
 
@@ -1993,7 +1969,7 @@ snapshots:
 
   '@mixmark-io/domino@2.2.0': {}
 
-  '@modelcontextprotocol/sdk@1.12.0':
+  '@modelcontextprotocol/sdk@1.12.1':
     dependencies:
       ajv: 6.12.6
       content-type: 1.0.5
@@ -2004,8 +1980,8 @@ snapshots:
       express-rate-limit: 7.5.0(express@5.1.0)
       pkce-challenge: 5.0.0
       raw-body: 3.0.0
-      zod: 3.25.28
-      zod-to-json-schema: 3.24.5(zod@3.25.28)
+      zod: 3.25.51
+      zod-to-json-schema: 3.24.5(zod@3.25.51)
     transitivePeerDependencies:
       - supports-color
 
@@ -2088,30 +2064,30 @@ snapshots:
 
   '@tokenizer/token@0.3.0': {}
 
-  '@trpc/client@11.1.2(@trpc/server@11.1.2(typescript@5.8.3))(typescript@5.8.3)':
+  '@trpc/client@11.2.0(@trpc/server@11.2.0(typescript@5.8.3))(typescript@5.8.3)':
     dependencies:
-      '@trpc/server': 11.1.2(typescript@5.8.3)
+      '@trpc/server': 11.2.0(typescript@5.8.3)
       typescript: 5.8.3
 
-  '@trpc/server@11.1.2(typescript@5.8.3)':
+  '@trpc/server@11.2.0(typescript@5.8.3)':
     dependencies:
       typescript: 5.8.3
 
   '@types/estree@1.0.7': {}
 
-  '@types/node@20.17.50':
+  '@types/node@20.17.57':
     dependencies:
       undici-types: 6.19.8
 
-  '@types/pg@8.15.2':
+  '@types/pg@8.15.4':
     dependencies:
-      '@types/node': 20.17.50
+      '@types/node': 20.17.57
       pg-protocol: 1.10.0
-      pg-types: 4.0.2
+      pg-types: 2.2.0
 
   '@types/turndown@5.0.5': {}
 
-  '@vitest/coverage-v8@2.1.9(vitest@2.1.9(@types/node@20.17.50))':
+  '@vitest/coverage-v8@2.1.9(vitest@2.1.9(@types/node@20.17.57))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -2125,7 +2101,7 @@ snapshots:
       std-env: 3.9.0
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-      vitest: 2.1.9(@types/node@20.17.50)
+      vitest: 2.1.9(@types/node@20.17.57)
     transitivePeerDependencies:
       - supports-color
 
@@ -2136,13 +2112,13 @@ snapshots:
       chai: 5.2.0
       tinyrainbow: 1.2.0
 
-  '@vitest/mocker@2.1.9(vite@5.4.19(@types/node@20.17.50))':
+  '@vitest/mocker@2.1.9(vite@5.4.19(@types/node@20.17.57))':
     dependencies:
       '@vitest/spy': 2.1.9
       estree-walker: 3.0.3
       magic-string: 0.30.17
     optionalDependencies:
-      vite: 5.4.19(@types/node@20.17.50)
+      vite: 5.4.19(@types/node@20.17.57)
 
   '@vitest/pretty-format@2.1.9':
     dependencies:
@@ -2384,7 +2360,7 @@ snapshots:
     dependencies:
       eventsource-parser: 3.0.2
 
-  execa@9.5.3:
+  execa@9.6.0:
     dependencies:
       '@sindresorhus/merge-streams': 4.0.0
       cross-spawn: 7.0.6
@@ -2441,26 +2417,27 @@ snapshots:
 
   fast-json-stable-stringify@2.1.0: {}
 
-  fastmcp@1.27.7:
+  fastmcp@2.2.1:
     dependencies:
-      '@modelcontextprotocol/sdk': 1.12.0
+      '@modelcontextprotocol/sdk': 1.12.1
       '@standard-schema/spec': 1.0.0
-      execa: 9.5.3
+      execa: 9.6.0
       file-type: 20.5.0
       fuse.js: 7.1.0
-      mcp-proxy: 2.14.3
+      mcp-proxy: 3.3.0
       strict-event-emitter-types: 2.0.0
       undici: 7.10.0
       uri-templates: 0.2.0
-      xsschema: 0.2.0-beta.3(zod-to-json-schema@3.24.5(zod@3.25.28))
+      xsschema: 0.3.0-beta.1(zod-to-json-schema@3.24.5(zod@3.25.51))(zod@3.25.51)
       yargs: 17.7.2
-      zod: 3.25.28
-      zod-to-json-schema: 3.24.5(zod@3.25.28)
+      zod: 3.25.51
+      zod-to-json-schema: 3.24.5(zod@3.25.51)
     transitivePeerDependencies:
       - '@valibot/to-json-schema'
       - arktype
       - effect
       - supports-color
+      - sury
 
   fflate@0.8.2: {}
 
@@ -2637,9 +2614,9 @@ snapshots:
 
   math-intrinsics@1.1.0: {}
 
-  mcp-proxy@2.14.3:
+  mcp-proxy@3.3.0:
     dependencies:
-      '@modelcontextprotocol/sdk': 1.12.0
+      '@modelcontextprotocol/sdk': 1.12.1
       eventsource: 4.0.0
       yargs: 17.7.2
     transitivePeerDependencies:
@@ -2675,8 +2652,6 @@ snapshots:
   object-assign@4.1.1: {}
 
   object-inspect@1.13.4: {}
-
-  obuf@1.1.2: {}
 
   on-finished@2.4.1:
     dependencies:
@@ -2716,8 +2691,6 @@ snapshots:
 
   pg-int8@1.0.1: {}
 
-  pg-numeric@1.0.2: {}
-
   pg-pool@3.10.0(pg@8.16.0):
     dependencies:
       pg: 8.16.0
@@ -2731,16 +2704,6 @@ snapshots:
       postgres-bytea: 1.0.0
       postgres-date: 1.0.7
       postgres-interval: 1.2.0
-
-  pg-types@4.0.2:
-    dependencies:
-      pg-int8: 1.0.1
-      pg-numeric: 1.0.2
-      postgres-array: 3.0.4
-      postgres-bytea: 3.0.0
-      postgres-date: 2.1.0
-      postgres-interval: 3.0.0
-      postgres-range: 1.1.4
 
   pg@8.16.0:
     dependencies:
@@ -2768,25 +2731,13 @@ snapshots:
 
   postgres-array@2.0.0: {}
 
-  postgres-array@3.0.4: {}
-
   postgres-bytea@1.0.0: {}
 
-  postgres-bytea@3.0.0:
-    dependencies:
-      obuf: 1.1.2
-
   postgres-date@1.0.7: {}
-
-  postgres-date@2.1.0: {}
 
   postgres-interval@1.2.0:
     dependencies:
       xtend: 4.0.2
-
-  postgres-interval@3.0.0: {}
-
-  postgres-range@1.1.4: {}
 
   pretty-ms@9.2.0:
     dependencies:
@@ -3000,32 +2951,32 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  turbo-darwin-64@2.5.3:
+  turbo-darwin-64@2.5.4:
     optional: true
 
-  turbo-darwin-arm64@2.5.3:
+  turbo-darwin-arm64@2.5.4:
     optional: true
 
-  turbo-linux-64@2.5.3:
+  turbo-linux-64@2.5.4:
     optional: true
 
-  turbo-linux-arm64@2.5.3:
+  turbo-linux-arm64@2.5.4:
     optional: true
 
-  turbo-windows-64@2.5.3:
+  turbo-windows-64@2.5.4:
     optional: true
 
-  turbo-windows-arm64@2.5.3:
+  turbo-windows-arm64@2.5.4:
     optional: true
 
-  turbo@2.5.3:
+  turbo@2.5.4:
     optionalDependencies:
-      turbo-darwin-64: 2.5.3
-      turbo-darwin-arm64: 2.5.3
-      turbo-linux-64: 2.5.3
-      turbo-linux-arm64: 2.5.3
-      turbo-windows-64: 2.5.3
-      turbo-windows-arm64: 2.5.3
+      turbo-darwin-64: 2.5.4
+      turbo-darwin-arm64: 2.5.4
+      turbo-linux-64: 2.5.4
+      turbo-linux-arm64: 2.5.4
+      turbo-windows-64: 2.5.4
+      turbo-windows-arm64: 2.5.4
 
   turndown@7.2.0:
     dependencies:
@@ -3057,13 +3008,13 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vite-node@2.1.9(@types/node@20.17.50):
+  vite-node@2.1.9(@types/node@20.17.57):
     dependencies:
       cac: 6.7.14
       debug: 4.4.1
       es-module-lexer: 1.7.0
       pathe: 1.1.2
-      vite: 5.4.19(@types/node@20.17.50)
+      vite: 5.4.19(@types/node@20.17.57)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -3075,19 +3026,19 @@ snapshots:
       - supports-color
       - terser
 
-  vite@5.4.19(@types/node@20.17.50):
+  vite@5.4.19(@types/node@20.17.57):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.5.3
       rollup: 4.41.1
     optionalDependencies:
-      '@types/node': 20.17.50
+      '@types/node': 20.17.57
       fsevents: 2.3.3
 
-  vitest@2.1.9(@types/node@20.17.50):
+  vitest@2.1.9(@types/node@20.17.57):
     dependencies:
       '@vitest/expect': 2.1.9
-      '@vitest/mocker': 2.1.9(vite@5.4.19(@types/node@20.17.50))
+      '@vitest/mocker': 2.1.9(vite@5.4.19(@types/node@20.17.57))
       '@vitest/pretty-format': 2.1.9
       '@vitest/runner': 2.1.9
       '@vitest/snapshot': 2.1.9
@@ -3103,11 +3054,11 @@ snapshots:
       tinyexec: 0.3.2
       tinypool: 1.0.2
       tinyrainbow: 1.2.0
-      vite: 5.4.19(@types/node@20.17.50)
-      vite-node: 2.1.9(@types/node@20.17.50)
+      vite: 5.4.19(@types/node@20.17.57)
+      vite-node: 2.1.9(@types/node@20.17.57)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 20.17.50
+      '@types/node': 20.17.57
     transitivePeerDependencies:
       - less
       - lightningcss
@@ -3142,9 +3093,10 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  xsschema@0.2.0-beta.3(zod-to-json-schema@3.24.5(zod@3.25.28)):
+  xsschema@0.3.0-beta.1(zod-to-json-schema@3.24.5(zod@3.25.51))(zod@3.25.51):
     optionalDependencies:
-      zod-to-json-schema: 3.24.5(zod@3.25.28)
+      zod: 3.25.51
+      zod-to-json-schema: 3.24.5(zod@3.25.51)
 
   xtend@4.0.2: {}
 
@@ -3164,8 +3116,8 @@ snapshots:
 
   yoctocolors@2.1.1: {}
 
-  zod-to-json-schema@3.24.5(zod@3.25.28):
+  zod-to-json-schema@3.24.5(zod@3.25.51):
     dependencies:
-      zod: 3.25.28
+      zod: 3.25.51
 
-  zod@3.25.28: {}
+  zod@3.25.51: {}
