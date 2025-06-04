@@ -1,0 +1,50 @@
+{
+  "name": "@civic/passthrough-proxy-builder",
+  "version": "1.0.0",
+  "description": "CLI wizard for creating MCP passthrough proxies with hooks",
+  "main": "dist/cli.js",
+  "bin": {
+    "passthrough-proxy-builder": "./dist/cli.js",
+    "ppb": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "esbuild src/cli.ts --bundle --platform=node --outfile=dist/cli.js --external:fs --external:path --external:child_process --external:os --external:crypto --external:util --external:stream --external:events --external:net --external:tty --external:url",
+    "dev": "tsx src/cli.ts",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm run build"
+  },
+  "keywords": [
+    "mcp",
+    "proxy",
+    "hooks",
+    "cli"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@mcphooks/audit-hook": "workspace:*",
+    "@mcphooks/guardrail-hook": "workspace:*",
+    "@mcphooks/explain-hook": "workspace:*",
+    "@mcphooks/custom-description-hook": "workspace:*",
+    "@mcphooks/simple-log-hook": "workspace:*",
+    "@mcphooks/passthrough-proxy": "workspace:*",
+    "commander": "^12.0.0",
+    "inquirer": "^9.2.15",
+    "ejs": "^3.1.9",
+    "chalk": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/inquirer": "^9.0.7",
+    "@types/ejs": "^3.1.5",
+    "esbuild": "^0.20.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
