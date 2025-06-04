@@ -78,6 +78,176 @@ Each hook can:
 
 This is useful for implementing validation, security checks, audit logging, or transformations.
 
+## Programmatic Usage
+
+The passthrough MCP server can be used programmatically in your Node.js applications, allowing you to embed a passthrough proxy within your own systems.
+
+### Installation for Library Use
+
+```bash
+npm install @civic/passthrough-mcp-server
+```
+
+### Basic Programmatic Usage
+
+```typescript
+import { createPassthroughProxy } from '@civic/passthrough-mcp-server';
+
+// Create and start the proxy
+const proxy = await createPassthroughProxy({
+  server: {
+    port: 34000,
+    transportType: "httpStream"
+  },
+  client: {
+    url: "http://localhost:33000",
+    type: "stream"
+  },
+  serverInfo: {
+    name: "my-passthrough-server",
+    version: "1.0.0"
+  }
+});
+
+// Later, stop the proxy
+await proxy.stop();
+```
+
+### Advanced Programmatic Features
+
+#### Manual Start
+
+```typescript
+const proxy = await createPassthroughProxy({
+  server: {
+    port: 34000,
+    transportType: "httpStream"
+  },
+  client: {
+    url: "http://localhost:33000",
+    type: "stream"
+  },
+  autoStart: false
+});
+
+// Perform additional setup...
+
+// Start when ready
+await proxy.start();
+```
+
+#### Custom Client Factory
+
+You can provide a custom client factory to control how connections to the target server are created:
+
+```typescript
+import type { ClientFactory, PassthroughClient } from '@civic/passthrough-mcp-server';
+
+const customClientFactory: ClientFactory = // your factory implementation here;
+
+const proxy = await createPassthroughProxy({
+  server: {
+    port: 34000,
+    transportType: "httpStream"
+  },
+  client: {
+    url: "http://localhost:33000",
+    type: "stream"
+  },
+  clientFactory: customClientFactory
+});
+```
+
+#### With Hooks in Code
+
+Configure hooks programmatically:
+
+```typescript
+const proxy = await createPassthroughProxy({
+  server: {
+    port: 34000,
+    transportType: "httpStream"
+  },
+  client: {
+    url: "http://localhost:33000",
+    type: "stream"
+  },
+  hooks: [
+    {
+      url: "http://localhost:8080/trpc",
+      name: "audit-hook"
+    },
+    {
+      url: "http://localhost:8081/trpc",
+      name: "security-hook"
+    }
+  ]
+});
+```
+
+### API Reference
+
+#### `createPassthroughProxy(options)`
+
+Creates and optionally starts a passthrough MCP proxy server.
+
+**Parameters:**
+- `options.server` (required): Server configuration
+  - `port`: Port number for the server
+  - `transportType`: Transport type ("httpStream", "sse", "stdio")
+- `options.client` (required): Target client configuration
+  - `url`: URL of the target MCP server
+  - `type`: Client type ("stream", "sse", "stdio")
+- `options.serverInfo` (optional): Server metadata
+  - `name`: Server name
+  - `version`: Server version
+- `options.clientInfo` (optional): Client metadata
+- `options.hooks` (optional): Array of hook configurations
+  - `url`: Hook endpoint URL
+  - `name`: Hook name
+- `options.clientFactory` (optional): Custom factory for creating target clients
+- `options.autoStart` (optional): Whether to start the server immediately (default: true)
+
+**Returns:**
+A `PassthroughProxy` object with:
+- `server`: The underlying FastMCP server instance
+- `start()`: Method to start the server (if not auto-started)
+- `stop()`: Method to stop the server
+
+### Loading Configuration from Environment
+
+When using programmatically, you can still leverage environment variables:
+
+```typescript
+import { loadConfig, createPassthroughProxy } from '@civic/passthrough-mcp-server';
+
+// Load configuration from environment
+const config = loadConfig();
+
+// Create proxy with environment-based config
+const proxy = await createPassthroughProxy({
+  ...config
+});
+```
+
+### Type Exports
+
+The package exports several TypeScript types for better type safety:
+
+```typescript
+import type {
+  ClientConfig,
+  ClientFactory,
+  PassthroughClient,
+  PassthroughProxy,
+  PassthroughProxyOptions
+} from '@civic/passthrough-mcp-server';
+```
+
+### Examples
+
+See the `examples/` directory for complete working examples of programmatic usage.
+
 ## Implementation
 
 This server uses:

@@ -1,22 +1,64 @@
 {
   "name": "@civic/passthrough-mcp-server",
-  "version": "0.0.2",
-  "private": true,
+  "version": "0.1.0",
+  "description": "A Model Context Protocol (MCP) server that acts as a passthrough proxy with hook middleware support",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "proxy",
+    "passthrough",
+    "middleware",
+    "hooks",
+    "trpc",
+    "ai",
+    "llm"
+  ],
+  "homepage": "https://github.com/civicteam/mcp-tools/tree/main/packages/passthrough-mcp-server",
+  "bugs": {
+    "url": "https://github.com/civicteam/mcp-tools/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/civicteam/mcp-tools.git",
+    "directory": "packages/passthrough-mcp-server"
+  },
+  "license": "MIT",
+  "author": "Civic Technologies, Inc.",
   "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
-  "files": ["dist/", "README.md", "run.sh"],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "passthrough-mcp-server": "./dist/cli.js"
+  },
+  "files": ["dist/", "README.md", "LICENSE", "CHANGELOG.md"],
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "dev:stdio": "tsx watch src/index.ts -- --stdio",
+    "dev": "tsx watch src/cli.ts",
+    "dev:stdio": "tsx watch src/cli.ts -- --stdio",
     "build": "tsc",
+    "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --fix .",
-    "start": "node dist/index.js",
-    "start:stdio": "node dist/index.js --stdio",
+    "start": "node dist/cli.js",
+    "start:stdio": "node dist/cli.js --stdio",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
-    "prepack": "pnpm run build"
+    "prepack": "pnpm run build",
+    "prepublishOnly": "CI=1 pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",

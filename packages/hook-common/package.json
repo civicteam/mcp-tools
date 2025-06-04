@@ -1,6 +1,6 @@
 {
   "name": "@civic/hook-common",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Common utilities and types for implementing MCP server hooks",
   "keywords": ["mcp", "hooks", "middleware", "toolcall", "interceptor"],
   "homepage": "https://github.com/civicteam/mcp-tools/tree/main/packages/hook-common",
@@ -22,7 +22,7 @@
     "lint:fix": "biome check --fix .",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "CI=1 pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build"
   },
   "publishConfig": {
     "access": "public",
