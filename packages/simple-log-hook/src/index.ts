@@ -18,6 +18,13 @@ import { createHTTPServer } from "@trpc/server/adapters/standalone";
  * Minimal hook implementation that logs to console
  */
 class SimpleLogHook extends AbstractHook {
+  /**
+   * The name of this hook
+   */
+  get name(): string {
+    return "SimpleLogHook";
+  }
+
   async processRequest(toolCall: ToolCall): Promise<HookResponse> {
     console.log(`[REQUEST] ${toolCall.name}`, toolCall.arguments);
 

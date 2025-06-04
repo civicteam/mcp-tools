@@ -11,6 +11,13 @@ export class AuditHook implements Hook {
   constructor(private auditLogger: AuditLogger) {}
 
   /**
+   * The name of this hook
+   */
+  get name(): string {
+    return "AuditHook";
+  }
+
+  /**
    * Process an incoming tool call request
    */
   async processRequest(toolCall: ToolCall): Promise<HookResponse> {

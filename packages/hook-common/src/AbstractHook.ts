@@ -13,6 +13,10 @@ import type {
  */
 export abstract class AbstractHook implements Hook {
   /**
+   * The name of this hook. Must be implemented by subclasses.
+   */
+  abstract get name(): string;
+  /**
    * Process an incoming tool call request.
    * Default implementation passes through without modification.
    */

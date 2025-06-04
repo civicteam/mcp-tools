@@ -7,6 +7,7 @@
  */
 
 import * as process from "node:process";
+import type { Hook } from "@civic/hook-common";
 import { configureLoggerForStdio, logger } from "./logger.js";
 
 export type TransportType = "stdio" | "sse" | "httpStream";
@@ -21,15 +22,17 @@ export interface ClientConfig {
   url: string;
 }
 
-export interface HookConfig {
+export interface RemoteHookConfig {
   url: string;
   name?: string; // Optional name for the hook
 }
 
+export type HookDefinition = RemoteHookConfig | Hook;
+
 export interface Config {
   server: ServerConfig;
   client: ClientConfig;
-  hooks?: HookConfig[];
+  hooks?: HookDefinition[];
   serverInfo?: {
     name: string;
     version: string;
@@ -70,7 +73,7 @@ export function parseHookUrls(hooksEnv?: string): string[] {
 /**
  * Convert hook URLs to hook configurations
  */
-export function createHookConfigs(urls: string[]): HookConfig[] {
+export function createHookConfigs(urls: string[]): RemoteHookConfig[] {
   return urls.map((url) => {
     try {
       const urlObj = new URL(url);
@@ -86,26 +89,6 @@ export function createHookConfigs(urls: string[]): HookConfig[] {
       };
     }
   });
-}
-
-/**
- * Create server info configuration
- */
-export function createServerInfo(
-  name: string,
-  version: string,
-): { name: string; version: string } {
-  return { name, version };
-}
-
-/**
- * Create client info configuration
- */
-export function createClientInfo(
-  name: string,
-  version: string,
-): { name: string; version: string } {
-  return { name, version };
 }
 
 /**

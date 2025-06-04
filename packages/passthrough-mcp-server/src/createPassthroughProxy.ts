@@ -34,7 +34,7 @@ export interface PassthroughProxyOptions {
   clientInfo?: Config["clientInfo"];
 
   /**
-   * Optional array of hook configurations
+   * Optional array of hook configurations or Hook instances
    */
   hooks?: Config["hooks"];
 

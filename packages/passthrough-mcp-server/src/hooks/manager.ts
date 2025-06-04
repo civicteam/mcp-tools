@@ -4,25 +4,63 @@
  * Manages hook clients and caching for the passthrough server
  */
 
-import { type HookClient, createHookClients } from "@civic/hook-common";
-import type { Config } from "../utils/config.js";
+import {
+  type Hook,
+  type HookClient,
+  LocalHookClient,
+  RemoteHookClient,
+} from "@civic/hook-common";
+import type {
+  Config,
+  HookDefinition,
+  RemoteHookConfig,
+} from "../utils/config.js";
 
 // Cache for hook clients
 const hookClientsCache = new Map<string, HookClient[]>();
 
 /**
+ * Check if a hook definition is a Hook instance
+ */
+function isHookInstance(hook: HookDefinition): hook is Hook {
+  return (
+    typeof hook === "object" &&
+    "processRequest" in hook &&
+    "processResponse" in hook &&
+    "name" in hook
+  );
+}
+
+/**
+ * Create a cache key for hook definitions
+ */
+function createCacheKey(hooks: HookDefinition[]): string {
+  return JSON.stringify(
+    hooks.map((hook) =>
+      isHookInstance(hook) ? { type: "instance", name: hook.name } : hook,
+    ),
+  );
+}
+
+/**
  * Get or create hook clients for a configuration
  */
 export function getHookClients(config: Config): HookClient[] {
-  const cacheKey = JSON.stringify(config.hooks || []);
+  const hookDefinitions = config.hooks || [];
+  const cacheKey = createCacheKey(hookDefinitions);
 
   if (!hookClientsCache.has(cacheKey)) {
-    const clients = createHookClients(
-      (config.hooks || []).map((hook) => ({
-        url: hook.url,
-        name: hook.name || hook.url,
-      })),
-    );
+    const clients: HookClient[] = hookDefinitions.map((hookDef) => {
+      if (isHookInstance(hookDef)) {
+        // Create a LocalHookClient for Hook instances
+        return new LocalHookClient(hookDef);
+      }
+      // Create a RemoteHookClient for URL-based hooks
+      return new RemoteHookClient({
+        url: hookDef.url,
+        name: hookDef.name || hookDef.url,
+      });
+    });
     hookClientsCache.set(cacheKey, clients);
   }
 

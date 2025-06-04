@@ -5,6 +5,11 @@
  * programmatically in your own applications.
  */
 
+import {
+  AbstractHook,
+  type HookResponse,
+  type ToolCall,
+} from "@civic/hook-common";
 import { createPassthroughProxy } from "../src/index.js";
 
 async function example1_basicUsage() {
@@ -57,16 +62,12 @@ async function example2_manualStart() {
   console.log("Starting proxy...");
   await proxy.start();
   console.log("Proxy is now running!");
-
-  // Access the underlying FastMCP server if needed
-  const server = proxy.server;
-  console.log(`Server name: ${server.name}`);
 }
 
-async function example3_withHooks() {
-  console.log("\nExample 3: With Hooks");
+async function example3_withRemoteHooks() {
+  console.log("\nExample 3: With Remote Hooks");
 
-  const proxy = await createPassthroughProxy({
+  await createPassthroughProxy({
     server: {
       port: 34002,
       transportType: "httpStream",
@@ -86,11 +87,96 @@ async function example3_withHooks() {
       },
     ],
   });
-  console.log("Proxy running with hooks configured");
+  console.log("Proxy running with remote hooks configured");
 }
 
-async function example4_customClientFactory() {
-  console.log("\nExample 4: Custom Client Factory");
+async function example4_withProgrammaticHooks() {
+  console.log("\nExample 4: With Programmatic Hooks");
+
+  // Create a simple logging hook
+  class LoggingHook extends AbstractHook {
+    get name(): string {
+      return "LoggingHook";
+    }
+
+    async processRequest(toolCall: ToolCall): Promise<HookResponse> {
+      console.log(
+        `[${this.name}] Tool request: ${toolCall.name}`,
+        toolCall.arguments,
+      );
+      return {
+        response: "continue",
+        body: toolCall,
+      };
+    }
+
+    async processResponse(
+      response: unknown,
+      originalToolCall: ToolCall,
+    ): Promise<HookResponse> {
+      console.log(
+        `[${this.name}] Tool response for ${originalToolCall.name}:`,
+        response,
+      );
+      return {
+        response: "continue",
+        body: response,
+      };
+    }
+  }
+
+  // Create a validation hook
+  class ValidationHook extends AbstractHook {
+    get name(): string {
+      return "ValidationHook";
+    }
+
+    async processRequest(toolCall: ToolCall): Promise<HookResponse> {
+      // Block dangerous operations
+      if (
+        toolCall.name.toLowerCase().includes("delete") ||
+        toolCall.name.toLowerCase().includes("remove")
+      ) {
+        return {
+          response: "abort",
+          body: null,
+          reason: "Dangerous operations are not allowed",
+        };
+      }
+
+      return {
+        response: "continue",
+        body: toolCall,
+      };
+    }
+  }
+
+  // Mix programmatic hooks with remote hooks
+  const proxy = await createPassthroughProxy({
+    server: {
+      port: 34002,
+      transportType: "httpStream",
+    },
+    client: {
+      url: "http://localhost:33002",
+      type: "stream",
+    },
+    hooks: [
+      new LoggingHook(), // Programmatic hook instance
+      new ValidationHook(), // Another programmatic hook
+      {
+        // Remote hook
+        url: "http://localhost:8080/trpc",
+        name: "remote-audit-hook",
+      },
+    ],
+  });
+
+  console.log("Proxy running with both programmatic and remote hooks");
+}
+
+async function example5_customClientFactory() {
+  console.log("\nExample 5: Custom Client Factory");
 
   // Custom client factory that adds logging
   const customClientFactory = async (clientConfig, clientId, clientInfo) => {
@@ -145,15 +231,19 @@ switch (exampleNumber) {
     example2_manualStart().catch(console.error);
     break;
   case "3":
-    example3_withHooks().catch(console.error);
+    example3_withRemoteHooks().catch(console.error);
     break;
   case "4":
-    example4_customClientFactory().catch(console.error);
+    example4_withProgrammaticHooks().catch(console.error);
+    break;
+  case "5":
+    example5_customClientFactory().catch(console.error);
     break;
   default:
-    console.log("Usage: tsx programmatic-usage.ts [1|2|3|4]");
+    console.log("Usage: tsx programmatic-usage.ts [1|2|3|4|5]");
     console.log("1 - Basic usage");
     console.log("2 - Manual start");
-    console.log("3 - With hooks");
-    console.log("4 - Custom client factory");
+    console.log("3 - With remote hooks");
+    console.log("4 - With programmatic hooks");
+    console.log("5 - Custom client factory");
 }
