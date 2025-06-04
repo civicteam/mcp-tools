@@ -1,6 +1,6 @@
 {
   "name": "@civic/passthrough-mcp-server",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A Model Context Protocol (MCP) server that acts as a passthrough proxy with hook middleware support",
   "keywords": [
     "mcp",
@@ -42,6 +42,7 @@
     "dev": "tsx watch src/cli.ts",
     "dev:stdio": "tsx watch src/cli.ts -- --stdio",
     "build": "tsc",
+    "postbuild": "chmod +x dist/cli.js",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
