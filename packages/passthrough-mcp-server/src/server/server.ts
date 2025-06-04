@@ -18,6 +18,7 @@ import {
   FastMCP,
   type ImageContent,
   type TextContent,
+    type Tool as FastMCPTool,
 } from "fastmcp";
 import { createTargetClient } from "../client/client.js";
 import { getHookClients } from "../hooks/manager.js";
@@ -31,15 +32,11 @@ import { logger } from "../utils/logger.js";
 import { extractToolParameters } from "../utils/schemaConverter.js";
 import { generateSessionId } from "../utils/session.js";
 import { createPassthroughHandler } from "./passthrough.js";
+import {ZodType, ZodTypeDef} from "zod";
 
-type ToolHandler = (
-  args: unknown,
-  context: Context<{
-    id: string;
-  }>,
-) => Promise<
-  string | AudioContent | ContentResult | ImageContent | TextContent
->;
+type FastMCPToolHandler = FastMCPTool<{
+  id: string;
+}, ZodType<any, ZodTypeDef, any>>["execute"]
 
 // Store discovered tools in memory
 let discoveredTools: MCPTool[] = [];
@@ -55,13 +52,11 @@ export function getDiscoveredTools(): MCPTool[] {
  */
 export function createServer(serverInfo?: {
   name: string;
-  version: string;
+  version?: `${number}.${number}.${number}`
 }): FastMCP<{ id: string }> {
   return new FastMCP<{ id: string }>({
     name: serverInfo?.name || "passthrough-mcp-server",
-    version: (serverInfo?.version ||
-      "0.0.1") as `${number}.${number}.${number}`,
-    vendor: "civic",
+    version: serverInfo?.version ?? "0.0.1",
     authenticate: async () => {
       return {
         id: generateSessionId(),
@@ -167,7 +162,7 @@ export async function discoverAndRegisterTools(
       description:
         tool.description || `Passthrough to ${tool.name} on target server`,
       parameters,
-      execute: toolHandler as ToolHandler,
+      execute: toolHandler as FastMCPToolHandler,
     });
 
     logger.info(`Registered passthrough for tool: ${tool.name}`);

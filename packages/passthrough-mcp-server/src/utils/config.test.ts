@@ -134,11 +134,9 @@ describe("Config Utils", () => {
       const config = loadConfig();
 
       expect(config).toEqual({
-        server: {
-          port: 34000,
-          transportType: "httpStream",
-        },
-        client: {
+        port: 34000,
+        transportType: "httpStream",
+        target: {
           url: "http://localhost:33000",
           type: "stream",
         },
@@ -152,9 +150,9 @@ describe("Config Utils", () => {
 
       const config = loadConfig();
 
-      expect(config.server.port).toBe(8080);
-      expect(config.client.url).toBe("http://example.com:3000");
-      expect(config.client.type).toBe("sse");
+      expect(config.transportType).toBe('httpStream');
+      expect(config.target.url).toBe("http://example.com:3000");
+      expect(config.target.type).toBe("sse");
     });
 
     it("should load hooks configuration", () => {
@@ -178,7 +176,7 @@ describe("Config Utils", () => {
       const config = loadConfig();
 
       // Default case (no args) should be httpStream
-      expect(config.server.transportType).toBe("httpStream");
+      expect(config.transportType).toBe("httpStream");
 
       // The actual --stdio test is covered by parseServerTransport tests
     });

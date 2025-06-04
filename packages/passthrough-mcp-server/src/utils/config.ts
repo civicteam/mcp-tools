@@ -40,7 +40,7 @@ export type Config = BaseConfig & {
   hooks?: HookDefinition[];
   serverInfo?: {
     name: string;
-    version: string;
+    version: `${number}.${number}.${number}`;
   };
   clientInfo?: {
     name: string;
