@@ -1,6 +1,10 @@
 {
   "prompt": "Find out about civic's offerings in the authentication space.",
-  "allowedTools": ["mcp__passthrough-mcp-server__fetch", "mcp__fetch-docs__fetch", "WebFetch"],
+  "allowedTools": [
+    "mcp__passthrough-mcp-server__fetch",
+    "mcp__fetch-docs__fetch",
+    "WebFetch"
+  ],
   "mcpServers": {
     "passthrough-mcp-server": {
       "type": "stdio",

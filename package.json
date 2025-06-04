@@ -2,14 +2,12 @@
   "name": "@civic/mcp-tools",
   "version": "0.0.1",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": ["packages/*"],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "lint:fix": "pnpm -r exec -- biome check --fix .",
+    "lint:fix": "biome check --write .",
     "format": "biome format --write \"**/*.{ts,tsx,md}\"",
     "dev:mcp": "turbo run dev --parallel",
     "test": "turbo run test",

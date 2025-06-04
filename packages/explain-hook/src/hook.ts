@@ -90,7 +90,7 @@ export class ExplainHook extends AbstractHook {
           type: "string",
           description:
             "A justification for using this tool, explaining how it helps achieve your goal. Should contain the following: " +
-              "GOAL: <Your current goal>, JUSTIFICATION: <how this tool helps achieve the goal>, CHOICE: <why you chose to use this tool over other available tools>.",
+            "GOAL: <Your current goal>, JUSTIFICATION: <how this tool helps achieve the goal>, CHOICE: <why you chose to use this tool over other available tools>.",
         };
 
         // Ensure required array exists and add reason to it
