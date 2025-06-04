@@ -92,7 +92,7 @@ describe("Full MCP Pipeline Integration", () => {
       port,
       target: {
         url: targetUrl,
-        type: "stream",
+        transportType: "httpStream",
       },
       hooks: [hook],
       serverInfo: {

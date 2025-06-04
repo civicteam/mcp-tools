@@ -35,7 +35,7 @@ export async function createTargetClient(
   // Create appropriate transport based on configuration
   const url = new URL(targetConfig.url);
   const transport =
-    targetConfig.type === "sse"
+    targetConfig.transportType === "sse"
       ? new SSEClientTransport(url)
       : new StreamableHTTPClientTransport(url);
 

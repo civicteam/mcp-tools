@@ -43,7 +43,7 @@ describe("createPassthroughProxy", () => {
     port: 34000,
     target: {
       url: "http://localhost:33000",
-      type: "stream",
+      transportType: "httpStream",
     },
     serverInfo: {
       name: "test-passthrough",

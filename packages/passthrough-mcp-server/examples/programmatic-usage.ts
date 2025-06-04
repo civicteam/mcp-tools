@@ -21,7 +21,7 @@ async function example1_basicUsage() {
     port: 34000,
     target: {
       url: "http://localhost:33000",
-      type: "stream",
+      transportType: "httpStream",
     },
     serverInfo: {
       name: "my-passthrough-server",
@@ -47,7 +47,7 @@ async function example2_manualStart() {
     port: 34001,
     target: {
       url: "http://localhost:33001",
-      type: "sse",
+      transportType: "sse",
     },
     autoStart: false,
   });
@@ -68,7 +68,7 @@ async function example3_withRemoteHooks() {
     port: 34002,
     target: {
       url: "http://localhost:33002",
-      type: "stream",
+      transportType: "httpStream",
     },
     hooks: [
       {
@@ -151,7 +151,7 @@ async function example4_withProgrammaticHooks() {
     port: 34002,
     target: {
       url: "http://localhost:33002",
-      type: "stream",
+      transportType: "httpStream",
     },
     hooks: [
       new LoggingHook(), // Programmatic hook instance
@@ -202,7 +202,7 @@ async function example5_customClientFactory() {
     port: 34003,
     target: {
       url: "http://localhost:33003",
-      type: "stream",
+      transportType: "httpStream",
     },
     clientFactory: customClientFactory,
   });
