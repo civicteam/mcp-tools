@@ -24,7 +24,7 @@ export type BaseConfig =
     };
 
 export interface TargetConfig {
-  type: "sse" | "stream";
+  transportType: "sse" | "httpStream";
   url: string;
 }
 
@@ -60,8 +60,10 @@ export function parseServerTransport(args: string[]): TransportType {
 /**
  * Parse client transport type from environment
  */
-export function parseClientTransport(env: NodeJS.ProcessEnv): "sse" | "stream" {
-  return env.TARGET_SERVER_TRANSPORT === "sse" ? "sse" : "stream";
+export function parseClientTransport(
+  env: NodeJS.ProcessEnv,
+): "sse" | "httpStream" {
+  return env.TARGET_SERVER_TRANSPORT === "sse" ? "sse" : "httpStream";
 }
 
 /**
@@ -123,7 +125,7 @@ export function loadConfig(): Config {
       transportType: "stdio",
       target: {
         url: targetUrl,
-        type: targetTransport,
+        transportType: targetTransport,
       },
     };
   } else {
@@ -133,7 +135,7 @@ export function loadConfig(): Config {
       port,
       target: {
         url: targetUrl,
-        type: targetTransport,
+        transportType: targetTransport,
       },
     };
   }

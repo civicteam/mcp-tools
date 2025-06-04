@@ -95,13 +95,11 @@ import { createPassthroughProxy } from '@civic/passthrough-mcp-server';
 
 // Create and start the proxy
 const proxy = await createPassthroughProxy({
-  server: {
-    port: 34000,
-    transportType: "httpStream"
-  },
-  client: {
+  transportType: "httpStream",
+  port: 34000,
+  target: {
     url: "http://localhost:33000",
-    type: "stream"
+    transportType: "httpStream"
   },
   serverInfo: {
     name: "my-passthrough-server",
@@ -119,13 +117,11 @@ await proxy.stop();
 
 ```typescript
 const proxy = await createPassthroughProxy({
-  server: {
-    port: 34000,
-    transportType: "httpStream"
-  },
-  client: {
+  transportType: "httpStream",
+  port: 34000,
+  target: {
     url: "http://localhost:33000",
-    type: "stream"
+    transportType: "httpStream"
   },
   autoStart: false
 });
@@ -146,13 +142,11 @@ import type { ClientFactory, PassthroughClient } from '@civic/passthrough-mcp-se
 const customClientFactory: ClientFactory = // your factory implementation here;
 
 const proxy = await createPassthroughProxy({
-  server: {
-    port: 34000,
-    transportType: "httpStream"
-  },
-  client: {
+  transportType: "httpStream",
+  port: 34000,
+  target: {
     url: "http://localhost:33000",
-    type: "stream"
+    transportType: "httpStream"
   },
   clientFactory: customClientFactory
 });
@@ -164,13 +158,11 @@ Configure hooks programmatically:
 
 ```typescript
 const proxy = await createPassthroughProxy({
-  server: {
-    port: 34000,
-    transportType: "httpStream"
-  },
-  client: {
+  transportType: "httpStream",
+  port: 34000,
+  target: {
     url: "http://localhost:33000",
-    type: "stream"
+    transportType: "httpStream"
   },
   hooks: [
     {
@@ -192,12 +184,11 @@ const proxy = await createPassthroughProxy({
 Creates and optionally starts a passthrough MCP proxy server.
 
 **Parameters:**
-- `options.server` (required): Server configuration
-  - `port`: Port number for the server
-  - `transportType`: Transport type ("httpStream", "sse", "stdio")
-- `options.client` (required): Target client configuration
+- `options.transportType` (required): Transport type for the server ("httpStream", "sse", "stdio")
+- `options.port` (required for non-stdio transports): Port number for the server
+- `options.target` (required): Target server configuration
   - `url`: URL of the target MCP server
-  - `type`: Client type ("stream", "sse", "stdio")
+  - `transportType`: Transport type ("httpStream", "sse")
 - `options.serverInfo` (optional): Server metadata
   - `name`: Server name
   - `version`: Server version

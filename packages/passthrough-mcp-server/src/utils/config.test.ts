@@ -36,14 +36,14 @@ describe("Config Utils", () => {
       expect(parseClientTransport(env)).toBe("sse");
     });
 
-    it("should return stream by default", () => {
+    it("should return httpStream by default", () => {
       const env = {};
-      expect(parseClientTransport(env)).toBe("stream");
+      expect(parseClientTransport(env)).toBe("httpStream");
     });
 
-    it("should return stream for other values", () => {
+    it("should return httpStream for other values", () => {
       const env = { TARGET_SERVER_TRANSPORT: "invalid" };
-      expect(parseClientTransport(env)).toBe("stream");
+      expect(parseClientTransport(env)).toBe("httpStream");
     });
   });
 
@@ -138,7 +138,7 @@ describe("Config Utils", () => {
         transportType: "httpStream",
         target: {
           url: "http://localhost:33000",
-          type: "stream",
+          transportType: "httpStream",
         },
       });
     });
@@ -152,7 +152,7 @@ describe("Config Utils", () => {
 
       expect(config.transportType).toBe("httpStream");
       expect(config.target.url).toBe("http://example.com:3000");
-      expect(config.target.type).toBe("sse");
+      expect(config.target.transportType).toBe("sse");
     });
 
     it("should load hooks configuration", () => {

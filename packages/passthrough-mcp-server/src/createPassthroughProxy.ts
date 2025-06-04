@@ -61,7 +61,7 @@ export interface PassthroughProxy {
  * const proxy = await createPassthroughProxy({
  *   transportType: "httpStream",
  *   port: 34000,
- *   target: { url: "http://localhost:33000", type: "stream" },
+ *   target: { url: "http://localhost:33000", transportType: "httpStream" },
  *   serverInfo: { name: "my-passthrough", version: "1.0.0" }
  * });
  *
@@ -75,7 +75,7 @@ export interface PassthroughProxy {
  * const proxy = await createPassthroughProxy({
  *   transportType: "httpStream",
  *   port: 34000,
- *   target: { url: "http://localhost:33000", type: "stream" },
+ *   target: { url: "http://localhost:33000", transportType: "httpStream" },
  *   autoStart: false
  * });
  *
@@ -88,7 +88,7 @@ export interface PassthroughProxy {
  * // Create with stdio transport (no port required)
  * const proxy = await createPassthroughProxy({
  *   transportType: "stdio",
- *   target: { url: "http://localhost:33000", type: "stream" },
+ *   target: { url: "http://localhost:33000", transportType: "httpStream" },
  *   serverInfo: { name: "stdio-passthrough", version: "1.0.0" }
  * });
  * ```
