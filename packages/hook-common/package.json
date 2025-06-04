@@ -1,6 +1,6 @@
 {
   "name": "@civic/hook-common",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Common utilities and types for implementing MCP server hooks",
   "keywords": ["mcp", "hooks", "middleware", "toolcall", "interceptor"],
   "homepage": "https://github.com/civicteam/mcp-tools/tree/main/packages/hook-common",
