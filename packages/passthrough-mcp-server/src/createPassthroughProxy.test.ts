@@ -6,7 +6,7 @@ import type { FastMCP } from "fastmcp";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPassthroughProxy } from "./createPassthroughProxy.js";
 import type { PassthroughClient } from "./types/client.js";
-import type { ClientConfig, Config } from "./utils/config.js";
+import type { Config } from "./utils/config.js";
 
 // Mock the dependencies
 vi.mock("./server/server.js", () => ({
@@ -39,11 +39,9 @@ vi.mock("./utils/logger.js", () => ({
 
 describe("createPassthroughProxy", () => {
   const mockConfig: Config = {
-    server: {
-      port: 34000,
-      transportType: "httpStream",
-    },
-    client: {
+    transportType: "httpStream",
+    port: 34000,
+    target: {
       url: "http://localhost:33000",
       type: "stream",
     },
@@ -208,10 +206,10 @@ describe("createPassthroughProxy", () => {
 
     // Test stdio transport
     const stdioConfig: Config = {
-      ...mockConfig,
-      server: {
-        port: 34000,
-        transportType: "stdio",
+      transportType: "stdio",
+      target: {
+        url: "http://localhost:33000",
+        type: "stream",
       },
     };
 
@@ -220,7 +218,7 @@ describe("createPassthroughProxy", () => {
     });
 
     expect(logger.info).toHaveBeenCalledWith(
-      expect.stringContaining("stdio transport, connecting to target"),
+      expect.stringContaining("stdio transport"),
     );
   });
 

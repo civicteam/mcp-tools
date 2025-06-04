@@ -12,12 +12,18 @@ import { configureLoggerForStdio, logger } from "./logger.js";
 
 export type TransportType = "stdio" | "sse" | "httpStream";
 
-export interface ServerConfig {
-  port: number;
-  transportType: TransportType;
-}
+// Base configuration with discriminated union based on transport type
+export type BaseConfig = 
+  | {
+      transportType: "stdio";
+      // Port is not required for stdio
+    }
+  | {
+      transportType: "sse" | "httpStream";
+      port: number;
+    };
 
-export interface ClientConfig {
+export interface TargetConfig {
   type: "sse" | "stream";
   url: string;
 }
@@ -29,9 +35,8 @@ export interface RemoteHookConfig {
 
 export type HookDefinition = RemoteHookConfig | Hook;
 
-export interface Config {
-  server: ServerConfig;
-  client: ClientConfig;
+export type Config = BaseConfig & {
+  target: TargetConfig;
   hooks?: HookDefinition[];
   serverInfo?: {
     name: string;
@@ -41,7 +46,7 @@ export interface Config {
     name: string;
     version: string;
   };
-}
+};
 
 /**
  * Parse server transport type from command line arguments
@@ -96,31 +101,42 @@ export function createHookConfigs(urls: string[]): RemoteHookConfig[] {
  */
 export function loadConfig(): Config {
   // Server configuration
-  const port = process.env.PORT ? Number.parseInt(process.env.PORT) : 34000;
-  const serverTransport = parseServerTransport(process.argv);
+  const transportType = parseServerTransport(process.argv);
 
   // Configure logger for stdio mode to avoid interfering with stdout
-  if (serverTransport === "stdio") {
+  if (transportType === "stdio") {
     configureLoggerForStdio();
   }
 
-  // Client configuration
+  // Target configuration
   const targetUrl = process.env.TARGET_SERVER_URL || "http://localhost:33000";
-  const clientTransport = parseClientTransport(process.env);
+  const targetTransport = parseClientTransport(process.env);
 
   // Hooks configuration
   const hookUrls = parseHookUrls(process.env.HOOKS);
 
-  const config: Config = {
-    server: {
+  // Build config based on transport type
+  let config: Config;
+  
+  if (transportType === "stdio") {
+    config = {
+      transportType: "stdio",
+      target: {
+        url: targetUrl,
+        type: targetTransport,
+      },
+    };
+  } else {
+    const port = process.env.PORT ? Number.parseInt(process.env.PORT) : 34000;
+    config = {
+      transportType,
       port,
-      transportType: serverTransport,
-    },
-    client: {
-      url: targetUrl,
-      type: clientTransport,
-    },
-  };
+      target: {
+        url: targetUrl,
+        type: targetTransport,
+      },
+    };
+  }
 
   // Add hooks config if URLs are provided
   if (hookUrls.length > 0) {

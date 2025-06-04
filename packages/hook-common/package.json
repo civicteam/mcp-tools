@@ -22,7 +22,7 @@
     "lint:fix": "biome check --fix .",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
-    "prepublishOnly": "CI=1 pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build"
+    "prepublishOnly": "pnpm run lint && pnpm run typecheck && CI=1 pnpm run test && pnpm run build"
   },
   "publishConfig": {
     "access": "public",

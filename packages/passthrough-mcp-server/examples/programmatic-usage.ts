@@ -17,11 +17,9 @@ async function example1_basicUsage() {
 
   // Create and start the proxy
   const proxy = await createPassthroughProxy({
-    server: {
-      port: 34000,
-      transportType: "httpStream",
-    },
-    client: {
+    transportType: "httpStream",
+    port: 34000,
+    target: {
       url: "http://localhost:33000",
       type: "stream",
     },
@@ -45,11 +43,9 @@ async function example2_manualStart() {
 
   // Create without auto-starting
   const proxy = await createPassthroughProxy({
-    server: {
-      port: 34001,
-      transportType: "sse",
-    },
-    client: {
+    transportType: "sse",
+    port: 34001,
+    target: {
       url: "http://localhost:33001",
       type: "sse",
     },
@@ -67,12 +63,10 @@ async function example2_manualStart() {
 async function example3_withRemoteHooks() {
   console.log("\nExample 3: With Remote Hooks");
 
-  await createPassthroughProxy({
-    server: {
-      port: 34002,
-      transportType: "httpStream",
-    },
-    client: {
+  const proxy = await createPassthroughProxy({
+    transportType: "httpStream",
+    port: 34002,
+    target: {
       url: "http://localhost:33002",
       type: "stream",
     },
@@ -153,11 +147,9 @@ async function example4_withProgrammaticHooks() {
 
   // Mix programmatic hooks with remote hooks
   const proxy = await createPassthroughProxy({
-    server: {
-      port: 34002,
-      transportType: "httpStream",
-    },
-    client: {
+    transportType: "httpStream",
+    port: 34002,
+    target: {
       url: "http://localhost:33002",
       type: "stream",
     },
@@ -206,11 +198,9 @@ async function example5_customClientFactory() {
   };
 
   const proxy = await createPassthroughProxy({
-    server: {
-      port: 34003,
-      transportType: "httpStream",
-    },
-    client: {
+    transportType: "httpStream",
+    port: 34003,
+    target: {
       url: "http://localhost:33003",
       type: "stream",
     },

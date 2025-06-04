@@ -9,7 +9,7 @@ import type {
   CallToolResult,
   ListToolsResult,
 } from "@modelcontextprotocol/sdk/types.js";
-import type { ClientConfig } from "../utils/config.js";
+import type { TargetConfig } from "../utils/config.js";
 
 export interface PassthroughClient {
   /**
@@ -35,7 +35,7 @@ export interface PassthroughClient {
  * This allows for custom client implementations while maintaining compatibility.
  */
 export type ClientFactory = (
-  clientConfig: ClientConfig,
+  targetConfig: TargetConfig,
   clientId: string,
   clientInfo?: { name: string; version: string },
 ) => Promise<PassthroughClient>;

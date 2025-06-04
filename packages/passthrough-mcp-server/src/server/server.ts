@@ -61,6 +61,7 @@ export function createServer(serverInfo?: {
     name: serverInfo?.name || "passthrough-mcp-server",
     version: (serverInfo?.version ||
       "0.0.1") as `${number}.${number}.${number}`,
+    vendor: "civic",
     authenticate: async () => {
       return {
         id: generateSessionId(),
@@ -79,8 +80,8 @@ export async function discoverAndRegisterTools(
 ): Promise<void> {
   // Create a temporary client to discover available tools
   const tempClient = clientFactory
-    ? await clientFactory(config.client, "discovery", config.clientInfo)
-    : await createTargetClient(config.client, "discovery", config.clientInfo);
+    ? await clientFactory(config.target, "discovery", config.clientInfo)
+    : await createTargetClient(config.target, "discovery", config.clientInfo);
 
   // Create tools/list request
   const toolsListRequest: ToolsListRequest = {

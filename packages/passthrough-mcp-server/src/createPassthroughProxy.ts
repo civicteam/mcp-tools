@@ -12,32 +12,7 @@ import type { ClientFactory } from "./types/client.js";
 import type { Config } from "./utils/config.js";
 import { logger } from "./utils/logger.js";
 
-export interface PassthroughProxyOptions {
-  /**
-   * Server configuration
-   */
-  server: Config["server"];
-
-  /**
-   * Target client configuration
-   */
-  client: Config["client"];
-
-  /**
-   * Optional server metadata
-   */
-  serverInfo?: Config["serverInfo"];
-
-  /**
-   * Optional client metadata for connections
-   */
-  clientInfo?: Config["clientInfo"];
-
-  /**
-   * Optional array of hook configurations or Hook instances
-   */
-  hooks?: Config["hooks"];
-
+export type PassthroughProxyOptions = Config & {
   /**
    * Optional custom client factory for creating target clients
    */
@@ -48,7 +23,7 @@ export interface PassthroughProxyOptions {
    * @default true
    */
   autoStart?: boolean;
-}
+};
 
 export interface PassthroughProxy {
   /**
@@ -84,8 +59,9 @@ export interface PassthroughProxy {
  * ```typescript
  * // Create and start a passthrough proxy
  * const proxy = await createPassthroughProxy({
- *   server: { port: 34000, transportType: "httpStream" },
- *   client: { url: "http://localhost:33000", type: "stream" },
+ *   transportType: "httpStream",
+ *   port: 34000,
+ *   target: { url: "http://localhost:33000", type: "stream" },
  *   serverInfo: { name: "my-passthrough", version: "1.0.0" }
  * });
  *
@@ -97,36 +73,34 @@ export interface PassthroughProxy {
  * ```typescript
  * // Create without auto-starting
  * const proxy = await createPassthroughProxy({
- *   server: { port: 34000, transportType: "httpStream" },
- *   client: { url: "http://localhost:33000", type: "stream" },
+ *   transportType: "httpStream",
+ *   port: 34000,
+ *   target: { url: "http://localhost:33000", type: "stream" },
  *   autoStart: false
  * });
  *
  * // Start manually later
  * await proxy.start();
  * ```
+ *
+ * @example
+ * ```typescript
+ * // Create with stdio transport (no port required)
+ * const proxy = await createPassthroughProxy({
+ *   transportType: "stdio",
+ *   target: { url: "http://localhost:33000", type: "stream" },
+ *   serverInfo: { name: "stdio-passthrough", version: "1.0.0" }
+ * });
+ * ```
  */
 export async function createPassthroughProxy(
   options: PassthroughProxyOptions,
 ): Promise<PassthroughProxy> {
   const {
-    server: serverConfig,
-    client: clientConfig,
-    serverInfo,
-    clientInfo,
-    hooks,
     clientFactory,
     autoStart = true,
+    ...config
   } = options;
-
-  // Reconstruct config object for internal use
-  const config: Config = {
-    server: serverConfig,
-    client: clientConfig,
-    serverInfo,
-    clientInfo,
-    hooks,
-  };
 
   // Create the server
   const server = createServer(config.serverInfo);
@@ -134,8 +108,10 @@ export async function createPassthroughProxy(
   // Discover and register tools from the target server
   await discoverAndRegisterTools(server, config, clientFactory);
 
-  // Get transport configuration
-  const transportConfig = getServerTransportConfig(config.server);
+  // Get transport configuration based on transport type
+  const transportConfig = config.transportType === "stdio"
+    ? getServerTransportConfig({ transportType: "stdio" })
+    : getServerTransportConfig({ transportType: config.transportType, port: config.port });
 
   let isStarted = false;
 
@@ -148,12 +124,12 @@ export async function createPassthroughProxy(
     await server.start(transportConfig);
     isStarted = true;
 
+    const transportInfo = config.transportType === "stdio"
+      ? "stdio transport"
+      : `${config.transportType} transport on port ${config.port}`;
+    
     logger.info(
-      `Passthrough MCP Server running with ${config.server.transportType} transport${
-        config.server.transportType !== "stdio"
-          ? ` on port ${config.server.port}`
-          : ""
-      }, connecting to target at ${config.client.url}`,
+      `Passthrough MCP Server running with ${transportInfo}, connecting to target at ${config.target.url}`,
     );
   };
 
