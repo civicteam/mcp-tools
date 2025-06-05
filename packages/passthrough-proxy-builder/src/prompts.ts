@@ -123,9 +123,83 @@ export async function runWizard(): Promise<void> {
 
   config.hooksOrder = hooks;
 
-  // Placeholder for hook ordering (step 10)
+  // Step 3: Hook ordering (if multiple hooks selected)
   if (hooks.length > 1) {
-    console.log(chalk.gray("\nHook ordering will be implemented in step 10"));
+    console.log(chalk.blue("\n🔄 Order your hooks (executed in sequence):\n"));
+
+    const orderedHooks = [...hooks];
+    let ordering = true;
+
+    while (ordering) {
+      // Display current order
+      console.log(chalk.cyan("Current order:"));
+      orderedHooks.forEach((hook, index) => {
+        const hookName = typeof hook === "string" ? hook : hook.alias;
+        console.log(`  ${index + 1}. ${hookName}`);
+      });
+
+      const { action } = await inquirer.prompt([
+        {
+          type: "list",
+          name: "action",
+          message: "What would you like to do?",
+          choices: [
+            { name: "Move a hook up/down", value: "move" },
+            { name: "Continue with this order", value: "done" },
+          ],
+        },
+      ]);
+
+      if (action === "done") {
+        ordering = false;
+      } else {
+        // Select hook to move
+        const hookChoices = orderedHooks.map((hook, index) => {
+          const hookName = typeof hook === "string" ? hook : hook.alias;
+          return {
+            name: `${index + 1}. ${hookName}`,
+            value: index,
+          };
+        });
+
+        const { hookIndex } = await inquirer.prompt([
+          {
+            type: "list",
+            name: "hookIndex",
+            message: "Select hook to move:",
+            choices: hookChoices,
+          },
+        ]);
+
+        // Select direction
+        const moveChoices = [];
+        if (hookIndex > 0) moveChoices.push({ name: "Move up", value: "up" });
+        if (hookIndex < orderedHooks.length - 1)
+          moveChoices.push({ name: "Move down", value: "down" });
+
+        if (moveChoices.length > 0) {
+          const { direction } = await inquirer.prompt([
+            {
+              type: "list",
+              name: "direction",
+              message: "Move direction:",
+              choices: moveChoices,
+            },
+          ]);
+
+          // Perform the move
+          const [movedHook] = orderedHooks.splice(hookIndex, 1);
+          const newIndex = direction === "up" ? hookIndex - 1 : hookIndex + 1;
+          orderedHooks.splice(newIndex, 0, movedHook);
+
+          console.log(chalk.green("\n✓ Hook moved!\n"));
+        }
+      }
+    }
+
+    config.hooksOrder = orderedHooks;
+  } else {
+    config.hooksOrder = hooks;
   }
 
   // Generate the project
