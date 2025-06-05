@@ -274,8 +274,8 @@ Detailed Implementation Plan:
 9.	✅ Build multi-select prompt for hook selection with custom hook option
 10.	✅ Create hook ordering prompt with arrow-key reordering functionality
 11.	✅ Add validation logic for user inputs and config structure
-12.	Create Dockerfile.ejs template for generated Docker images
-13.	Build generator.ts to write config.json and render Dockerfile
+12.	✅ Create Dockerfile.ejs template for generated Docker images
+13.	✅ Build generator.ts to write config.json and render Dockerfile
 14.	Add file system utilities for creating output directories
 15.	Implement custom hook URL prompt flow with alias naming
 16.	Create formatted terminal output for summary and instructions
