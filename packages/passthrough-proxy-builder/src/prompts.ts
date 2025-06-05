@@ -76,9 +76,57 @@ export async function runWizard(): Promise<void> {
         : proxyAnswers.proxyMode;
   }
 
-  // Placeholder for hook selection (step 9)
+  // Step 2: Hook selection
   console.log(chalk.yellow("\n✓ Target server configured"));
-  console.log(chalk.gray("Hook selection will be implemented in step 9"));
+  console.log(chalk.blue("\n🪝 Select hooks to add to your proxy:\n"));
+
+  const builtInHooks = getBuiltInHookNames();
+  const hookChoices = [
+    ...builtInHooks.map((name) => ({
+      name: name,
+      value: name,
+      checked: false,
+    })),
+    new inquirer.Separator(),
+    {
+      name: "Add Custom Hook (external URL)",
+      value: "CUSTOM_HOOK",
+      checked: false,
+    },
+  ];
+
+  const { selectedHooks } = await inquirer.prompt([
+    {
+      type: "checkbox",
+      name: "selectedHooks",
+      message: "Select hooks (use Space to toggle, Enter to continue):",
+      choices: hookChoices,
+      validate: (input) =>
+        input.length > 0 || "Please select at least one hook",
+    },
+  ]);
+
+  // Process selected hooks
+  const hooks: HookEntry[] = [];
+
+  for (const hook of selectedHooks) {
+    if (hook === "CUSTOM_HOOK") {
+      // Handle custom hook - will be implemented in step 15
+      console.log(
+        chalk.gray("Custom hook URL prompt will be implemented in step 15"),
+      );
+    } else {
+      // Built-in hook
+      hooks.push(hook);
+    }
+  }
+
+  config.hooksOrder = hooks;
+
+  // Placeholder for hook ordering (step 10)
+  if (hooks.length > 1) {
+    console.log(chalk.gray("\nHook ordering will be implemented in step 10"));
+  }
 
   // Generate the project
   await generateProject(config);
