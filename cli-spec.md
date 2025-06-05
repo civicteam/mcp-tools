@@ -264,16 +264,16 @@ Detailed Implementation Plan:
 4.	✅ Install Commander.js, Inquirer.js, EJS, and chalk as dependencies
 5.	✅ Create cli.ts with Commander setup and main entry point
 6.	✅ Define TypeScript interfaces for config structure in config.ts
-7.	Create hooks.ts that imports and exports all built-in hook classes:
-    a. Import each hook from its workspace package (e.g., from '@mcphooks/audit-hook')
-    b. Configure esbuild/rollup to bundle all workspace dependencies at build time
-    c. Set bundle: true to include all hook code in the output
-    d. Mark only truly external dependencies (like 'fs', 'path') as external
-    e. This creates a self-contained bundle with all hooks included in the npm package
-8.	Implement target server prompts (local vs remote) in prompts.ts
-9.	Build multi-select prompt for hook selection with custom hook option
-10.	Create hook ordering prompt with arrow-key reordering functionality
-11.	Add validation logic for user inputs and config structure
+7.	✅ Create hooks.ts that imports and exports all built-in hook classes:
+    a. ✅ Import each hook from its workspace package (e.g., from '@civic/audit-hook')
+    b. ✅ Configure esbuild/rollup to bundle all workspace dependencies at build time
+    c. ✅ Set bundle: true to include all hook code in the output
+    d. ✅ Mark only truly external dependencies (like 'fs', 'path') as external
+    e. ✅ This creates a self-contained bundle with all hooks included in the npm package
+8.	✅ Implement target server prompts (local vs remote) in prompts.ts
+9.	✅ Build multi-select prompt for hook selection with custom hook option
+10.	✅ Create hook ordering prompt with arrow-key reordering functionality
+11.	✅ Add validation logic for user inputs and config structure
 12.	Create Dockerfile.ejs template for generated Docker images
 13.	Build generator.ts to write config.json and render Dockerfile
 14.	Add file system utilities for creating output directories
