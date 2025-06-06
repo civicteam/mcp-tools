@@ -8,7 +8,33 @@ import {
 import { generateProject } from "./generator.js";
 import { getBuiltInHookNames } from "./hooks.js";
 
-export async function runWizard(): Promise<void> {
+export async function runWizard(
+  initialProjectDirectory?: string,
+): Promise<void> {
+  // Step 0: Get project directory if not provided
+  let projectDirectory = initialProjectDirectory;
+
+  if (!projectDirectory) {
+    const { directory } = await inquirer.prompt([
+      {
+        type: "input",
+        name: "directory",
+        message: "What is your project named?",
+        default: "my-mcp-proxy",
+        validate: (input) => {
+          if (!input.trim()) return "Project name is required";
+          if (!/^[a-zA-Z0-9-_]+$/.test(input)) {
+            return "Project name can only contain letters, numbers, hyphens, and underscores";
+          }
+          return true;
+        },
+      },
+    ]);
+    projectDirectory = directory;
+  }
+
+  console.log(chalk.green(`\n✓ Creating project in ./${projectDirectory}\n`));
+
   const config = getDefaultConfig();
 
   // Step 1: Target server configuration
@@ -203,5 +229,9 @@ export async function runWizard(): Promise<void> {
   }
 
   // Generate the project
-  await generateProject(config);
+  // projectDirectory is guaranteed to be defined at this point
+  if (!projectDirectory) {
+    throw new Error("Project directory is required");
+  }
+  await generateProject(config, projectDirectory);
 }

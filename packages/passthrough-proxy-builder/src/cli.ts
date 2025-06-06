@@ -1,16 +1,13 @@
-#!/usr/bin/env node
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import chalk from "chalk";
 import { Command } from "commander";
 import { readConfig } from "./config.js";
 import { runWizard } from "./prompts.js";
 import { startProxy } from "./proxy.js";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const packagePath = join(__dirname, "..", "package.json");
-const packageJson = JSON.parse(readFileSync(packagePath, "utf-8"));
+// Read package.json version
+const packageJson = { version: "1.0.0" }; // Hardcoded for bundled CLI
 
 const program = new Command();
 
@@ -20,12 +17,12 @@ program
   .version(packageJson.version);
 
 program
-  .command("init")
+  .command("init [project-directory]")
   .description("Run the interactive wizard to configure your proxy")
-  .action(async () => {
+  .action(async (projectDirectory?: string) => {
     console.log(chalk.blue.bold("\n🚀 MCP Passthrough Proxy Builder\n"));
     try {
-      await runWizard();
+      await runWizard(projectDirectory);
     } catch (error) {
       console.error(
         chalk.red("\n❌ Error:"),

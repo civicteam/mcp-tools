@@ -1,16 +1,32 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import chalk from "chalk";
 import ejs from "ejs";
 import { type MCPHooksConfig, writeConfig } from "./config.js";
+import { DOCKERFILE_TEMPLATE } from "./templates.js";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-export async function generateProject(config: MCPHooksConfig): Promise<void> {
-  const outputDir = process.cwd();
+export async function generateProject(
+  config: MCPHooksConfig,
+  projectDirectory: string,
+): Promise<void> {
+  const outputDir = join(process.cwd(), projectDirectory);
 
   try {
+    // Step 0: Check if directory exists
+    try {
+      await access(outputDir);
+      console.log(
+        chalk.yellow(
+          `⚠️  Directory ${projectDirectory} already exists. Files may be overwritten.`,
+        ),
+      );
+    } catch {
+      // Directory doesn't exist, which is good
+    }
+
+    // Create project directory
+    await mkdir(outputDir, { recursive: true });
+
     // Step 1: Write config file
     console.log(chalk.blue("\n📝 Writing configuration..."));
     const configPath = join(outputDir, "mcphooks.config.json");
@@ -51,9 +67,7 @@ async function generateDockerfile(
   path: string,
   config: MCPHooksConfig,
 ): Promise<void> {
-  const templatePath = join(__dirname, "..", "templates", "Dockerfile.ejs");
-  const template = await readFile(templatePath, "utf-8");
-  const dockerfile = ejs.render(template, { config });
+  const dockerfile = ejs.render(DOCKERFILE_TEMPLATE, { config });
   await writeFile(path, dockerfile, "utf-8");
 }
 

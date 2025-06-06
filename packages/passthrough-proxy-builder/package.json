@@ -3,13 +3,12 @@
   "version": "1.0.0",
   "description": "CLI wizard for creating MCP passthrough proxies with hooks",
   "main": "dist/cli.js",
-  "type": "module",
   "bin": {
     "passthrough-proxy-builder": "./dist/cli.js",
     "ppb": "./dist/cli.js"
   },
   "scripts": {
-    "build": "esbuild src/cli.ts --bundle --platform=node --target=node18 --format=esm --outfile=dist/cli.js --banner:js='#!/usr/bin/env node' --external:node:fs --external:node:path --external:node:child_process --external:node:os --external:node:crypto --external:node:util --external:node:stream --external:node:events --external:node:net --external:node:tty --external:node:url --external:node:fs/promises && chmod +x dist/cli.js",
+    "build": "esbuild src/cli.ts --bundle --platform=node --target=node18 --format=cjs --outfile=dist/cli.js --banner:js='#!/usr/bin/env node' --external:node:fs --external:node:path --external:node:child_process --external:node:os --external:node:crypto --external:node:util --external:node:stream --external:node:events --external:node:net --external:node:tty --external:node:url --external:node:fs/promises && chmod +x dist/cli.js",
     "dev": "tsx src/cli.ts",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
