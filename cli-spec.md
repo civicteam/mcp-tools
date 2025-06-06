@@ -276,7 +276,7 @@ Detailed Implementation Plan:
 11.	✅ Add validation logic for user inputs and config structure
 12.	✅ Create Dockerfile.ejs template for generated Docker images
 13.	✅ Build generator.ts to write config.json and render Dockerfile
-14.	Add file system utilities for creating output directories
+14.	✅ Add file system utilities for creating output directories
 15.	Implement custom hook URL prompt flow with alias naming
 16.	Create formatted terminal output for summary and instructions
 17.	Add error handling for file operations and user cancellations
