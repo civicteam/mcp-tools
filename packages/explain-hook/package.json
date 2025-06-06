@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "description": "MCP hook that adds a 'reason' parameter to all tools for explaining tool usage",
   "keywords": ["mcp", "hook", "explain", "reasoning", "tool-usage"],
-  "homepage": "https://github.com/civicteam/mcp-tools/tree/main/packages/explain-hook",
+  "homepage": "https://github.com/civicteam/mcp-hooks/tree/main/packages/explain-hook",
   "repository": {
     "type": "git",
-    "url": "https://github.com/civicteam/mcp-tools.git",
+    "url": "https://github.com/civicteam/mcp-hooks.git",
     "directory": "packages/explain-hook"
   },
   "license": "MIT",

@@ -1,4 +1,4 @@
-# @civic/mcp-tools
+# Civic MCP Hooks
 
 A middleware layer for the Model Context Protocol (MCP) that enables monitoring, validation, and transformation of AI tool interactions.
 
@@ -167,8 +167,8 @@ A simple MCP server that fetches web pages and converts them to markdown. Includ
 
 1. **Clone and install:**
 ```bash
-git clone https://github.com/civicteam/mcp-tools.git
-cd mcp-tools
+git clone https://github.com/civicteam/mcp-hooks.git
+cd mcp-hooks
 pnpm install
 pnpm build
 ```
@@ -291,7 +291,7 @@ Hooks can return three types of responses:
 ### Project Structure
 
 ```
-mcp-tools/
+mcp-hooks/
 ├── packages/
 │   ├── passthrough-mcp-server/   # Main proxy server
 │   ├── hook-common/              # Shared types and utilities
