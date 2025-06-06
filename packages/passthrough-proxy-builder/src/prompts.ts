@@ -8,8 +8,17 @@ import {
 import { generateProject } from "./generator.js";
 import { getBuiltInHookNames } from "./hooks.js";
 
+export interface CLIOptions {
+  targetMode?: string;
+  targetCommand?: string;
+  targetUrl?: string;
+  proxyPort?: string;
+  hooks?: string[];
+}
+
 export async function runWizard(
   initialProjectDirectory?: string,
+  options?: CLIOptions,
 ): Promise<void> {
   // Step 0: Get project directory if not provided
   let projectDirectory = initialProjectDirectory;
@@ -37,50 +46,69 @@ export async function runWizard(
 
   const config = getDefaultConfig();
 
-  // Step 1: Target server configuration
-  const targetAnswers = await inquirer.prompt([
-    {
-      type: "list",
-      name: "targetMode",
-      message: "Is your target MCP server running locally or remotely?",
-      choices: [
-        { name: "Local", value: "local" },
-        { name: "Remote", value: "remote" },
-      ],
-    },
-  ]);
+  // Set proxy port if provided
+  if (options?.proxyPort) {
+    config.proxy.port = Number.parseInt(options.proxyPort, 10);
+  }
 
-  config.target.mode = targetAnswers.targetMode;
+  // Step 1: Target server configuration
+  if (options?.targetMode) {
+    config.target.mode = options.targetMode as "local" | "remote";
+    console.log(chalk.green(`✓ Target mode: ${options.targetMode}`));
+  } else {
+    const targetAnswers = await inquirer.prompt([
+      {
+        type: "list",
+        name: "targetMode",
+        message: "Is your target MCP server running locally or remotely?",
+        choices: [
+          { name: "Local", value: "local" },
+          { name: "Remote", value: "remote" },
+        ],
+      },
+    ]);
+    config.target.mode = targetAnswers.targetMode;
+  }
 
   if (config.target.mode === "local") {
-    const localAnswers = await inquirer.prompt([
-      {
-        type: "input",
-        name: "command",
-        message: "Enter the command to start your local MCP server:",
-        default: "node dist/server.js --port 5555",
-        validate: (input) => input.trim().length > 0 || "Command is required",
-      },
-    ]);
-    config.target.command = localAnswers.command;
-  } else {
-    const remoteAnswers = await inquirer.prompt([
-      {
-        type: "input",
-        name: "url",
-        message: "Enter the remote MCP server URL:",
-        default: "https://api.my-mcp.com:8000",
-        validate: (input) => {
-          try {
-            new URL(input);
-            return true;
-          } catch {
-            return "Please enter a valid URL";
-          }
+    if (options?.targetCommand) {
+      config.target.command = options.targetCommand;
+      console.log(chalk.green(`✓ Target command: ${options.targetCommand}`));
+    } else {
+      const localAnswers = await inquirer.prompt([
+        {
+          type: "input",
+          name: "command",
+          message: "Enter the command to start your local MCP server:",
+          default: "node dist/server.js --port 5555",
+          validate: (input) => input.trim().length > 0 || "Command is required",
         },
-      },
-    ]);
-    config.target.url = remoteAnswers.url;
+      ]);
+      config.target.command = localAnswers.command;
+    }
+  } else {
+    if (options?.targetUrl) {
+      config.target.url = options.targetUrl;
+      console.log(chalk.green(`✓ Target URL: ${options.targetUrl}`));
+    } else {
+      const remoteAnswers = await inquirer.prompt([
+        {
+          type: "input",
+          name: "url",
+          message: "Enter the remote MCP server URL:",
+          default: "https://api.my-mcp.com:8000",
+          validate: (input) => {
+            try {
+              new URL(input);
+              return true;
+            } catch {
+              return "Please enter a valid URL";
+            }
+          },
+        },
+      ]);
+      config.target.url = remoteAnswers.url;
+    }
 
     // For remote targets, ask about proxy location
     const proxyAnswers = await inquirer.prompt([
@@ -104,33 +132,42 @@ export async function runWizard(
 
   // Step 2: Hook selection
   console.log(chalk.yellow("\n✓ Target server configured"));
-  console.log(chalk.blue("\n🪝 Select hooks to add to your proxy:\n"));
 
-  const builtInHooks = getBuiltInHookNames();
-  const hookChoices = [
-    ...builtInHooks.map((name) => ({
-      name: name,
-      value: name,
-      checked: false,
-    })),
-    new inquirer.Separator(),
-    {
-      name: "Add Custom Hook (external URL)",
-      value: "CUSTOM_HOOK",
-      checked: false,
-    },
-  ];
+  let selectedHooks: string[];
 
-  const { selectedHooks } = await inquirer.prompt([
-    {
-      type: "checkbox",
-      name: "selectedHooks",
-      message: "Select hooks (use Space to toggle, Enter to continue):",
-      choices: hookChoices,
-      validate: (input) =>
-        input.length > 0 || "Please select at least one hook",
-    },
-  ]);
+  if (options?.hooks && options.hooks.length > 0) {
+    selectedHooks = options.hooks;
+    console.log(chalk.green(`✓ Selected hooks: ${options.hooks.join(", ")}`));
+  } else {
+    console.log(chalk.blue("\n🪝 Select hooks to add to your proxy:\n"));
+
+    const builtInHooks = getBuiltInHookNames();
+    const hookChoices = [
+      ...builtInHooks.map((name) => ({
+        name: name,
+        value: name,
+        checked: false,
+      })),
+      new inquirer.Separator(),
+      {
+        name: "Add Custom Hook (external URL)",
+        value: "CUSTOM_HOOK",
+        checked: false,
+      },
+    ];
+
+    const answers = await inquirer.prompt([
+      {
+        type: "checkbox",
+        name: "selectedHooks",
+        message: "Select hooks (use Space to toggle, Enter to continue):",
+        choices: hookChoices,
+        validate: (input) =>
+          input.length > 0 || "Please select at least one hook",
+      },
+    ]);
+    selectedHooks = answers.selectedHooks;
+  }
 
   // Process selected hooks
   const hooks: HookEntry[] = [];

@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import chalk from "chalk";
 import { Command } from "commander";
 import { readConfig } from "./config.js";
-import { runWizard } from "./prompts.js";
+import { type CLIOptions, runWizard } from "./prompts.js";
 import { startProxy } from "./proxy.js";
 
 // Read package.json version
@@ -19,10 +19,18 @@ program
 program
   .command("init [project-directory]")
   .description("Run the interactive wizard to configure your proxy")
-  .action(async (projectDirectory?: string) => {
+  .option("--target-mode <mode>", "Target server mode: local or remote")
+  .option("--target-command <command>", "Command to start local MCP server")
+  .option("--target-url <url>", "URL of remote MCP server")
+  .option("--proxy-port <port>", "Port for the proxy server", "3000")
+  .option(
+    "--hooks <hooks...>",
+    "List of hooks to enable (e.g., SimpleLogHook AuditHook)",
+  )
+  .action(async (projectDirectory?: string, options?: CLIOptions) => {
     console.log(chalk.blue.bold("\n🚀 MCP Passthrough Proxy Builder\n"));
     try {
-      await runWizard(projectDirectory);
+      await runWizard(projectDirectory, options);
     } catch (error) {
       console.error(
         chalk.red("\n❌ Error:"),
