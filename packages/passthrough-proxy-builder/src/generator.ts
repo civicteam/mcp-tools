@@ -125,7 +125,7 @@ function showSummary(config: MCPHooksConfig): void {
   console.log(chalk.white("\nHooks (in order):"));
   config.hooksOrder.forEach((hook, index) => {
     const hookName =
-      typeof hook === "string" ? hook : `${hook.alias} (${hook.url})`;
+      hook.type === "built-in" ? hook.name : `${hook.alias} (${hook.url})`;
     console.log(chalk.white(`  ${index + 1}. ${hookName}`));
   });
 

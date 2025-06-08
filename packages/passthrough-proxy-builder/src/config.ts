@@ -1,8 +1,17 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import type { BuiltInHookName } from "./hooks";
 
-// Simplified - built-in hooks are just strings now
-export type HookEntry = string | { alias: string; url: string };
+export type HookEntry =
+  | {
+      type: "built-in";
+      name: BuiltInHookName;
+    }
+  | {
+      type: "custom";
+      alias: string;
+      url: string;
+    };
 
 export interface TargetConfig {
   mode: "local" | "remote";
@@ -50,10 +59,6 @@ export async function writeConfig(
 
 export function validateConfig(config: MCPHooksConfig): void {
   // Validate target
-  if (!config.target || !config.target.mode) {
-    throw new Error("Invalid config: target.mode is required");
-  }
-
   if (config.target.mode === "local" && !config.target.command) {
     throw new Error(
       "Invalid config: target.command is required for local mode",
@@ -64,26 +69,9 @@ export function validateConfig(config: MCPHooksConfig): void {
     throw new Error("Invalid config: target.url is required for remote mode");
   }
 
-  // Validate proxy
-  if (!config.proxy || typeof config.proxy.port !== "number") {
-    throw new Error("Invalid config: proxy.port must be a number");
-  }
-
-  // Validate hooks
-  if (!Array.isArray(config.hooksOrder)) {
-    throw new Error("Invalid config: hooksOrder must be an array");
-  }
-
-  for (const hook of config.hooksOrder) {
-    if (typeof hook === "string") {
-      // Built-in hook - just a string
-    } else if (typeof hook === "object" && hook.alias && hook.url) {
-      // Custom hook with alias and url
-    } else {
-      throw new Error(
-        "Invalid config: each hook must be a string or {alias, url} object",
-      );
-    }
+  // Validate proxy port is a reasonable number
+  if (config.proxy.port < 1 || config.proxy.port > 65535) {
+    throw new Error("Invalid config: proxy.port must be between 1 and 65535");
   }
 }
 

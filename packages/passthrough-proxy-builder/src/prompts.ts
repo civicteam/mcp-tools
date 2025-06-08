@@ -6,7 +6,7 @@ import {
   getDefaultConfig,
 } from "./config.js";
 import { generateProject } from "./generator.js";
-import { getBuiltInHookNames } from "./hooks.js";
+import { type BuiltInHookName, getBuiltInHookNames } from "./hooks.js";
 
 export interface CLIOptions {
   targetMode?: string;
@@ -48,7 +48,11 @@ export async function runWizard(
 
   // Set proxy port if provided
   if (options?.proxyPort) {
-    config.proxy.port = Number.parseInt(options.proxyPort, 10);
+    const port = Number.parseInt(options.proxyPort, 10);
+    if (Number.isNaN(port) || port < 1 || port > 65535) {
+      throw new Error("Proxy port must be a number between 1 and 65535");
+    }
+    config.proxy.port = port;
   }
 
   // Step 1: Target server configuration
@@ -133,11 +137,28 @@ export async function runWizard(
   // Step 2: Hook selection
   console.log(chalk.yellow("\n✓ Target server configured"));
 
+  // Process selected hooks
+  const hooks: HookEntry[] = [];
   let selectedHooks: string[];
 
   if (options?.hooks && options.hooks.length > 0) {
     selectedHooks = options.hooks;
     console.log(chalk.green(`✓ Selected hooks: ${options.hooks.join(", ")}`));
+
+    // Convert CLI hook names directly to HookEntry format
+    const builtInHookNames = getBuiltInHookNames();
+    for (const hookName of selectedHooks) {
+      if (builtInHookNames.includes(hookName as BuiltInHookName)) {
+        hooks.push({
+          type: "built-in",
+          name: hookName as BuiltInHookName,
+        });
+      } else {
+        console.log(
+          chalk.yellow(`Warning: Unknown hook '${hookName}' will be skipped`),
+        );
+      }
+    }
   } else {
     console.log(chalk.blue("\n🪝 Select hooks to add to your proxy:\n"));
 
@@ -167,20 +188,78 @@ export async function runWizard(
       },
     ]);
     selectedHooks = answers.selectedHooks;
-  }
 
-  // Process selected hooks
-  const hooks: HookEntry[] = [];
+    // Process selected hooks from interactive prompts
+    for (const hook of selectedHooks) {
+      if (hook === "CUSTOM_HOOK") {
+        // Handle custom hook
+        console.log(chalk.blue("\n🔗 Configure custom hook:\n"));
 
-  for (const hook of selectedHooks) {
-    if (hook === "CUSTOM_HOOK") {
-      // Handle custom hook - will be implemented in step 15
-      console.log(
-        chalk.gray("Custom hook URL prompt will be implemented in step 15"),
-      );
-    } else {
-      // Built-in hook
-      hooks.push(hook);
+        const customHookAnswers = await inquirer.prompt([
+          {
+            type: "input",
+            name: "url",
+            message: "Enter the URL of your custom hook:",
+            validate: (input) => {
+              try {
+                new URL(input);
+                return true;
+              } catch {
+                return "Please enter a valid URL";
+              }
+            },
+          },
+          {
+            type: "input",
+            name: "alias",
+            message: "Enter an alias for this hook:",
+            default: `CustomHook${hooks.filter((h) => h.type === "custom").length + 1}`,
+            validate: (input) => {
+              if (!input.trim()) return "Alias is required";
+              if (!/^[a-zA-Z0-9_-]+$/.test(input)) {
+                return "Alias can only contain letters, numbers, hyphens, and underscores";
+              }
+              // Check for duplicate aliases
+              const existingAliases = hooks
+                .filter(
+                  (h): h is { type: "custom"; alias: string; url: string } =>
+                    h.type === "custom",
+                )
+                .map((h) => h.alias);
+              if (existingAliases.includes(input)) {
+                return "This alias is already in use";
+              }
+              return true;
+            },
+          },
+        ]);
+
+        hooks.push({
+          type: "custom",
+          url: customHookAnswers.url,
+          alias: customHookAnswers.alias,
+        });
+
+        // Ask if they want to add another custom hook
+        const { addAnother } = await inquirer.prompt([
+          {
+            type: "confirm",
+            name: "addAnother",
+            message: "Do you want to add another custom hook?",
+            default: false,
+          },
+        ]);
+
+        if (addAnother) {
+          selectedHooks.push("CUSTOM_HOOK");
+        }
+      } else {
+        // Built-in hook
+        hooks.push({
+          type: "built-in",
+          name: hook as BuiltInHookName,
+        });
+      }
     }
   }
 
@@ -197,7 +276,7 @@ export async function runWizard(
       // Display current order
       console.log(chalk.cyan("Current order:"));
       orderedHooks.forEach((hook, index) => {
-        const hookName = typeof hook === "string" ? hook : hook.alias;
+        const hookName = hook.type === "built-in" ? hook.name : hook.alias;
         console.log(`  ${index + 1}. ${hookName}`);
       });
 
@@ -218,7 +297,7 @@ export async function runWizard(
       } else {
         // Select hook to move
         const hookChoices = orderedHooks.map((hook, index) => {
-          const hookName = typeof hook === "string" ? hook : hook.alias;
+          const hookName = hook.type === "built-in" ? hook.name : hook.alias;
           return {
             name: `${index + 1}. ${hookName}`,
             value: index,
