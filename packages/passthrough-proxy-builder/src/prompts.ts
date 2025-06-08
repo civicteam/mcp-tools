@@ -35,6 +35,12 @@ export async function runWizard(
           if (!/^[a-zA-Z0-9-_]+$/.test(input)) {
             return "Project name can only contain letters, numbers, hyphens, and underscores";
           }
+          if (input.startsWith("-") || input.startsWith("_")) {
+            return "Project name cannot start with a hyphen or underscore";
+          }
+          if (input.length > 100) {
+            return "Project name is too long (max 100 characters)";
+          }
           return true;
         },
       },
@@ -57,7 +63,12 @@ export async function runWizard(
 
   // Step 1: Target server configuration
   if (options?.targetMode) {
-    config.target.mode = options.targetMode as "local" | "remote";
+    if (options.targetMode !== "local" && options.targetMode !== "remote") {
+      throw new Error(
+        `Invalid target mode '${options.targetMode}'. Must be 'local' or 'remote'`,
+      );
+    }
+    config.target.mode = options.targetMode;
     console.log(chalk.green(`✓ Target mode: ${options.targetMode}`));
   } else {
     const targetAnswers = await inquirer.prompt([
@@ -92,6 +103,11 @@ export async function runWizard(
     }
   } else {
     if (options?.targetUrl) {
+      try {
+        new URL(options.targetUrl);
+      } catch {
+        throw new Error(`Invalid target URL: ${options.targetUrl}`);
+      }
       config.target.url = options.targetUrl;
       console.log(chalk.green(`✓ Target URL: ${options.targetUrl}`));
     } else {

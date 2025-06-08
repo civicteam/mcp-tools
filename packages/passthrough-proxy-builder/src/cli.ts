@@ -11,6 +11,13 @@ const packageJson = { version: "1.0.0" }; // Hardcoded for bundled CLI
 
 const program = new Command();
 
+// Handle Ctrl+C gracefully
+process.on("SIGINT", () => {
+  console.log(chalk.yellow("\n\n👋 Operation cancelled by user"));
+  console.log(chalk.gray("Your project was not created.\n"));
+  process.exit(0);
+});
+
 program
   .name("passthrough-proxy-builder")
   .description("CLI wizard for creating MCP passthrough proxies with hooks")
@@ -37,7 +44,7 @@ program
 ║   minutes, not hours!                          ║
 ╚════════════════════════════════════════════════╝`;
     console.log(chalk.cyan(banner));
-    
+
     try {
       await runWizard(projectDirectory, options);
     } catch (error) {
