@@ -28,7 +28,16 @@ program
     "List of hooks to enable (e.g., SimpleLogHook AuditHook)",
   )
   .action(async (projectDirectory?: string, options?: CLIOptions) => {
-    console.log(chalk.blue.bold("\n🚀 MCP Passthrough Proxy Builder\n"));
+    // Display welcome banner
+    const banner = `
+╔════════════════════════════════════════════════╗
+║      🚀 MCP Passthrough Proxy Builder 🚀       ║
+║                                                ║
+║   Create custom MCP proxies with hooks in      ║
+║   minutes, not hours!                          ║
+╚════════════════════════════════════════════════╝`;
+    console.log(chalk.cyan(banner));
+    
     try {
       await runWizard(projectDirectory, options);
     } catch (error) {

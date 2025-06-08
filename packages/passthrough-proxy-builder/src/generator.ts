@@ -56,7 +56,7 @@ export async function generateProject(
     }
 
     // Step 5: Show summary and instructions
-    showSummary(config);
+    showSummary(config, projectDirectory);
   } catch (error) {
     console.error(chalk.red("\n❌ Error generating project:"), error);
     throw error;
@@ -110,41 +110,83 @@ function generatePackageJson(config: MCPHooksConfig): string {
   return JSON.stringify(pkg, null, 2);
 }
 
-function showSummary(config: MCPHooksConfig): void {
-  console.log(chalk.cyan("\n=== MCPHooks Proxy Configured ==="));
-  console.log(
-    chalk.white(
-      `Target: ${config.target.mode === "local" ? "Local" : "Remote"} → ${
-        config.target.mode === "local"
-          ? config.target.command
-          : config.target.url
-      }`,
-    ),
-  );
+function showSummary(config: MCPHooksConfig, projectDirectory: string): void {
+  const boxWidth = 60;
+  const line = "═".repeat(boxWidth);
+  const thinLine = "─".repeat(boxWidth);
+  
+  console.log(chalk.cyan(`\n╔${line}╗`));
+  console.log(chalk.cyan("║") + chalk.green.bold(" ✅ MCP Proxy Successfully Configured!".padEnd(boxWidth)) + chalk.cyan("║"));
+  console.log(chalk.cyan(`╚${line}╝`));
 
-  console.log(chalk.white("\nHooks (in order):"));
-  config.hooksOrder.forEach((hook, index) => {
-    const hookName =
-      hook.type === "built-in" ? hook.name : `${hook.alias} (${hook.url})`;
-    console.log(chalk.white(`  ${index + 1}. ${hookName}`));
-  });
+  // Configuration Summary
+  console.log(chalk.yellow("\n📋 Configuration Summary:"));
+  console.log(thinLine);
+  
+  // Target Server
+  console.log(chalk.white("🎯 Target Server:"));
+  if (config.target.mode === "local") {
+    console.log(chalk.gray(`   Mode: `) + chalk.white("Local"));
+    console.log(chalk.gray(`   Command: `) + chalk.white(config.target.command));
+  } else {
+    console.log(chalk.gray(`   Mode: `) + chalk.white("Remote"));
+    console.log(chalk.gray(`   URL: `) + chalk.white(config.target.url));
+  }
+  
+  // Proxy Settings
+  console.log(chalk.white("\n🔌 Proxy Settings:"));
+  console.log(chalk.gray(`   Port: `) + chalk.white(config.proxy.port));
+  console.log(chalk.gray(`   Mode: `) + chalk.white(config.proxy.mode));
 
-  console.log(chalk.cyan("\nDocker commands:"));
-  console.log(chalk.green("  docker build -t mcphooks-proxy ."));
-  console.log(
-    chalk.green(
-      `  docker run -p ${config.proxy.port}:${config.proxy.port} mcphooks-proxy`,
-    ),
-  );
+  // Hooks
+  console.log(chalk.white("\n🪝 Hooks (execution order):"));
+  if (config.hooksOrder.length === 0) {
+    console.log(chalk.gray("   No hooks configured"));
+  } else {
+    config.hooksOrder.forEach((hook, index) => {
+      if (hook.type === "built-in") {
+        console.log(chalk.gray(`   ${index + 1}. `) + chalk.white(hook.name));
+      } else {
+        console.log(chalk.gray(`   ${index + 1}. `) + chalk.white(hook.alias) + chalk.gray(` → ${hook.url}`));
+      }
+    });
+  }
 
-  console.log(chalk.cyan("\nNext steps:"));
-  console.log(chalk.white("  1. Review the generated files"));
-  console.log(chalk.white("  2. Build and run the Docker container"));
-  console.log(
-    chalk.white(
-      `  3. Point your MCP client at http://localhost:${config.proxy.port}`,
-    ),
-  );
+  // Files Generated
+  console.log(chalk.yellow("\n📁 Files Generated:"));
+  console.log(thinLine);
+  console.log(chalk.gray(`   ./${projectDirectory}/`));
+  console.log(chalk.gray(`   ├── mcphooks.config.json`) + chalk.green(" ✓"));
+  console.log(chalk.gray(`   ├── Dockerfile`) + chalk.green(" ✓"));
+  console.log(chalk.gray(`   ├── .dockerignore`) + chalk.green(" ✓"));
+  console.log(chalk.gray(`   └── package.json`) + chalk.green(" ✓"));
 
-  console.log(chalk.cyan("==================================\n"));
+  // Docker Commands
+  console.log(chalk.yellow("\n🐳 Docker Commands:"));
+  console.log(thinLine);
+  console.log(chalk.gray("   Build the image:"));
+  console.log(`   ${chalk.cyan("$")} ${chalk.white(`cd ${projectDirectory}`)}`);
+  console.log(`   ${chalk.cyan("$")} ${chalk.white("docker build -t mcp-proxy .")}`);
+  console.log(chalk.gray("\n   Run the container:"));
+  console.log(`   ${chalk.cyan("$")} ${chalk.white(`docker run -p ${config.proxy.port}:${config.proxy.port} mcp-proxy`)}`);
+
+  // Next Steps
+  console.log(chalk.yellow("\n🚀 Next Steps:"));
+  console.log(thinLine);
+  console.log(chalk.white("   1. Review the generated configuration files"));
+  console.log(chalk.white("   2. Build the Docker image using the command above"));
+  console.log(chalk.white("   3. Run the container to start your proxy"));
+  console.log(chalk.white(`   4. Configure your MCP client to connect to:`));
+  console.log(chalk.green(`      http://localhost:${config.proxy.port}`));
+
+  // Tips
+  console.log(chalk.yellow("\n💡 Tips:"));
+  console.log(thinLine);
+  console.log(chalk.gray("   • You can modify mcphooks.config.json to change settings"));
+  console.log(chalk.gray("   • Add environment variables to docker run for runtime config"));
+  console.log(chalk.gray("   • Use docker logs to debug any connection issues"));
+  
+  console.log(chalk.cyan(`\n╔${line}╗`));
+  console.log(chalk.cyan("║") + chalk.green.bold(" Happy proxying! 🎉".padEnd(boxWidth)) + chalk.cyan("║"));
+  console.log(chalk.cyan(`╚${line}╝\n`));
 }
