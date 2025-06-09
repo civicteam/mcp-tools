@@ -30,41 +30,52 @@ describe("Session Management", () => {
 
   describe("getOrCreateSession", () => {
     it("should create new session if not exists", async () => {
-      const mockClient = { close: vi.fn() };
-      const createClient = vi.fn().mockResolvedValue(mockClient);
+      const mockClient = {
+        listTools: vi.fn(),
+        callTool: vi.fn(),
+        close: vi.fn(),
+      };
 
-      const session = await getOrCreateSession("test-session", createClient);
+      const session = await getOrCreateSession("test-session", mockClient);
 
       expect(session).toBeDefined();
       expect(session.id).toBe("test-session");
       expect(session.targetClient).toBe(mockClient);
       expect(session.requestCount).toBe(0);
-      expect(createClient).toHaveBeenCalledTimes(1);
     });
 
     it("should return existing session", async () => {
-      const mockClient = { close: vi.fn() };
-      const createClient = vi.fn().mockResolvedValue(mockClient);
+      const mockClient = {
+        listTools: vi.fn(),
+        callTool: vi.fn(),
+        close: vi.fn(),
+      };
 
-      const session1 = await getOrCreateSession("test-session", createClient);
+      const session1 = await getOrCreateSession("test-session", mockClient);
       session1.requestCount = 5;
 
-      const session2 = await getOrCreateSession("test-session", createClient);
+      const session2 = await getOrCreateSession("test-session", mockClient);
 
       expect(session2).toBe(session1);
       expect(session2.requestCount).toBe(5);
-      expect(createClient).toHaveBeenCalledTimes(1); // Only called once
     });
 
     it("should handle multiple sessions", async () => {
-      const mockClient1 = { close: vi.fn(), id: "client1" };
-      const mockClient2 = { close: vi.fn(), id: "client2" };
+      const mockClient1 = {
+        listTools: vi.fn(),
+        callTool: vi.fn(),
+        close: vi.fn(),
+        id: "client1",
+      };
+      const mockClient2 = {
+        listTools: vi.fn(),
+        callTool: vi.fn(),
+        close: vi.fn(),
+        id: "client2",
+      };
 
-      const createClient1 = vi.fn().mockResolvedValue(mockClient1);
-      const createClient2 = vi.fn().mockResolvedValue(mockClient2);
-
-      const session1 = await getOrCreateSession("session-1", createClient1);
-      const session2 = await getOrCreateSession("session-2", createClient2);
+      const session1 = await getOrCreateSession("session-1", mockClient1);
+      const session2 = await getOrCreateSession("session-2", mockClient2);
 
       expect(session1.id).toBe("session-1");
       expect(session2.id).toBe("session-2");
@@ -76,26 +87,36 @@ describe("Session Management", () => {
 
   describe("clearSession", () => {
     it("should clear specific session", async () => {
-      const mockClient = { close: vi.fn() };
-      const createClient = vi.fn().mockResolvedValue(mockClient);
+      const mockClient1 = {
+        listTools: vi.fn(),
+        callTool: vi.fn(),
+        close: vi.fn(),
+      };
+      const mockClient2 = {
+        listTools: vi.fn(),
+        callTool: vi.fn(),
+        close: vi.fn(),
+      };
 
-      const session1 = await getOrCreateSession("test-session", createClient);
+      const session1 = await getOrCreateSession("test-session", mockClient1);
       session1.requestCount = 10;
 
       clearSession("test-session");
 
-      const session2 = await getOrCreateSession("test-session", createClient);
+      const session2 = await getOrCreateSession("test-session", mockClient2);
       expect(session2).not.toBe(session1);
       expect(session2.requestCount).toBe(0);
-      expect(createClient).toHaveBeenCalledTimes(2);
     });
 
     it("should not affect other sessions", async () => {
-      const mockClient = { close: vi.fn() };
-      const createClient = vi.fn().mockResolvedValue(mockClient);
+      const mockClient = {
+        listTools: vi.fn(),
+        callTool: vi.fn(),
+        close: vi.fn(),
+      };
 
-      await getOrCreateSession("session-1", createClient);
-      await getOrCreateSession("session-2", createClient);
+      await getOrCreateSession("session-1", mockClient);
+      await getOrCreateSession("session-2", mockClient);
 
       clearSession("session-1");
 
@@ -105,12 +126,15 @@ describe("Session Management", () => {
 
   describe("clearAllSessions", () => {
     it("should clear all sessions", async () => {
-      const mockClient = { close: vi.fn() };
-      const createClient = vi.fn().mockResolvedValue(mockClient);
+      const mockClient = {
+        listTools: vi.fn(),
+        callTool: vi.fn(),
+        close: vi.fn(),
+      };
 
-      await getOrCreateSession("session-1", createClient);
-      await getOrCreateSession("session-2", createClient);
-      await getOrCreateSession("session-3", createClient);
+      await getOrCreateSession("session-1", mockClient);
+      await getOrCreateSession("session-2", mockClient);
+      await getOrCreateSession("session-3", mockClient);
 
       expect(getSessionCount()).toBe(3);
 

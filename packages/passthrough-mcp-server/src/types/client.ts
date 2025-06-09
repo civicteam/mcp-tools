@@ -26,6 +26,11 @@ export interface PassthroughClient {
     arguments?: { [x: string]: unknown };
     _meta?: { [x: string]: unknown; progressToken?: string | number };
   }): Promise<CallToolResult>;
+
+  /**
+   * Close the client connection and clean up resources
+   */
+  close(): Promise<void>;
 }
 
 /**

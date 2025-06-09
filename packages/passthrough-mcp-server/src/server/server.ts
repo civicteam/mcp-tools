@@ -69,7 +69,7 @@ export async function discoverAndRegisterTools(
   clientFactory?: ClientFactory,
 ): Promise<void> {
   // Create a temporary client to discover available tools
-  const tempClient = clientFactory
+  const targetClient = clientFactory
     ? await clientFactory(config.target, "discovery", config.clientInfo)
     : await createTargetClient(config.target, "discovery", config.clientInfo);
 
@@ -99,7 +99,7 @@ export async function discoverAndRegisterTools(
   }
 
   // Get list of tools from the target server
-  const { tools } = await tempClient.listTools();
+  const { tools } = await targetClient.listTools();
   logger.info(`Discovered ${tools.length} tools from target server`);
   logger.debug(`Raw: ${JSON.stringify(tools)}`);
 
@@ -146,7 +146,7 @@ export async function discoverAndRegisterTools(
     const toolHandler = createPassthroughHandler(
       config,
       tool.name,
-      clientFactory,
+      targetClient,
     );
 
     // Extract parameters from the tool definition

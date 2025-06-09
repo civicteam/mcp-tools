@@ -22,10 +22,9 @@ const sessions = new Map<string, SessionData>();
  */
 export async function getOrCreateSession(
   sessionId: string,
-  createClient: () => Promise<PassthroughClient>,
+  targetClient: PassthroughClient,
 ): Promise<SessionData> {
   if (!sessions.has(sessionId)) {
-    const targetClient = await createClient();
     sessions.set(sessionId, {
       id: sessionId,
       targetClient,

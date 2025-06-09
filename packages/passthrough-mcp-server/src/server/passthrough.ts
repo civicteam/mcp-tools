@@ -16,7 +16,7 @@ import {
   processRequestThroughHooks,
   processResponseThroughHooks,
 } from "../hooks/processor.js";
-import type { ClientFactory } from "../types/client.js";
+import type { ClientFactory, PassthroughClient } from "../types/client.js";
 import type { Config } from "../utils/config.js";
 import { logger } from "../utils/logger.js";
 import { getOrCreateSession } from "../utils/session.js";
@@ -34,7 +34,7 @@ import { getDiscoveredTools } from "./server.js";
 export function createPassthroughHandler(
   config: Config,
   toolName: string,
-  clientFactory?: ClientFactory,
+  targetClient: PassthroughClient,
 ) {
   return async function passthrough(
     args: unknown,
@@ -44,11 +44,7 @@ export function createPassthroughHandler(
     const sessionId = session?.id || "default";
 
     // Get or create session with target client
-    const sessionData = await getOrCreateSession(sessionId, () =>
-      clientFactory
-        ? clientFactory(config.target, sessionId, config.clientInfo)
-        : createTargetClient(config.target, sessionId, config.clientInfo),
-    );
+    const sessionData = await getOrCreateSession(sessionId, targetClient);
 
     // Increment request counter
     sessionData.requestCount += 1;
