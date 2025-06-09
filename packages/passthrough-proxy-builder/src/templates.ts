@@ -1,4 +1,4 @@
-export const DOCKERFILE_TEMPLATE = `FROM node:18-alpine
+export const DOCKERFILE_TEMPLATE = `FROM node:20-alpine
 WORKDIR /app
 
 # Copy package files

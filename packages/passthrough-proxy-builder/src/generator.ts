@@ -1,3 +1,4 @@
+import { constants } from "node:fs";
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import chalk from "chalk";
@@ -25,7 +26,7 @@ export async function generateProject(
 
       // Check if we have write permissions
       try {
-        await access(outputDir, 0o200); // W_OK
+        await access(outputDir, constants.W_OK);
       } catch {
         throw new Error(
           `No write permission for directory: ${projectDirectory}`,
