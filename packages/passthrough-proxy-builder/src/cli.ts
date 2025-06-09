@@ -5,6 +5,7 @@ import { Command } from "commander";
 import { readConfig } from "./config.js";
 import { type CLIOptions, runWizard } from "./prompts.js";
 import { startProxy } from "./proxy.js";
+import { getErrorMessage } from "./utils.js";
 
 // Read package.json version
 const packageJson = { version: "1.0.0" }; // Hardcoded for bundled CLI
@@ -48,10 +49,7 @@ program
     try {
       await runWizard(projectDirectory, options);
     } catch (error) {
-      console.error(
-        chalk.red("\n❌ Error:"),
-        error instanceof Error ? error.message : String(error),
-      );
+      console.error(chalk.red("\n❌ Error:"), getErrorMessage(error));
       process.exit(1);
     }
   });
@@ -66,10 +64,7 @@ program
       console.log(chalk.blue.bold("\n🚀 Starting MCP Passthrough Proxy\n"));
       await startProxy(config);
     } catch (error) {
-      console.error(
-        chalk.red("\n❌ Error:"),
-        error instanceof Error ? error.message : String(error),
-      );
+      console.error(chalk.red("\n❌ Error:"), getErrorMessage(error));
       process.exit(1);
     }
   });

@@ -17,9 +17,26 @@
     "test": "echo 'No tests yet'",
     "prepublishOnly": "pnpm run build"
   },
-  "keywords": ["mcp", "proxy", "hooks", "cli"],
-  "author": "",
+  "keywords": [
+    "mcp",
+    "proxy",
+    "hooks",
+    "cli",
+    "model-context-protocol",
+    "passthrough",
+    "middleware"
+  ],
+  "author": "Civic Technologies, Inc.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/civicteam/mcp-tools.git",
+    "directory": "packages/passthrough-proxy-builder"
+  },
+  "bugs": {
+    "url": "https://github.com/civicteam/mcp-tools/issues"
+  },
+  "homepage": "https://github.com/civicteam/mcp-tools/tree/main/packages/passthrough-proxy-builder#readme",
   "dependencies": {
     "@civic/audit-hook": "workspace:*",
     "@civic/guardrail-hook": "workspace:*",

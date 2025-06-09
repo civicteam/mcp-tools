@@ -4,6 +4,7 @@ import chalk from "chalk";
 import ejs from "ejs";
 import { type MCPHooksConfig, writeConfig } from "./config.js";
 import { DOCKERFILE_TEMPLATE } from "./templates.js";
+import { getErrorMessage } from "./utils.js";
 
 export async function generateProject(
   config: MCPHooksConfig,
@@ -53,7 +54,7 @@ export async function generateProject(
       await mkdir(outputDir, { recursive: true });
     } catch (error) {
       throw new Error(
-        `Failed to create directory ${projectDirectory}: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to create directory ${projectDirectory}: ${getErrorMessage(error)}`,
       );
     }
 
@@ -64,9 +65,7 @@ export async function generateProject(
       await writeConfig(configPath, config);
       console.log(chalk.green("✓ Created mcphooks.config.json"));
     } catch (error) {
-      throw new Error(
-        `Failed to write config file: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      throw new Error(`Failed to write config file: ${getErrorMessage(error)}`);
     }
 
     // Step 2: Generate Dockerfile
@@ -77,7 +76,7 @@ export async function generateProject(
       console.log(chalk.green("✓ Created Dockerfile"));
     } catch (error) {
       throw new Error(
-        `Failed to generate Dockerfile: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to generate Dockerfile: ${getErrorMessage(error)}`,
       );
     }
 
@@ -89,7 +88,7 @@ export async function generateProject(
       console.log(chalk.green("✓ Created .dockerignore"));
     } catch (error) {
       throw new Error(
-        `Failed to create .dockerignore: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to create .dockerignore: ${getErrorMessage(error)}`,
       );
     }
 
@@ -105,7 +104,7 @@ export async function generateProject(
         console.log(chalk.green("✓ Created package.json"));
       } catch (error) {
         throw new Error(
-          `Failed to create package.json: ${error instanceof Error ? error.message : String(error)}`,
+          `Failed to create package.json: ${getErrorMessage(error)}`,
         );
       }
     }
