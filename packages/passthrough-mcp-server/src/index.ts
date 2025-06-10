@@ -31,9 +31,11 @@ export type {
   HookResponse,
   ToolCall,
   ToolsListRequest,
-  AbstractHook,
   LocalHookClient,
 } from "@civic/hook-common";
+
+// Export AbstractHook as a value (not just a type)
+export { AbstractHook } from "@civic/hook-common";
 
 // Export the simplified hook API
 export { applyHooks } from "./hooks/apply.js";
@@ -41,7 +43,7 @@ export type { HookType, HookResult, HookContext } from "./hooks/apply.js";
 
 // Export hook utilities
 export { getHookClients } from "./hooks/manager.js";
-export { createHookClient } from "./hooks/utils.js";
+export { createHookClient, createHookClients } from "./hooks/utils.js";
 
 // Export utility functions that users might need
 export { createTargetClient } from "./client/client.js";
