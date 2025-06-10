@@ -13,13 +13,13 @@
     "ai",
     "llm"
   ],
-  "homepage": "https://github.com/civicteam/mcp-tools/tree/main/packages/passthrough-mcp-server",
+  "homepage": "https://github.com/civicteam/mcp-hooks/tree/main/packages/passthrough-mcp-server",
   "bugs": {
-    "url": "https://github.com/civicteam/mcp-tools/issues"
+    "url": "https://github.com/civicteam/mcp-hooks/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/civicteam/mcp-tools.git",
+    "url": "git+https://github.com/civicteam/mcp-hooks.git",
     "directory": "packages/passthrough-mcp-server"
   },
   "license": "MIT",

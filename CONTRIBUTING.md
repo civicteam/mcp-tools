@@ -1,11 +1,11 @@
-# Contributing to @civic/mcp-tools
+# Contributing to @civic/mcp-hooks
 
 Thank you for your interest in contributing to the MCP Tools project! We welcome contributions from the community.
 
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/mcp-tools.git`
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/mcp-hooks.git`
 3. Create a new branch: `git checkout -b feature/your-feature-name`
 4. Make your changes
 5. Submit a pull request

@@ -1,4 +1,4 @@
-# @civic/mcp-tools
+# Civic MCP Hooks
 
 A middleware layer for the Model Context Protocol (MCP) that enables monitoring, validation, and transformation of AI tool interactions.
 
@@ -154,6 +154,9 @@ Adds a "reason" parameter to all tools, encouraging the AI to explain why it's u
 **@civic/custom-description-hook**
 Replaces tool descriptions based on configuration. Useful for providing context-specific information about what tools do in your environment.
 
+**@civic/rate-limit-hook**
+Enforces rate limits on tool calls per user. Configurable limits per minute and per hour with clear retry-after responses.
+
 ### Testing Tools
 
 **@civic/fetch-docs**
@@ -170,8 +173,8 @@ A simple MCP server that fetches web pages and converts them to markdown. Includ
 
 1. **Clone and install:**
 ```bash
-git clone https://github.com/civicteam/mcp-tools.git
-cd mcp-tools
+git clone https://github.com/civicteam/mcp-hooks.git
+cd mcp-hooks
 pnpm install
 pnpm build
 ```
@@ -339,7 +342,7 @@ Hooks can return three types of responses:
 ### Project Structure
 
 ```
-mcp-tools/
+mcp-hooks/
 ├── packages/
 │   ├── passthrough-mcp-server/   # Main proxy server
 │   ├── hook-common/              # Shared types and utilities
