@@ -131,6 +131,9 @@ This monorepo contains everything you need to add a middleware layer to MCP:
 **@civic/passthrough-mcp-server**
 The main proxy server that intercepts MCP traffic and routes it through your hooks. This is the foundation that makes everything else possible.
 
+**@civic/passthrough-proxy-builder**
+CLI tool that generates Docker-based MCP proxy configurations with your choice of hooks. Create a production-ready proxy in minutes without writing any code.
+
 **@civic/hook-common**
 Shared utilities and TypeScript types for building hooks. Provides the `AbstractHook` base class that makes creating new hooks straightforward.
 
@@ -191,6 +194,52 @@ pnpm start
 ```
 
 Now any MCP client connecting to port 34000 will have all requests logged by the audit hook before being forwarded to the fetch-docs server.
+
+### Quick Start with Docker (Recommended)
+
+The easiest way to get started is with the passthrough-proxy-builder CLI:
+
+```bash
+npx @civic/passthrough-proxy-builder init my-proxy
+```
+
+This interactive wizard will:
+1. Ask about your target MCP server (local command or remote URL)
+2. Let you select which hooks to enable
+3. Allow you to order hooks for request processing
+4. Generate a complete Docker configuration
+
+After the wizard completes:
+
+```bash
+cd my-proxy
+docker build -t my-mcp-proxy .
+docker run -p 3000:3000 my-mcp-proxy
+```
+
+Your proxy is now running with all selected hooks active!
+
+#### Non-Interactive Usage
+
+Skip the wizard with command-line options:
+
+```bash
+npx @civic/passthrough-proxy-builder init my-proxy \
+  --target-mode local \
+  --target-command "node my-server.js" \
+  --proxy-port 3000 \
+  --hooks AuditHook GuardrailHook SimpleLogHook
+```
+
+#### Available Built-in Hooks
+
+- `AuditHook` - Complete request/response logging
+- `GuardrailHook` - Security and validation rules  
+- `SimpleLogHook` - Basic console logging
+- `ExplainHook` - Require AI to explain tool usage
+- `CustomDescriptionHook` - Modify tool descriptions
+
+You can also add custom hooks by providing their URL during setup.
 
 ### Testing with Included Examples
 
