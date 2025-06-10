@@ -213,8 +213,7 @@ After the wizard completes:
 
 ```bash
 cd my-proxy
-docker build -t my-mcp-proxy .
-docker run -p 3000:3000 my-mcp-proxy
+docker compose up
 ```
 
 Your proxy is now running with all selected hooks active!

@@ -4,7 +4,7 @@ import { join } from "node:path";
 import chalk from "chalk";
 import ejs from "ejs";
 import { type MCPHooksConfig, writeConfig } from "./config.js";
-import { DOCKERFILE_TEMPLATE } from "./templates.js";
+import { DOCKERFILE_TEMPLATE, DOCKER_COMPOSE_TEMPLATE } from "./templates.js";
 import { getErrorMessage } from "./utils.js";
 
 export async function generateProject(
@@ -81,7 +81,19 @@ export async function generateProject(
       );
     }
 
-    // Step 3: Create .dockerignore
+    // Step 3: Generate docker-compose.yml
+    console.log(chalk.blue("\n🐳 Generating docker-compose.yml..."));
+    const dockerComposePath = join(outputDir, "docker-compose.yml");
+    try {
+      await generateDockerCompose(dockerComposePath, config);
+      console.log(chalk.green("✓ Created docker-compose.yml"));
+    } catch (error) {
+      throw new Error(
+        `Failed to generate docker-compose.yml: ${getErrorMessage(error)}`,
+      );
+    }
+
+    // Step 4: Create .dockerignore
     console.log(chalk.blue("\n📄 Creating .dockerignore..."));
     const dockerignorePath = join(outputDir, ".dockerignore");
     try {
@@ -93,7 +105,7 @@ export async function generateProject(
       );
     }
 
-    // Step 4: Create basic package.json if it doesn't exist
+    // Step 5: Create basic package.json if it doesn't exist
     const packageJsonPath = join(outputDir, "package.json");
     try {
       await readFile(packageJsonPath);
@@ -110,7 +122,7 @@ export async function generateProject(
       }
     }
 
-    // Step 5: Show summary and instructions
+    // Step 6: Show summary and instructions
     showSummary(config, projectDirectory);
   } catch (error) {
     // Display user-friendly error message
@@ -164,6 +176,14 @@ async function generateDockerfile(
 ): Promise<void> {
   const dockerfile = ejs.render(DOCKERFILE_TEMPLATE, { config });
   await writeFile(path, dockerfile, "utf-8");
+}
+
+async function generateDockerCompose(
+  path: string,
+  config: MCPHooksConfig,
+): Promise<void> {
+  const dockerCompose = ejs.render(DOCKER_COMPOSE_TEMPLATE, { config });
+  await writeFile(path, dockerCompose, "utf-8");
 }
 
 function generateDockerignore(): string {
@@ -265,18 +285,22 @@ function showSummary(config: MCPHooksConfig, projectDirectory: string): void {
   console.log(chalk.gray(`   ./${projectDirectory}/`));
   console.log(chalk.gray("   ├── mcphooks.config.json") + chalk.green(" ✓"));
   console.log(chalk.gray("   ├── Dockerfile") + chalk.green(" ✓"));
+  console.log(chalk.gray("   ├── docker-compose.yml") + chalk.green(" ✓"));
   console.log(chalk.gray("   ├── .dockerignore") + chalk.green(" ✓"));
   console.log(chalk.gray("   └── package.json") + chalk.green(" ✓"));
 
   // Docker Commands
   console.log(chalk.yellow("\n🐳 Docker Commands:"));
   console.log(thinLine);
-  console.log(chalk.gray("   Build the image:"));
+  console.log(chalk.gray("   Quick start with Docker Compose:"));
   console.log(`   ${chalk.cyan("$")} ${chalk.white(`cd ${projectDirectory}`)}`);
+  console.log(
+    `   ${chalk.cyan("$")} ${chalk.white("docker compose up")}`,
+  );
+  console.log(chalk.gray("\n   Or build and run manually:"));
   console.log(
     `   ${chalk.cyan("$")} ${chalk.white("docker build -t mcp-proxy .")}`,
   );
-  console.log(chalk.gray("\n   Run the container:"));
   console.log(
     `   ${chalk.cyan("$")} ${chalk.white(`docker run -p ${config.proxy.port}:${config.proxy.port} mcp-proxy`)}`,
   );
@@ -286,10 +310,9 @@ function showSummary(config: MCPHooksConfig, projectDirectory: string): void {
   console.log(thinLine);
   console.log(chalk.white("   1. Review the generated configuration files"));
   console.log(
-    chalk.white("   2. Build the Docker image using the command above"),
+    chalk.white("   2. Start the proxy with: ") + chalk.cyan("docker compose up"),
   );
-  console.log(chalk.white("   3. Run the container to start your proxy"));
-  console.log(chalk.white("   4. Configure your MCP client to connect to:"));
+  console.log(chalk.white("   3. Configure your MCP client to connect to:"));
   console.log(chalk.green(`      http://localhost:${config.proxy.port}`));
 
   // Tips

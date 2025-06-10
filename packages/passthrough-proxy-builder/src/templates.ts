@@ -34,3 +34,30 @@ ENV PROXY_PORT=<%= config.proxy.port %>
 
 # Start the proxy
 CMD ["node", "dist/cli.js", "start-proxy", "--config", "mcphooks.config.json"]`;
+
+export const DOCKER_COMPOSE_TEMPLATE = `version: '3.8'
+
+services:
+  mcp-proxy:
+    build: .
+    container_name: mcp-proxy
+    ports:
+      - "<%= config.proxy.port %>:<%= config.proxy.port %>"
+    environment:
+      - NODE_ENV=production
+      - PROXY_PORT=<%= config.proxy.port %>
+<% if (config.target.mode === 'local') { -%>
+      - TARGET_MODE=local
+      - TARGET_COMMAND=<%= config.target.command %>
+<% } else { -%>
+      - TARGET_MODE=remote
+      - TARGET_URL=<%= config.target.url %>
+<% } -%>
+    restart: unless-stopped
+    # Uncomment to persist logs
+    # volumes:
+    #   - ./logs:/app/logs
+    # Uncomment for custom environment file
+    # env_file:
+    #   - .env
+`;

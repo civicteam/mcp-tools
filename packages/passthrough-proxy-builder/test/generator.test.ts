@@ -54,6 +54,9 @@ describe("generator", () => {
         access(join(projectPath, "Dockerfile")),
       ).resolves.toBeUndefined();
       await expect(
+        access(join(projectPath, "docker-compose.yml")),
+      ).resolves.toBeUndefined();
+      await expect(
         access(join(projectPath, ".dockerignore")),
       ).resolves.toBeUndefined();
       await expect(
@@ -78,7 +81,15 @@ describe("generator", () => {
       );
       expect(dockerfile).toContain("FROM node:20-alpine");
       expect(dockerfile).toContain("EXPOSE 3000");
-      expect(dockerfile).toContain("EXPOSE 3000");
+
+      // Verify docker-compose content
+      const dockerCompose = await readFile(
+        join(projectPath, "docker-compose.yml"),
+        "utf-8",
+      );
+      expect(dockerCompose).toContain("version: '3.8'");
+      expect(dockerCompose).toContain("container_name: mcp-proxy");
+      expect(dockerCompose).toContain("TARGET_COMMAND=npx some-mcp-server");
 
       // Verify .dockerignore
       const dockerignore = await readFile(

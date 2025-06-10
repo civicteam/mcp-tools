@@ -166,6 +166,9 @@ describe("passthrough-proxy-builder", () => {
         access(join(projectPath, "Dockerfile")),
       ).resolves.toBeUndefined();
       await expect(
+        access(join(projectPath, "docker-compose.yml")),
+      ).resolves.toBeUndefined();
+      await expect(
         access(join(projectPath, ".dockerignore")),
       ).resolves.toBeUndefined();
       await expect(
