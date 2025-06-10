@@ -1,0 +1,38 @@
+# Source files (only need built files)
+src/
+test/
+*.ts
+!*.d.ts
+
+# Test files and results
+TEST_RESULTS.md
+test-*.sh
+*.test.*
+coverage/
+
+# Build artifacts
+*.tgz
+*.log
+
+# Config files
+tsconfig.json
+tsconfig.test.json
+.gitignore
+vitest.config.ts
+
+# Development files
+test-npx-run/
+test-local-proxy/
+compose-test/
+docker-test/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,6 +1,6 @@
 {
   "name": "@civic/passthrough-proxy-builder",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "CLI wizard for creating MCP passthrough proxies with hooks",
   "main": "dist/cli.js",
   "bin": {
