@@ -17,6 +17,7 @@ export interface ProcessRequestResult {
   toolCall: ToolCall;
   wasRejected: boolean;
   rejectionResponse?: unknown;
+  rejectionReason?: string;
   lastProcessedIndex: number;
 }
 
@@ -24,6 +25,7 @@ export interface ProcessResponseResult {
   response: unknown;
   wasRejected: boolean;
   rejectionResponse?: unknown;
+  rejectionReason?: string;
   lastProcessedIndex: number;
 }
 
@@ -37,6 +39,7 @@ export async function processRequestThroughHooks(
   let currentToolCall = toolCall;
   let wasRejected = false;
   let rejectionResponse: unknown = null;
+  let rejectionReason: string | undefined;
   let lastProcessedIndex = -1;
 
   for (let i = 0; i < hooks.length && !wasRejected; i++) {
@@ -58,6 +61,7 @@ export async function processRequestThroughHooks(
     } else {
       wasRejected = true;
       rejectionResponse = hookResponse.body;
+      rejectionReason = hookResponse.reason;
       logger.info(
         `Hook ${i + 1} rejected request: ${hookResponse.reason || "No reason provided"}`,
       );
@@ -68,6 +72,7 @@ export async function processRequestThroughHooks(
     toolCall: currentToolCall,
     wasRejected,
     rejectionResponse,
+    rejectionReason,
     lastProcessedIndex,
   };
 }
@@ -84,6 +89,7 @@ export async function processResponseThroughHooks(
   let currentResponse = response;
   let wasRejected = false;
   let rejectionResponse: unknown = null;
+  let rejectionReason: string | undefined;
   let lastProcessedIndex = startIndex;
 
   for (let i = startIndex; i >= 0; i--) {
@@ -107,8 +113,8 @@ export async function processResponseThroughHooks(
       );
     } else {
       wasRejected = true;
-      rejectionResponse =
-        hookResponse.body ?? hookResponse.reason ?? "No reason provided";
+      rejectionResponse = hookResponse.body;
+      rejectionReason = hookResponse.reason;
       logger.info(
         `Hook ${i + 1} rejected response: ${hookResponse.reason || "No reason provided"}`,
       );
@@ -121,6 +127,7 @@ export async function processResponseThroughHooks(
     response: currentResponse,
     wasRejected,
     rejectionResponse,
+    rejectionReason,
     lastProcessedIndex,
   };
 }
@@ -135,6 +142,7 @@ export async function processToolsListRequestThroughHooks(
   let currentRequest = request;
   let wasRejected = false;
   let rejectionResponse: unknown = null;
+  let rejectionReason: string | undefined;
   let lastProcessedIndex = -1;
 
   for (let i = 0; i < hooks.length && !wasRejected; i++) {
@@ -162,6 +170,7 @@ export async function processToolsListRequestThroughHooks(
     } else {
       wasRejected = true;
       rejectionResponse = hookResponse.body;
+      rejectionReason = hookResponse.reason;
       logger.info(
         `Hook ${i + 1} rejected tools/list request: ${hookResponse.reason || "No reason provided"}`,
       );
@@ -173,6 +182,7 @@ export async function processToolsListRequestThroughHooks(
     toolCall: {} as ToolCall, // Not used for tools/list
     wasRejected,
     rejectionResponse,
+    rejectionReason,
     lastProcessedIndex,
   };
 }
@@ -189,6 +199,7 @@ export async function processToolsListResponseThroughHooks(
   let currentResponse = response;
   let wasRejected = false;
   let rejectionResponse: unknown = null;
+  let rejectionReason: string | undefined;
   let lastProcessedIndex = startIndex;
 
   for (let i = startIndex; i >= 0; i--) {
@@ -217,8 +228,8 @@ export async function processToolsListResponseThroughHooks(
       logger.info(`Hook ${i + 1} approved tools/list response`);
     } else {
       wasRejected = true;
-      rejectionResponse =
-        hookResponse.body ?? hookResponse.reason ?? "No reason provided";
+      rejectionResponse = hookResponse.body;
+      rejectionReason = hookResponse.reason;
       logger.info(
         `Hook ${i + 1} rejected tools/list response: ${hookResponse.reason || "No reason provided"}`,
       );
@@ -230,6 +241,7 @@ export async function processToolsListResponseThroughHooks(
     response: currentResponse,
     wasRejected,
     rejectionResponse,
+    rejectionReason,
     lastProcessedIndex,
   };
 }

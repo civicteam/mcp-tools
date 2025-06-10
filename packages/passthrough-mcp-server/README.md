@@ -235,9 +235,30 @@ import type {
 } from '@civic/passthrough-mcp-server';
 ```
 
+## Hook API
+
+The passthrough server provides a comprehensive API for applying hooks to requests and responses, making it easy to integrate hook functionality into other services like the MCP Hub.
+
+### Key Features
+
+- **Unified `applyHooks` function**: Single entry point for processing both request and response hooks
+- **Hook creation utilities**: `createHookClient` and `createHookClients` for easy hook instantiation
+- **Type exports**: All necessary types from `@civic/hook-common` are re-exported for convenience
+- **AbstractHook base class**: Simplifies creating custom local hooks
+
+### Hook-Related Exports
+
+- `applyHooks` - Main function for applying hooks to data
+- `createHookClient`, `createHookClients` - Utilities for creating hook instances
+- `AbstractHook` - Base class for implementing custom hooks
+- Types: `Hook`, `HookClient`, `HookResponse`, `ToolCall`, `HookType`, `HookResult`, `HookContext`
+
 ### Examples
 
-See the `examples/` directory for complete working examples of programmatic usage.
+For a complete example of using the hook API, see:
+- `examples/hook-api-example.ts` - Hook API usage patterns and implementation
+
+See the `examples/` directory for additional working examples of programmatic usage.
 
 ## Implementation
 

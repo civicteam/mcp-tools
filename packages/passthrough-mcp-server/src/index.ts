@@ -24,6 +24,25 @@ export type {
   PassthroughProxyOptions,
 } from "./createPassthroughProxy.js";
 
+// Export hook-related types and interfaces
+export type {
+  Hook,
+  HookClient,
+  HookResponse,
+  ToolCall,
+  ToolsListRequest,
+  AbstractHook,
+  LocalHookClient,
+} from "@civic/hook-common";
+
+// Export the simplified hook API
+export { applyHooks } from "./hooks/apply.js";
+export type { HookType, HookResult, HookContext } from "./hooks/apply.js";
+
+// Export hook utilities
+export { getHookClients } from "./hooks/manager.js";
+export { createHookClient } from "./hooks/utils.js";
+
 // Export utility functions that users might need
 export { createTargetClient } from "./client/client.js";
 export { loadConfig } from "./utils/config.js";

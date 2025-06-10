@@ -210,6 +210,7 @@ describe("Hook Processor", () => {
         response: { content: "sensitive data" },
         wasRejected: true,
         rejectionResponse: "Response filtered",
+        rejectionReason: "Sensitive content",
         lastProcessedIndex: 0,
       });
     });

@@ -199,6 +199,25 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@20.17.50)
 
+  packages/rate-limit-hook:
+    dependencies:
+      '@civic/hook-common':
+        specifier: workspace:^
+        version: link:../hook-common
+      '@trpc/server':
+        specifier: ^11.1.2
+        version: 11.1.2(typescript@5.8.3)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.0
+        version: 20.17.50
+      tsx:
+        specifier: ^4.19.4
+        version: 4.19.4
+      typescript:
+        specifier: ^5.2.2
+        version: 5.8.3
+
   packages/simple-log-hook:
     dependencies:
       '@civic/hook-common':
