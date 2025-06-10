@@ -158,7 +158,10 @@ describe("applyHooks", () => {
       expect(result.rejectionReason).toContain("Invalid tool call");
 
       // Test with valid object
-      result = await applyHooks("request", [hook], { name: "test", arguments: {} });
+      result = await applyHooks("request", [hook], {
+        name: "test",
+        arguments: {},
+      });
       expect(result.rejected).toBe(false);
     });
   });

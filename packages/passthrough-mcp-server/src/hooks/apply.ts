@@ -50,8 +50,8 @@ export async function applyHooks(
   try {
     if (type === "request") {
       // Process request hooks
-      if (!data || typeof data !== 'object' || !('name' in data)) {
-        throw new Error('Invalid tool call: missing required properties');
+      if (!data || typeof data !== "object" || !("name" in data)) {
+        throw new Error("Invalid tool call: missing required properties");
       }
       const toolCall = data as ToolCall;
       const result = await processRequestThroughHooks(toolCall, hooks);
