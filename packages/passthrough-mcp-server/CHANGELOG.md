@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-01-09
+
 ### Added
+- Simplified Hook API for external service integration
+  - New `applyHooks` function providing a unified interface for processing request/response hooks
+  - Hook creation utilities: `createHookClient` and `createHookClients`
+  - Export of `AbstractHook` as a value for easy custom hook creation
+  - Comprehensive error handling with `messageFromError` utility
+- Enhanced exports from `@civic/hook-common` making the library self-contained
+- Validation for tool call data in `applyHooks` function
+- Processor enhancements to include rejection reasons
+- Example demonstrating hook API usage patterns (`hook-api-example.ts`)
+- Full test coverage for new functionality
+
+### Added (from previous unreleased)
 - Support for programmatic hooks via Hook instances in addition to URL-based hooks
 - `name` getter requirement for Hook interface
 - LocalHookClient implementation for programmatic hooks
