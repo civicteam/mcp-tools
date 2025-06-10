@@ -19,8 +19,12 @@ import {
 import type { ClientFactory } from "../types/client.js";
 import type { Config } from "../utils/config.js";
 import { logger } from "../utils/logger.js";
-import { getOrCreateSession } from "../utils/session.js";
-import { getDiscoveredTools } from "./server.js";
+import {
+  DEFAULT_SESSION_ID,
+  type SessionData,
+  getOrCreateSession,
+} from "../utils/session.js";
+import { type AuthSessionData, getDiscoveredTools } from "./server.js";
 
 /**
  * Create a passthrough handler for a specific tool
@@ -34,24 +38,17 @@ import { getDiscoveredTools } from "./server.js";
 export function createPassthroughHandler(
   config: Config,
   toolName: string,
-  clientFactory?: ClientFactory,
+  getSessionForRequest: (sessionId: string) => Promise<SessionData>,
 ) {
   return async function passthrough(
     args: unknown,
-    context: Context<{ id: string }>,
+    context: Context<AuthSessionData>,
   ): Promise<unknown> {
     const { session } = context;
-    const sessionId = session?.id || "default";
+    const sessionId = session?.id || DEFAULT_SESSION_ID;
 
     // Get or create session with target client
-    const sessionData = await getOrCreateSession(sessionId, () =>
-      clientFactory
-        ? clientFactory(config.target, sessionId, config.clientInfo)
-        : createTargetClient(config.target, sessionId, config.clientInfo),
-    );
-
-    // Increment request counter
-    sessionData.requestCount += 1;
+    const sessionData = await getSessionForRequest(sessionId);
 
     // Find the tool definition from cached tools
     const discoveredTools = getDiscoveredTools();

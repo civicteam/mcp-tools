@@ -11,6 +11,7 @@ import { getServerTransportConfig } from "./server/transport.js";
 import type { ClientFactory } from "./types/client.js";
 import type { Config } from "./utils/config.js";
 import { logger } from "./utils/logger.js";
+import { clearAllSessions } from "./utils/session.js";
 
 export type PassthroughProxyOptions = Config & {
   /**
@@ -139,6 +140,9 @@ export async function createPassthroughProxy(
       logger.warn("Server is not started");
       return;
     }
+
+    // stop all clients.
+    await clearAllSessions();
 
     await server.stop();
     isStarted = false;

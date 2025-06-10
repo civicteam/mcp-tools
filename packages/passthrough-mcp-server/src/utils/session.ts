@@ -16,6 +16,9 @@ export interface SessionData {
 
 // Global session store
 const sessions = new Map<string, SessionData>();
+// Default Session ID for client operations that are not associated with
+// one (stdio or start-up client)
+export const DEFAULT_SESSION_ID = "default";
 
 /**
  * Get or create session data for a given session ID
@@ -43,14 +46,23 @@ export async function getOrCreateSession(
 /**
  * Clear a specific session
  */
-export function clearSession(sessionId: string): void {
+export async function clearSession(sessionId: string): Promise<void> {
+  const session = sessions.get(sessionId);
+  if (session) {
+    await session.targetClient.close();
+  }
   sessions.delete(sessionId);
 }
 
 /**
  * Clear all sessions
  */
-export function clearAllSessions(): void {
+export async function clearAllSessions(): Promise<void> {
+  await Promise.all(
+    Array.from(sessions.values()).map((session) =>
+      session.targetClient.close(),
+    ),
+  );
   sessions.clear();
 }
 

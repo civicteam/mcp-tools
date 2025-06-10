@@ -8,8 +8,8 @@ import {
 } from "./session.js";
 
 describe("Session Management", () => {
-  beforeEach(() => {
-    clearAllSessions();
+  beforeEach(async () => {
+    await clearAllSessions();
   });
 
   describe("generateSessionId", () => {
@@ -82,7 +82,7 @@ describe("Session Management", () => {
       const session1 = await getOrCreateSession("test-session", createClient);
       session1.requestCount = 10;
 
-      clearSession("test-session");
+      await clearSession("test-session");
 
       const session2 = await getOrCreateSession("test-session", createClient);
       expect(session2).not.toBe(session1);
@@ -97,7 +97,7 @@ describe("Session Management", () => {
       await getOrCreateSession("session-1", createClient);
       await getOrCreateSession("session-2", createClient);
 
-      clearSession("session-1");
+      await clearSession("session-1");
 
       expect(getSessionCount()).toBe(1);
     });
@@ -114,7 +114,7 @@ describe("Session Management", () => {
 
       expect(getSessionCount()).toBe(3);
 
-      clearAllSessions();
+      await clearAllSessions();
 
       expect(getSessionCount()).toBe(0);
     });

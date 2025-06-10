@@ -23,13 +23,28 @@ import type { ClientFactory } from "../types/client.js";
 import type { Config } from "../utils/config.js";
 import { logger } from "../utils/logger.js";
 import { extractToolParameters } from "../utils/schemaConverter.js";
-import { generateSessionId } from "../utils/session.js";
+import {
+  DEFAULT_SESSION_ID,
+  generateSessionId,
+  getOrCreateSession,
+} from "../utils/session.js";
 import { createPassthroughHandler } from "./passthrough.js";
 
+/**
+ * AuthSessionData of the FastMCP. This is only defined for http-streaming and sse, NOT for stdio
+ */
+export interface AuthSessionData {
+  id: string;
+  [key: string]: unknown; // Add index signature to satisfy Record<string, unknown>
+}
+
+interface ServerInfo {
+  name: string;
+  version: `${number}.${number}.${number}`;
+}
+
 type FastMCPToolHandler = FastMCPTool<
-  {
-    id: string;
-  },
+  AuthSessionData,
   ZodType<unknown, ZodTypeDef, unknown>
 >["execute"];
 
@@ -45,11 +60,10 @@ export function getDiscoveredTools(): MCPTool[] {
 /**
  * Create a FastMCP server instance
  */
-export function createServer(serverInfo?: {
-  name: string;
-  version?: `${number}.${number}.${number}`;
-}): FastMCP<{ id: string }> {
-  return new FastMCP<{ id: string }>({
+export function createServer(
+  serverInfo?: ServerInfo,
+): FastMCP<AuthSessionData> {
+  return new FastMCP<AuthSessionData>({
     name: serverInfo?.name || "passthrough-mcp-server",
     version: serverInfo?.version ?? "0.0.1",
     authenticate: async () => {
@@ -64,14 +78,25 @@ export function createServer(serverInfo?: {
  * Discover and register tools from the target server
  */
 export async function discoverAndRegisterTools(
-  server: FastMCP<{ id: string }>,
+  server: FastMCP<AuthSessionData>,
   config: Config,
   clientFactory?: ClientFactory,
 ): Promise<void> {
-  // Create a temporary client to discover available tools
-  const tempClient = clientFactory
-    ? await clientFactory(config.target, "discovery", config.clientInfo)
-    : await createTargetClient(config.target, "discovery", config.clientInfo);
+  const getOrCreateSessionForRequest = async (sessionId: string) => {
+    // Get or create session with target client
+    const sessionData = await getOrCreateSession(sessionId, () =>
+      clientFactory
+        ? clientFactory(config.target, sessionId, config.clientInfo)
+        : createTargetClient(config.target, sessionId, config.clientInfo),
+    );
+
+    // Increment request counter
+    sessionData.requestCount += 1;
+
+    return sessionData;
+  };
+
+  const sessionData = await getOrCreateSessionForRequest(DEFAULT_SESSION_ID);
 
   // Create tools/list request
   const toolsListRequest: ToolsListRequest = {
@@ -99,7 +124,7 @@ export async function discoverAndRegisterTools(
   }
 
   // Get list of tools from the target server
-  const { tools } = await tempClient.listTools();
+  const { tools } = await sessionData.targetClient.listTools();
   logger.info(`Discovered ${tools.length} tools from target server`);
   logger.debug(`Raw: ${JSON.stringify(tools)}`);
 
@@ -146,7 +171,7 @@ export async function discoverAndRegisterTools(
     const toolHandler = createPassthroughHandler(
       config,
       tool.name,
-      clientFactory,
+      getOrCreateSessionForRequest,
     );
 
     // Extract parameters from the tool definition
