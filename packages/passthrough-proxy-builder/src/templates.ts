@@ -1,39 +1,30 @@
 export const DOCKERFILE_TEMPLATE = `FROM node:20-alpine
 WORKDIR /app
 
-# Copy package files
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
-
-# Install dependencies based on which lockfile exists
-RUN \\
-  if [ -f pnpm-lock.yaml ]; then \\
-    npm install -g pnpm && pnpm install --frozen-lockfile; \\
-  elif [ -f yarn.lock ]; then \\
-    yarn install --frozen-lockfile; \\
-  elif [ -f package-lock.json ]; then \\
-    npm ci; \\
-  else \\
-    npm install; \\
-  fi
-
-# Copy source files
-COPY . .
+# Install passthrough-mcp-server globally
+RUN npm install -g @civic/passthrough-mcp-server@0.2.0
 
 # Copy configuration
 COPY mcphooks.config.json ./mcphooks.config.json
-
-# Build the application
-RUN npm run build || yarn build || pnpm build || echo "No build script found"
 
 # Expose proxy port
 EXPOSE <%= config.proxy.port %>
 
 # Set environment variables
 ENV NODE_ENV=production
-ENV PROXY_PORT=<%= config.proxy.port %>
+ENV PORT=<%= config.proxy.port %>
+ENV CONFIG_FILE=/app/mcphooks.config.json
+<% if (config.target.mode === 'local') { -%>
+ENV TARGET_SERVER_COMMAND="<%= config.target.command %>"
+<% } else { -%>
+ENV TARGET_SERVER_URL=<%= config.target.url %>
+<% } -%>
+<% if (config.hooks && config.hooks.length > 0) { -%>
+ENV HOOKS=<%= config.hooks.map(h => h.url || h.name).join(',') %>
+<% } -%>
 
 # Start the proxy
-CMD ["node", "dist/cli.js", "start-proxy", "--config", "mcphooks.config.json"]`;
+CMD ["passthrough-mcp-server"]`;
 
 export const DOCKER_COMPOSE_TEMPLATE = `version: '3.8'
 
@@ -45,13 +36,15 @@ services:
       - "<%= config.proxy.port %>:<%= config.proxy.port %>"
     environment:
       - NODE_ENV=production
-      - PROXY_PORT=<%= config.proxy.port %>
+      - PORT=<%= config.proxy.port %>
+      - CONFIG_FILE=/app/mcphooks.config.json
 <% if (config.target.mode === 'local') { -%>
-      - TARGET_MODE=local
-      - TARGET_COMMAND=<%= config.target.command %>
+      - TARGET_SERVER_COMMAND=<%= config.target.command %>
 <% } else { -%>
-      - TARGET_MODE=remote
-      - TARGET_URL=<%= config.target.url %>
+      - TARGET_SERVER_URL=<%= config.target.url %>
+<% } -%>
+<% if (config.hooks && config.hooks.length > 0) { -%>
+      - HOOKS=<%= config.hooks.map(h => h.url || h.name).join(',') %>
 <% } -%>
     restart: unless-stopped
     # Uncomment to persist logs

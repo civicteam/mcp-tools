@@ -48,12 +48,33 @@ export async function readConfig(path: string): Promise<MCPHooksConfig> {
   }
 }
 
+/**
+ * Convert builder config to server config format
+ */
+function convertToServerFormat(config: MCPHooksConfig): any {
+  return {
+    target: config.target,
+    proxy: {
+      port: config.proxy.port,
+      transport: "httpStream" // Default transport
+    },
+    hooks: config.hooksOrder.map(hook => {
+      if (hook.type === "built-in") {
+        return { name: hook.name };
+      } else {
+        return { url: hook.url, name: hook.alias };
+      }
+    })
+  };
+}
+
 export async function writeConfig(
   path: string,
   config: MCPHooksConfig,
 ): Promise<void> {
   validateConfig(config);
-  const content = JSON.stringify(config, null, 2);
+  const serverConfig = convertToServerFormat(config);
+  const content = JSON.stringify(serverConfig, null, 2);
   await writeFile(resolve(path), content, "utf-8");
 }
 

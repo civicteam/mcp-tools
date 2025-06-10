@@ -170,9 +170,24 @@ importers:
 
   packages/passthrough-mcp-server:
     dependencies:
+      '@civic/audit-hook':
+        specifier: workspace:^
+        version: link:../audit-hook
+      '@civic/custom-description-hook':
+        specifier: workspace:^
+        version: link:../custom-description-hook
+      '@civic/explain-hook':
+        specifier: workspace:^
+        version: link:../explain-hook
+      '@civic/guardrail-hook':
+        specifier: workspace:^
+        version: link:../guardrail-hook
       '@civic/hook-common':
         specifier: workspace:^
         version: link:../hook-common
+      '@civic/simple-log-hook':
+        specifier: workspace:^
+        version: link:../simple-log-hook
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.0
         version: 1.12.0

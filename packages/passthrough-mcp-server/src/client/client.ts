@@ -9,6 +9,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { StdioClientTransport } from "./stdioTransport.js";
 import type { PassthroughClient } from "../types/client.js";
 import type { TargetConfig } from "../utils/config.js";
 import { logger } from "../utils/logger.js";
@@ -33,17 +34,22 @@ export async function createTargetClient(
   );
 
   // Create appropriate transport based on configuration
-  const url = new URL(targetConfig.url);
-  const transport =
-    targetConfig.transportType === "sse"
-      ? new SSEClientTransport(url)
-      : new StreamableHTTPClientTransport(url);
+  let transport;
+  if (targetConfig.mode === "local") {
+    transport = new StdioClientTransport(targetConfig.command);
+    logger.info(`Client ${clientId} starting local MCP server: ${targetConfig.command}`);
+  } else {
+    const url = new URL(targetConfig.url);
+    transport =
+      targetConfig.transportType === "sse"
+        ? new SSEClientTransport(url)
+        : new StreamableHTTPClientTransport(url);
+    logger.info(`Client ${clientId} connecting to remote server at ${url.toString()}`);
+  }
 
   // Connect the client to the target server
   await client.connect(transport);
-  logger.info(
-    `Client ${clientId} connected to target server at ${url.toString()}`,
-  );
+  logger.info(`Client ${clientId} connected successfully`);
 
   return client as PassthroughClient;
 }

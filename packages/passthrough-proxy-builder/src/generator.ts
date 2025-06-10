@@ -97,7 +97,7 @@ export async function generateProject(
     console.log(chalk.blue("\n📄 Creating .dockerignore..."));
     const dockerignorePath = join(outputDir, ".dockerignore");
     try {
-      await writeFile(dockerignorePath, generateDockerignore(), "utf-8");
+      await writeFile(dockerignorePath, generateDockerIgnore(), "utf-8");
       console.log(chalk.green("✓ Created .dockerignore"));
     } catch (error) {
       throw new Error(
@@ -105,24 +105,7 @@ export async function generateProject(
       );
     }
 
-    // Step 5: Create basic package.json if it doesn't exist
-    const packageJsonPath = join(outputDir, "package.json");
-    try {
-      await readFile(packageJsonPath);
-      console.log(chalk.gray("✓ package.json already exists, skipping"));
-    } catch {
-      console.log(chalk.blue("\n📦 Creating package.json..."));
-      try {
-        await writeFile(packageJsonPath, generatePackageJson(config), "utf-8");
-        console.log(chalk.green("✓ Created package.json"));
-      } catch (error) {
-        throw new Error(
-          `Failed to create package.json: ${getErrorMessage(error)}`,
-        );
-      }
-    }
-
-    // Step 6: Show summary and instructions
+    // Step 5: Show summary and instructions
     showSummary(config, projectDirectory);
   } catch (error) {
     // Display user-friendly error message
@@ -186,7 +169,7 @@ async function generateDockerCompose(
   await writeFile(path, dockerCompose, "utf-8");
 }
 
-function generateDockerignore(): string {
+function generateDockerIgnore(): string {
   return `node_modules
 .git
 .gitignore
@@ -202,27 +185,6 @@ coverage
 *.swp
 *.swo
 `;
-}
-
-function generatePackageJson(config: MCPHooksConfig): string {
-  const pkg = {
-    name: "mcp-passthrough-proxy",
-    version: "1.0.0",
-    description: "MCP Passthrough Proxy with hooks",
-    type: "module",
-    scripts: {
-      start: "node dist/cli.js start-proxy --config mcphooks.config.json",
-      build: "echo 'No build required'",
-    },
-    dependencies: {
-      "@civic/passthrough-proxy-builder": "^1.0.0",
-    },
-    engines: {
-      node: ">=18.0.0",
-    },
-  };
-
-  return JSON.stringify(pkg, null, 2);
 }
 
 function showSummary(config: MCPHooksConfig, projectDirectory: string): void {
@@ -286,8 +248,7 @@ function showSummary(config: MCPHooksConfig, projectDirectory: string): void {
   console.log(chalk.gray("   ├── mcphooks.config.json") + chalk.green(" ✓"));
   console.log(chalk.gray("   ├── Dockerfile") + chalk.green(" ✓"));
   console.log(chalk.gray("   ├── docker-compose.yml") + chalk.green(" ✓"));
-  console.log(chalk.gray("   ├── .dockerignore") + chalk.green(" ✓"));
-  console.log(chalk.gray("   └── package.json") + chalk.green(" ✓"));
+  console.log(chalk.gray("   └── .dockerignore") + chalk.green(" ✓"));
 
   // Docker Commands
   console.log(chalk.yellow("\n🐳 Docker Commands:"));
