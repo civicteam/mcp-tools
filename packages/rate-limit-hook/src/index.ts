@@ -37,13 +37,9 @@ server.listen(PORT);
 console.log(`Rate Limit Hook running on port ${PORT}`);
 console.log(`Limits: ${LIMIT_PER_MINUTE}/minute, ${LIMIT_PER_HOUR}/hour`);
 
-// Periodically clean up old rate limit entries (every hour)
-setInterval(() => {
-  hook.cleanupOldEntries();
-}, 3600000);
-
 // Graceful shutdown
 process.on("SIGINT", () => {
   console.log("\nShutting down Rate Limit Hook...");
+  hook.stop();
   process.exit(0);
 });

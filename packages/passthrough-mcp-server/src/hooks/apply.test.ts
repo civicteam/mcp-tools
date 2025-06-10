@@ -135,6 +135,32 @@ describe("applyHooks", () => {
         rejectionReason: "Hook failed",
       });
     });
+
+    it("should validate tool call has required properties", async () => {
+      const hook = createMockHookClient("test-hook", {
+        response: "continue",
+        body: mockToolCall,
+      });
+
+      // Test with null
+      let result = await applyHooks("request", [hook], null);
+      expect(result.rejected).toBe(true);
+      expect(result.rejectionReason).toContain("Invalid tool call");
+
+      // Test with non-object
+      result = await applyHooks("request", [hook], "not an object");
+      expect(result.rejected).toBe(true);
+      expect(result.rejectionReason).toContain("Invalid tool call");
+
+      // Test with object missing name
+      result = await applyHooks("request", [hook], { arguments: {} });
+      expect(result.rejected).toBe(true);
+      expect(result.rejectionReason).toContain("Invalid tool call");
+
+      // Test with valid object
+      result = await applyHooks("request", [hook], { name: "test", arguments: {} });
+      expect(result.rejected).toBe(false);
+    });
   });
 
   describe("response hooks", () => {

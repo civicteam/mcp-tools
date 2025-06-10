@@ -19,12 +19,15 @@ export class RateLimitHook extends AbstractHook {
   name = "rate-limit-hook";
 
   private rateLimits = new Map<string, RateLimitInfo>();
+  private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor(
     private limitPerMinute = 10,
     private limitPerHour = 100,
+    private cleanupIntervalMs = 300000, // 5 minutes
   ) {
     super();
+    this.startCleanupTimer();
   }
 
   async processRequest(toolCall: ToolCall): Promise<HookResponse> {
@@ -88,6 +91,25 @@ export class RateLimitHook extends AbstractHook {
       }
     }
     return undefined;
+  }
+
+  /**
+   * Start the cleanup timer
+   */
+  private startCleanupTimer(): void {
+    this.cleanupInterval = setInterval(() => {
+      this.cleanupOldEntries();
+    }, this.cleanupIntervalMs);
+  }
+
+  /**
+   * Stop the cleanup timer
+   */
+  public stop(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
   }
 
   /**
