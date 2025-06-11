@@ -3,6 +3,7 @@ import inquirer from "inquirer";
 import {
   type HookEntry,
   type MCPHooksConfig,
+  type TargetConfig,
   getDefaultConfig,
 } from "./config.js";
 import { generateProject } from "./generator.js";
@@ -21,9 +22,11 @@ export async function runWizard(
   options?: CLIOptions,
 ): Promise<void> {
   // Step 0: Get project directory if not provided
-  let projectDirectory = initialProjectDirectory;
+  let projectDirectory: string;
 
-  if (!projectDirectory) {
+  if (initialProjectDirectory) {
+    projectDirectory = initialProjectDirectory;
+  } else {
     const { directory } = await inquirer.prompt([
       {
         type: "input",
@@ -37,9 +40,6 @@ export async function runWizard(
           }
           if (input.startsWith("-") || input.startsWith("_")) {
             return "Project name cannot start with a hyphen or underscore";
-          }
-          if (input.length > 100) {
-            return "Project name is too long (max 100 characters)";
           }
           return true;
         },
@@ -62,13 +62,15 @@ export async function runWizard(
   }
 
   // Step 1: Target server configuration
+  let targetMode: "local" | "remote";
+
   if (options?.targetMode) {
     if (options.targetMode !== "local" && options.targetMode !== "remote") {
       throw new Error(
         `Invalid target mode '${options.targetMode}'. Must be 'local' or 'remote'`,
       );
     }
-    config.target.mode = options.targetMode;
+    targetMode = options.targetMode;
     console.log(chalk.green(`✓ Target mode: ${options.targetMode}`));
   } else {
     const targetAnswers = await inquirer.prompt([
@@ -82,12 +84,14 @@ export async function runWizard(
         ],
       },
     ]);
-    config.target.mode = targetAnswers.targetMode;
+    targetMode = targetAnswers.targetMode;
   }
 
-  if (config.target.mode === "local") {
+  // Create the target config based on mode
+  if (targetMode === "local") {
+    let command: string;
     if (options?.targetCommand) {
-      config.target.command = options.targetCommand;
+      command = options.targetCommand;
       console.log(chalk.green(`✓ Target command: ${options.targetCommand}`));
     } else {
       const localAnswers = await inquirer.prompt([
@@ -99,16 +103,18 @@ export async function runWizard(
           validate: (input) => input.trim().length > 0 || "Command is required",
         },
       ]);
-      config.target.command = localAnswers.command;
+      command = localAnswers.command;
     }
+    config.target = { command };
   } else {
+    let url: string;
     if (options?.targetUrl) {
       try {
         new URL(options.targetUrl);
       } catch {
         throw new Error(`Invalid target URL: ${options.targetUrl}`);
       }
-      config.target.url = options.targetUrl;
+      url = options.targetUrl;
       console.log(chalk.green(`✓ Target URL: ${options.targetUrl}`));
     } else {
       const remoteAnswers = await inquirer.prompt([
@@ -127,173 +133,139 @@ export async function runWizard(
           },
         },
       ]);
-      config.target.url = remoteAnswers.url;
+      url = remoteAnswers.url;
     }
-
-    // For remote targets, ask about proxy location
-    const proxyAnswers = await inquirer.prompt([
-      {
-        type: "list",
-        name: "proxyMode",
-        message:
-          "Should your client connect to a local proxy or a remote proxy?",
-        choices: [
-          { name: "Local proxy", value: "local" },
-          { name: "Remote proxy", value: "remote" },
-          { name: "I'll decide later", value: "local" },
-        ],
-      },
-    ]);
-    config.proxy.mode =
-      proxyAnswers.proxyMode === "I'll decide later"
-        ? "local"
-        : proxyAnswers.proxyMode;
+    config.target = { url };
   }
 
-  // Step 2: Hook selection
-  console.log(chalk.yellow("\n✓ Target server configured"));
+  console.log(chalk.green("\n✓ Target server configured"));
 
-  // Process selected hooks
-  const hooks: HookEntry[] = [];
-  let selectedHooks: string[];
+  // Step 3: Hook selection
+  const builtInHookNames = getBuiltInHookNames();
+  const selectedHooks: HookEntry[] = [];
 
+  // Handle CLI-provided hooks
   if (options?.hooks && options.hooks.length > 0) {
-    selectedHooks = options.hooks;
-    console.log(chalk.green(`✓ Selected hooks: ${options.hooks.join(", ")}`));
-
-    // Convert CLI hook names directly to HookEntry format
-    const builtInHookNames = getBuiltInHookNames();
-    for (const hookName of selectedHooks) {
+    for (const hookName of options.hooks) {
       if (builtInHookNames.includes(hookName as BuiltInHookName)) {
-        hooks.push({
+        selectedHooks.push({
           type: "built-in",
           name: hookName as BuiltInHookName,
         });
       } else {
-        console.log(
-          chalk.yellow(`Warning: Unknown hook '${hookName}' will be skipped`),
-        );
+        // Treat as custom hook URL
+        try {
+          new URL(hookName);
+          selectedHooks.push({
+            type: "custom",
+            alias: new URL(hookName).hostname,
+            url: hookName,
+          });
+        } catch {
+          console.warn(
+            chalk.yellow(
+              `Warning: "${hookName}" is not a built-in hook or valid URL, skipping`,
+            ),
+          );
+        }
       }
     }
+    console.log(
+      chalk.green(
+        `✓ Selected hooks: ${selectedHooks.map((h) => (h.type === "built-in" ? h.name : h.alias)).join(", ")}`,
+      ),
+    );
   } else {
+    // Interactive hook selection
     console.log(chalk.blue("\n🪝 Select hooks to add to your proxy:\n"));
 
-    const builtInHooks = getBuiltInHookNames();
-    const hookChoices = [
-      ...builtInHooks.map((name) => ({
-        name: name,
-        value: name,
-        checked: false,
-      })),
-      new inquirer.Separator(),
-      {
-        name: "Add Custom Hook (external URL)",
-        value: "CUSTOM_HOOK",
-        checked: false,
-      },
-    ];
-
-    const answers = await inquirer.prompt([
+    const { selectedBuiltInHooks } = await inquirer.prompt([
       {
         type: "checkbox",
-        name: "selectedHooks",
+        name: "selectedBuiltInHooks",
         message: "Select hooks (use Space to toggle, Enter to continue):",
-        choices: hookChoices,
-        validate: (input) =>
-          input.length > 0 || "Please select at least one hook",
+        choices: builtInHookNames.map((name) => ({
+          name,
+          value: name,
+        })),
       },
     ]);
-    selectedHooks = answers.selectedHooks;
 
-    // Process selected hooks from interactive prompts
-    for (const hook of selectedHooks) {
-      if (hook === "CUSTOM_HOOK") {
-        // Handle custom hook
-        console.log(chalk.blue("\n🔗 Configure custom hook:\n"));
+    // Add selected built-in hooks
+    for (const hookName of selectedBuiltInHooks) {
+      selectedHooks.push({
+        type: "built-in",
+        name: hookName,
+      });
+    }
 
-        const customHookAnswers = await inquirer.prompt([
-          {
-            type: "input",
-            name: "url",
-            message: "Enter the URL of your custom hook:",
-            validate: (input) => {
-              try {
-                new URL(input);
-                return true;
-              } catch {
-                return "Please enter a valid URL";
-              }
-            },
-          },
-          {
-            type: "input",
-            name: "alias",
-            message: "Enter an alias for this hook:",
-            default: `CustomHook${hooks.filter((h) => h.type === "custom").length + 1}`,
-            validate: (input) => {
-              if (!input.trim()) return "Alias is required";
-              if (!/^[a-zA-Z0-9_-]+$/.test(input)) {
-                return "Alias can only contain letters, numbers, hyphens, and underscores";
-              }
-              // Check for duplicate aliases
-              const existingAliases = hooks
-                .filter(
-                  (h): h is { type: "custom"; alias: string; url: string } =>
-                    h.type === "custom",
-                )
-                .map((h) => h.alias);
-              if (existingAliases.includes(input)) {
-                return "This alias is already in use";
-              }
-              return true;
-            },
-          },
-        ]);
+    // Ask about custom hooks
+    let addCustom = true;
+    while (addCustom) {
+      const { wantCustom } = await inquirer.prompt([
+        {
+          type: "confirm",
+          name: "wantCustom",
+          message: "Would you like to add a custom hook URL?",
+          default: false,
+        },
+      ]);
 
-        hooks.push({
-          type: "custom",
-          url: customHookAnswers.url,
-          alias: customHookAnswers.alias,
-        });
-
-        // Ask if they want to add another custom hook
-        const { addAnother } = await inquirer.prompt([
-          {
-            type: "confirm",
-            name: "addAnother",
-            message: "Do you want to add another custom hook?",
-            default: false,
-          },
-        ]);
-
-        if (addAnother) {
-          selectedHooks.push("CUSTOM_HOOK");
-        }
-      } else {
-        // Built-in hook
-        hooks.push({
-          type: "built-in",
-          name: hook as BuiltInHookName,
-        });
+      if (!wantCustom) {
+        addCustom = false;
+        break;
       }
+
+      const { customUrl, customAlias } = await inquirer.prompt([
+        {
+          type: "input",
+          name: "customUrl",
+          message: "Enter the custom hook URL:",
+          validate: (input) => {
+            try {
+              new URL(input);
+              return true;
+            } catch {
+              return "Please enter a valid URL";
+            }
+          },
+        },
+        {
+          type: "input",
+          name: "customAlias",
+          message: "Enter a friendly name for this hook:",
+          default: (answers: { customUrl: string }) => {
+            try {
+              return new URL(answers.customUrl).hostname;
+            } catch {
+              return "custom-hook";
+            }
+          },
+          validate: (input) =>
+            input.trim().length > 0 || "Hook name is required",
+        },
+      ]);
+
+      selectedHooks.push({
+        type: "custom",
+        alias: customAlias,
+        url: customUrl,
+      });
     }
   }
 
-  config.hooksOrder = hooks;
-
-  // Step 3: Hook ordering (if multiple hooks selected)
-  if (hooks.length > 1) {
+  // Step 4: Hook ordering
+  if (selectedHooks.length > 1) {
     console.log(chalk.blue("\n🔄 Order your hooks (executed in sequence):\n"));
 
-    const orderedHooks = [...hooks];
     let ordering = true;
+    const orderedHooks = [...selectedHooks];
 
     while (ordering) {
-      // Display current order
-      console.log(chalk.cyan("Current order:"));
+      console.log(chalk.gray("Current order:"));
       orderedHooks.forEach((hook, index) => {
-        const hookName = hook.type === "built-in" ? hook.name : hook.alias;
-        console.log(`  ${index + 1}. ${hookName}`);
+        const name = hook.type === "built-in" ? hook.name : hook.alias;
+        console.log(chalk.gray(`  ${index + 1}. ${name}`));
       });
 
       const { action } = await inquirer.prompt([
@@ -303,67 +275,62 @@ export async function runWizard(
           message: "What would you like to do?",
           choices: [
             { name: "Move a hook up/down", value: "move" },
-            { name: "Continue with this order", value: "done" },
+            { name: "Continue with this order", value: "continue" },
           ],
         },
       ]);
 
-      if (action === "done") {
+      if (action === "continue") {
         ordering = false;
       } else {
-        // Select hook to move
-        const hookChoices = orderedHooks.map((hook, index) => {
-          const hookName = hook.type === "built-in" ? hook.name : hook.alias;
-          return {
-            name: `${index + 1}. ${hookName}`,
-            value: index,
-          };
-        });
-
-        const { hookIndex } = await inquirer.prompt([
+        const { hookToMove } = await inquirer.prompt([
           {
             type: "list",
-            name: "hookIndex",
-            message: "Select hook to move:",
-            choices: hookChoices,
+            name: "hookToMove",
+            message: "Which hook would you like to move?",
+            choices: orderedHooks.map((hook, index) => ({
+              name: `${index + 1}. ${hook.type === "built-in" ? hook.name : hook.alias}`,
+              value: index,
+            })),
           },
         ]);
 
-        // Select direction
-        const moveChoices = [];
-        if (hookIndex > 0) moveChoices.push({ name: "Move up", value: "up" });
-        if (hookIndex < orderedHooks.length - 1)
-          moveChoices.push({ name: "Move down", value: "down" });
+        const { direction } = await inquirer.prompt([
+          {
+            type: "list",
+            name: "direction",
+            message: "Move it:",
+            choices: [
+              { name: "Up", value: "up", disabled: hookToMove === 0 },
+              {
+                name: "Down",
+                value: "down",
+                disabled: hookToMove === orderedHooks.length - 1,
+              },
+            ],
+          },
+        ]);
 
-        if (moveChoices.length > 0) {
-          const { direction } = await inquirer.prompt([
-            {
-              type: "list",
-              name: "direction",
-              message: "Move direction:",
-              choices: moveChoices,
-            },
-          ]);
+        // Perform the move
+        const [movedHook] = orderedHooks.splice(hookToMove, 1);
+        const newIndex = direction === "up" ? hookToMove - 1 : hookToMove + 1;
+        orderedHooks.splice(newIndex, 0, movedHook);
 
-          // Perform the move
-          const [movedHook] = orderedHooks.splice(hookIndex, 1);
-          const newIndex = direction === "up" ? hookIndex - 1 : hookIndex + 1;
-          orderedHooks.splice(newIndex, 0, movedHook);
-
-          console.log(chalk.green("\n✓ Hook moved!\n"));
-        }
+        console.log(chalk.green("\n✓ Hook moved!\n"));
       }
     }
 
     config.hooksOrder = orderedHooks;
   } else {
-    config.hooksOrder = hooks;
+    config.hooksOrder = selectedHooks;
   }
 
   // Generate the project
-  // projectDirectory is guaranteed to be defined at this point
-  if (!projectDirectory) {
-    throw new Error("Project directory is required");
+  try {
+    await generateProject(config, projectDirectory);
+  } catch (error) {
+    console.error(chalk.red("\n❌ Failed to generate project:"));
+    console.error(chalk.red(`   ${error}`));
+    process.exit(1);
   }
-  await generateProject(config, projectDirectory);
 }

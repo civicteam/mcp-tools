@@ -129,10 +129,11 @@ export async function createPassthroughProxy(
         ? "stdio transport"
         : `${config.transportType} transport on port ${config.port}`;
 
-    const targetInfo = config.target.mode === "local" 
-      ? `local command: ${config.target.command}`
-      : `remote server at ${config.target.url}`;
-    
+    const targetInfo =
+      config.target.transportType === "stdio"
+        ? `local command: ${config.target.command}`
+        : `remote server at ${config.target.url}`;
+
     logger.info(
       `Passthrough MCP Server running with ${transportInfo}, connecting to ${targetInfo}`,
     );

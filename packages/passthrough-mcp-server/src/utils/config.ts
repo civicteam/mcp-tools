@@ -6,9 +6,9 @@
  * and command line arguments.
  */
 
-import * as process from "node:process";
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import * as process from "node:process";
 import type { Hook } from "@civic/hook-common";
 import { configureLoggerForStdio, logger } from "./logger.js";
 
@@ -25,14 +25,13 @@ export type BaseConfig =
       port: number;
     };
 
-export type TargetConfig = 
+export type TargetConfig =
   | {
-      mode: "remote";
       transportType: "sse" | "httpStream";
       url: string;
     }
   | {
-      mode: "local";
+      transportType: "stdio";
       command: string;
     };
 
@@ -57,18 +56,18 @@ export interface MCPHooksConfig {
   hooks: Array<{
     name?: string;
     url?: string;
-    config?: Record<string, any>;
+    config?: Record<string, unknown>;
   }>;
 }
 
 // Built-in hook name mapping to their default ports
 // For now, we'll use remote URLs until the hooks export their classes
 const BUILTIN_HOOKS: Record<string, string> = {
-  "SimpleLogHook": "http://localhost:33006",
-  "AuditHook": "http://localhost:33004",
-  "GuardrailHook": "http://localhost:33007",
-  "CustomDescriptionHook": "http://localhost:33008",
-  "ExplainHook": "http://localhost:33009",
+  SimpleLogHook: "http://localhost:33006",
+  AuditHook: "http://localhost:33004",
+  GuardrailHook: "http://localhost:33007",
+  CustomDescriptionHook: "http://localhost:33008",
+  ExplainHook: "http://localhost:33009",
 };
 
 export type Config = BaseConfig & {
@@ -143,7 +142,7 @@ export function loadConfigFromFile(filePath: string): MCPHooksConfig | null {
     if (!existsSync(absolutePath)) {
       return null;
     }
-    const content = readFileSync(absolutePath, 'utf-8');
+    const content = readFileSync(absolutePath, "utf-8");
     return JSON.parse(content) as MCPHooksConfig;
   } catch (error) {
     logger.error(`Failed to load config from ${filePath}: ${error}`);
@@ -166,14 +165,13 @@ export function convertMCPHooksConfig(mcpConfig: MCPHooksConfig): Config {
   let targetConfig: TargetConfig;
   if (mcpConfig.target.mode === "local" && mcpConfig.target.command) {
     targetConfig = {
-      mode: "local",
+      transportType: "stdio",
       command: mcpConfig.target.command,
     };
   } else if (mcpConfig.target.url) {
     targetConfig = {
-      mode: "remote",
-      url: mcpConfig.target.url,
       transportType: "httpStream", // Default to httpStream
+      url: mcpConfig.target.url,
     };
   } else {
     throw new Error("Invalid target configuration in mcphooks.config.json");
@@ -183,7 +181,8 @@ export function convertMCPHooksConfig(mcpConfig: MCPHooksConfig): Config {
   const hooks: HookDefinition[] = mcpConfig.hooks.map((hook) => {
     if (hook.url) {
       return { url: hook.url, name: hook.name } as RemoteHookConfig;
-    } else if (hook.name) {
+    }
+    if (hook.name) {
       // Get URL for built-in hook
       const builtinUrl = getBuiltinHookUrl(hook.name);
       if (builtinUrl) {
@@ -195,12 +194,13 @@ export function convertMCPHooksConfig(mcpConfig: MCPHooksConfig): Config {
   });
 
   // Build final config
-  const baseConfig: BaseConfig = mcpConfig.proxy.transport === "stdio"
-    ? { transportType: "stdio" }
-    : { 
-        transportType: mcpConfig.proxy.transport as "sse" | "httpStream", 
-        port: mcpConfig.proxy.port 
-      };
+  const baseConfig: BaseConfig =
+    mcpConfig.proxy.transport === "stdio"
+      ? { transportType: "stdio" }
+      : {
+          transportType: mcpConfig.proxy.transport as "sse" | "httpStream",
+          port: mcpConfig.proxy.port,
+        };
 
   return {
     ...baseConfig,
@@ -220,12 +220,12 @@ export function loadConfig(): Config {
     if (fileConfig) {
       logger.info(`Loading configuration from ${configFile}`);
       const config = convertMCPHooksConfig(fileConfig);
-      
+
       // Configure logger for stdio mode
       if (config.transportType === "stdio") {
         configureLoggerForStdio();
       }
-      
+
       return config;
     }
   }
@@ -242,10 +242,10 @@ export function loadConfig(): Config {
   // Check for TARGET_SERVER_COMMAND for local mode
   const targetCommand = process.env.TARGET_SERVER_COMMAND;
   let targetConfig: TargetConfig;
-  
+
   if (targetCommand) {
     targetConfig = {
-      mode: "local",
+      transportType: "stdio",
       command: targetCommand,
     };
   } else {
@@ -253,9 +253,8 @@ export function loadConfig(): Config {
     const targetUrl = process.env.TARGET_SERVER_URL || "http://localhost:33000";
     const targetTransport = parseClientTransport(process.env);
     targetConfig = {
-      mode: "remote",
-      url: targetUrl,
       transportType: targetTransport,
+      url: targetUrl,
     };
   }
 

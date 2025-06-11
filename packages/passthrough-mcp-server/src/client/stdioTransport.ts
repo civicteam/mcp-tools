@@ -1,13 +1,13 @@
 /**
  * Stdio Transport for Local MCP Servers
- * 
+ *
  * Implements a transport that spawns a local process and communicates
  * with it via stdio (stdin/stdout).
  */
 
 import { spawn } from "node:child_process";
-import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
-import { JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
+import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
+import type { JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
 import { logger } from "../utils/logger.js";
 
 export class StdioClientTransport implements Transport {
@@ -80,7 +80,7 @@ export class StdioClientTransport implements Transport {
       throw new Error("Transport not started");
     }
 
-    const messageStr = JSON.stringify(message) + "\n";
+    const messageStr = `${JSON.stringify(message)}\n`;
     this.process.stdin.write(messageStr);
   }
 

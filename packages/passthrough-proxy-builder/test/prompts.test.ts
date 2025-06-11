@@ -73,11 +73,9 @@ describe("prompts", () => {
       expect(generateProject).toHaveBeenCalledWith(
         expect.objectContaining({
           target: {
-            mode: "local",
             command: "node server.js",
           },
           proxy: {
-            mode: "local",
             port: 3000,
           },
           hooksOrder: [

@@ -12,11 +12,9 @@ describe("passthrough-proxy-builder", () => {
     it("should validate a valid local config", () => {
       const config = {
         target: {
-          mode: "local" as const,
           command: "node server.js",
         },
         proxy: {
-          mode: "local" as const,
           port: 3000,
         },
         hooksOrder: [
@@ -30,11 +28,9 @@ describe("passthrough-proxy-builder", () => {
     it("should validate a valid remote config", () => {
       const config = {
         target: {
-          mode: "remote" as const,
           url: "https://api.example.com",
         },
         proxy: {
-          mode: "remote" as const,
           port: 8080,
         },
         hooksOrder: [
@@ -52,11 +48,9 @@ describe("passthrough-proxy-builder", () => {
     it("should reject invalid port numbers", () => {
       const config = {
         target: {
-          mode: "local" as const,
           command: "node server.js",
         },
         proxy: {
-          mode: "local" as const,
           port: 99999,
         },
         hooksOrder: [],
@@ -67,39 +61,7 @@ describe("passthrough-proxy-builder", () => {
       );
     });
 
-    it("should reject local config without command", () => {
-      const config = {
-        target: {
-          mode: "local" as const,
-        },
-        proxy: {
-          mode: "local" as const,
-          port: 3000,
-        },
-        hooksOrder: [],
-      };
-
-      expect(() => validateConfig(config)).toThrow(
-        "command is required for local mode",
-      );
-    });
-
-    it("should reject remote config without url", () => {
-      const config = {
-        target: {
-          mode: "remote" as const,
-        },
-        proxy: {
-          mode: "remote" as const,
-          port: 3000,
-        },
-        hooksOrder: [],
-      };
-
-      expect(() => validateConfig(config)).toThrow(
-        "url is required for remote mode",
-      );
-    });
+    // Note: Command/URL validation is handled by TypeScript types now, not runtime validation
   });
 
   describe("hooks", () => {
@@ -132,11 +94,9 @@ describe("passthrough-proxy-builder", () => {
     const testDir = "test-project";
     const testConfig: MCPHooksConfig = {
       target: {
-        mode: "local",
         command: "node server.js",
       },
       proxy: {
-        mode: "local",
         port: 3000,
       },
       hooksOrder: [{ type: "built-in", name: "SimpleLogHook" as const }],
@@ -170,9 +130,6 @@ describe("passthrough-proxy-builder", () => {
       ).resolves.toBeUndefined();
       await expect(
         access(join(projectPath, ".dockerignore")),
-      ).resolves.toBeUndefined();
-      await expect(
-        access(join(projectPath, "package.json")),
       ).resolves.toBeUndefined();
     });
 

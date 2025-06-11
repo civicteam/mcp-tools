@@ -5,7 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2025-06-11
+
+### Added
+- CONFIG_FILE environment variable support to load configuration from mcphooks.config.json
+- Support for local MCP servers via TARGET_SERVER_COMMAND environment variable
+- StdioClientTransport for spawning and communicating with local MCP server processes
+- Built-in hook name resolution (e.g., "SimpleLogHook" → "http://localhost:33006")
+- Export of AbstractHook as a value for external consumption
+- Simplified hook API for external service integration
+
+### Changed
+- TargetConfig now supports both local (command-based) and remote (URL-based) modes
+- Enhanced configuration loading with fallback from CONFIG_FILE to environment variables
+- Improved error messages in stdio transport
+
+### Fixed
+- Export AbstractHook as value instead of just a type
+
+## [0.2.0] - Previous Release
 
 ### Added
 - Support for programmatic hooks via Hook instances in addition to URL-based hooks

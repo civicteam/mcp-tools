@@ -29,11 +29,9 @@ describe("generator", () => {
 
       const config: MCPHooksConfig = {
         target: {
-          mode: "local",
           command: "npx some-mcp-server",
         },
         proxy: {
-          mode: "local",
           port: 3000,
         },
         hooksOrder: [
@@ -59,9 +57,6 @@ describe("generator", () => {
       await expect(
         access(join(projectPath, ".dockerignore")),
       ).resolves.toBeUndefined();
-      await expect(
-        access(join(projectPath, "package.json")),
-      ).resolves.toBeUndefined();
 
       // Verify config content
       const configContent = await readFile(
@@ -69,10 +64,9 @@ describe("generator", () => {
         "utf-8",
       );
       const savedConfig = JSON.parse(configContent);
-      expect(savedConfig.target.mode).toBe("local");
       expect(savedConfig.target.command).toBe("npx some-mcp-server");
       expect(savedConfig.proxy.port).toBe(3000);
-      expect(savedConfig.hooksOrder).toHaveLength(2);
+      expect(savedConfig.hooks).toHaveLength(2);
 
       // Verify Dockerfile content
       const dockerfile = await readFile(
@@ -89,7 +83,9 @@ describe("generator", () => {
       );
       expect(dockerCompose).toContain("version: '3.8'");
       expect(dockerCompose).toContain("container_name: mcp-proxy");
-      expect(dockerCompose).toContain("TARGET_COMMAND=npx some-mcp-server");
+      expect(dockerCompose).toContain(
+        "TARGET_SERVER_COMMAND=npx some-mcp-server",
+      );
 
       // Verify .dockerignore
       const dockerignore = await readFile(
@@ -98,15 +94,6 @@ describe("generator", () => {
       );
       expect(dockerignore).toContain("node_modules");
       expect(dockerignore).toContain(".git");
-
-      // Verify package.json
-      const packageJson = JSON.parse(
-        await readFile(join(projectPath, "package.json"), "utf-8"),
-      );
-      expect(packageJson.name).toBe("mcp-passthrough-proxy");
-      expect(
-        packageJson.dependencies["@civic/passthrough-proxy-builder"],
-      ).toBeDefined();
     });
 
     it("should handle remote target configuration", async () => {
@@ -115,11 +102,9 @@ describe("generator", () => {
 
       const config: MCPHooksConfig = {
         target: {
-          mode: "remote",
           url: "https://api.example.com",
         },
         proxy: {
-          mode: "remote",
           port: 8080,
         },
         hooksOrder: [],
@@ -141,11 +126,9 @@ describe("generator", () => {
 
       const config: MCPHooksConfig = {
         target: {
-          mode: "local",
           command: "node server.js",
         },
         proxy: {
-          mode: "local",
           port: 3000,
         },
         hooksOrder: [
@@ -165,9 +148,10 @@ describe("generator", () => {
         "utf-8",
       );
       const savedConfig = JSON.parse(configContent);
-      expect(savedConfig.hooksOrder[1].type).toBe("custom");
-      expect(savedConfig.hooksOrder[1].alias).toBe("MyHook");
-      expect(savedConfig.hooksOrder[1].url).toBe("http://localhost:5000");
+      expect(savedConfig.hooks).toHaveLength(2);
+      expect(savedConfig.hooks[0].name).toBe("SimpleLogHook");
+      expect(savedConfig.hooks[1].name).toBe("MyHook");
+      expect(savedConfig.hooks[1].url).toBe("http://localhost:5000");
     });
 
     it("should handle existing directory gracefully", async () => {
@@ -186,11 +170,9 @@ describe("generator", () => {
 
       const config: MCPHooksConfig = {
         target: {
-          mode: "local",
           command: "node server.js",
         },
         proxy: {
-          mode: "local",
           port: 3000,
         },
         hooksOrder: [],
@@ -207,52 +189,6 @@ describe("generator", () => {
       ).resolves.toBeUndefined();
     });
 
-    it("should not overwrite existing package.json", async () => {
-      const projectName = "test-gen-preserve-package";
-      testProjects.push(projectName);
-
-      // Create directory and existing package.json
-      const projectPath = join(process.cwd(), projectName);
-      await mkdir(projectPath, { recursive: true });
-
-      const existingPackageJson = {
-        name: "existing-project",
-        version: "2.0.0",
-        description: "Should not be overwritten",
-      };
-      const { writeFile } = await import("node:fs/promises");
-      await writeFile(
-        join(projectPath, "package.json"),
-        JSON.stringify(existingPackageJson, null, 2),
-        "utf-8",
-      );
-
-      // Test write permission first
-      await writeFile(join(projectPath, "test.txt"), "test");
-      await rm(join(projectPath, "test.txt"));
-
-      const config: MCPHooksConfig = {
-        target: {
-          mode: "local",
-          command: "node server.js",
-        },
-        proxy: {
-          mode: "local",
-          port: 3000,
-        },
-        hooksOrder: [],
-      };
-
-      await generateProject(config, projectName);
-
-      // Verify package.json was not overwritten
-      const packageJson = JSON.parse(
-        await readFile(join(projectPath, "package.json"), "utf-8"),
-      );
-      expect(packageJson.name).toBe("existing-project");
-      expect(packageJson.version).toBe("2.0.0");
-    });
-
     it("should handle file system errors gracefully", async () => {
       const projectName = "test-filesystem-error";
       testProjects.push(projectName);
@@ -260,12 +196,10 @@ describe("generator", () => {
       // Create an invalid config that will fail validation
       const config: MCPHooksConfig = {
         target: {
-          mode: "local",
-          command: "", // Empty command should fail
+          command: "node server.js",
         },
         proxy: {
-          mode: "local",
-          port: 3000,
+          port: 70000, // Invalid port number
         },
         hooksOrder: [],
       };

@@ -13,14 +13,17 @@ export type HookEntry =
       url: string;
     };
 
-export interface TargetConfig {
-  mode: "local" | "remote";
-  command?: string; // if local
-  url?: string; // if remote
-}
+export type TargetConfig =
+  | {
+      command: string;
+      url?: never;
+    }
+  | {
+      url: string;
+      command?: never;
+    };
 
 export interface ProxyConfig {
-  mode: "local" | "remote"; // recorded for future
   port: number;
 }
 
@@ -48,23 +51,45 @@ export async function readConfig(path: string): Promise<MCPHooksConfig> {
   }
 }
 
+interface ServerConfig {
+  target: {
+    command?: string;
+    url?: string;
+  };
+  proxy: {
+    port: number;
+    transport: string;
+  };
+  hooks: Array<{
+    name: string;
+    url?: string;
+  }>;
+}
+
 /**
  * Convert builder config to server config format
  */
-function convertToServerFormat(config: MCPHooksConfig): any {
+function convertToServerFormat(config: MCPHooksConfig): ServerConfig {
+  // Clean up target config
+  const target: { command?: string; url?: string } = {};
+  if (config.target.command) {
+    target.command = config.target.command;
+  } else {
+    target.url = config.target.url;
+  }
+
   return {
-    target: config.target,
+    target,
     proxy: {
       port: config.proxy.port,
-      transport: "httpStream" // Default transport
+      transport: "httpStream", // Default transport
     },
-    hooks: config.hooksOrder.map(hook => {
+    hooks: config.hooksOrder.map((hook) => {
       if (hook.type === "built-in") {
         return { name: hook.name };
-      } else {
-        return { url: hook.url, name: hook.alias };
       }
-    })
+      return { url: hook.url, name: hook.alias };
+    }),
   };
 }
 
@@ -79,17 +104,6 @@ export async function writeConfig(
 }
 
 export function validateConfig(config: MCPHooksConfig): void {
-  // Validate target
-  if (config.target.mode === "local" && !config.target.command) {
-    throw new Error(
-      "Invalid config: target.command is required for local mode",
-    );
-  }
-
-  if (config.target.mode === "remote" && !config.target.url) {
-    throw new Error("Invalid config: target.url is required for remote mode");
-  }
-
   // Validate proxy port is a reasonable number
   if (config.proxy.port < 1 || config.proxy.port > 65535) {
     throw new Error("Invalid config: proxy.port must be between 1 and 65535");
@@ -100,11 +114,9 @@ export function validateConfig(config: MCPHooksConfig): void {
 export function getDefaultConfig(): MCPHooksConfig {
   return {
     target: {
-      mode: "local",
       command: "node dist/server.js",
     },
     proxy: {
-      mode: "local",
       port: 8080,
     },
     hooksOrder: [],

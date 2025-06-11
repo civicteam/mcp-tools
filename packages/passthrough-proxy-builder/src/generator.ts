@@ -208,7 +208,7 @@ function showSummary(config: MCPHooksConfig, projectDirectory: string): void {
 
   // Target Server
   console.log(chalk.white("🎯 Target Server:"));
-  if (config.target.mode === "local") {
+  if (config.target.command) {
     console.log(chalk.gray("   Mode: ") + chalk.white("Local"));
     console.log(
       chalk.gray("   Command: ") + chalk.white(config.target.command),
@@ -221,7 +221,6 @@ function showSummary(config: MCPHooksConfig, projectDirectory: string): void {
   // Proxy Settings
   console.log(chalk.white("\n🔌 Proxy Settings:"));
   console.log(chalk.gray("   Port: ") + chalk.white(config.proxy.port));
-  console.log(chalk.gray("   Mode: ") + chalk.white(config.proxy.mode));
 
   // Hooks
   console.log(chalk.white("\n🪝 Hooks (execution order):"));
@@ -255,9 +254,7 @@ function showSummary(config: MCPHooksConfig, projectDirectory: string): void {
   console.log(thinLine);
   console.log(chalk.gray("   Quick start with Docker Compose:"));
   console.log(`   ${chalk.cyan("$")} ${chalk.white(`cd ${projectDirectory}`)}`);
-  console.log(
-    `   ${chalk.cyan("$")} ${chalk.white("docker compose up")}`,
-  );
+  console.log(`   ${chalk.cyan("$")} ${chalk.white("docker compose up")}`);
   console.log(chalk.gray("\n   Or build and run manually:"));
   console.log(
     `   ${chalk.cyan("$")} ${chalk.white("docker build -t mcp-proxy .")}`,
@@ -271,7 +268,8 @@ function showSummary(config: MCPHooksConfig, projectDirectory: string): void {
   console.log(thinLine);
   console.log(chalk.white("   1. Review the generated configuration files"));
   console.log(
-    chalk.white("   2. Start the proxy with: ") + chalk.cyan("docker compose up"),
+    chalk.white("   2. Start the proxy with: ") +
+      chalk.cyan("docker compose up"),
   );
   console.log(chalk.white("   3. Configure your MCP client to connect to:"));
   console.log(chalk.green(`      http://localhost:${config.proxy.port}`));

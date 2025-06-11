@@ -2,7 +2,7 @@ export const DOCKERFILE_TEMPLATE = `FROM node:20-alpine
 WORKDIR /app
 
 # Install passthrough-mcp-server globally
-RUN npm install -g @civic/passthrough-mcp-server@0.2.0
+RUN npm install -g @civic/passthrough-mcp-server@0.3.0
 
 # Copy configuration
 COPY mcphooks.config.json ./mcphooks.config.json
@@ -14,7 +14,7 @@ EXPOSE <%= config.proxy.port %>
 ENV NODE_ENV=production
 ENV PORT=<%= config.proxy.port %>
 ENV CONFIG_FILE=/app/mcphooks.config.json
-<% if (config.target.mode === 'local') { -%>
+<% if (config.target.command) { -%>
 ENV TARGET_SERVER_COMMAND="<%= config.target.command %>"
 <% } else { -%>
 ENV TARGET_SERVER_URL=<%= config.target.url %>
@@ -38,7 +38,7 @@ services:
       - NODE_ENV=production
       - PORT=<%= config.proxy.port %>
       - CONFIG_FILE=/app/mcphooks.config.json
-<% if (config.target.mode === 'local') { -%>
+<% if (config.target.command) { -%>
       - TARGET_SERVER_COMMAND=<%= config.target.command %>
 <% } else { -%>
       - TARGET_SERVER_URL=<%= config.target.url %>

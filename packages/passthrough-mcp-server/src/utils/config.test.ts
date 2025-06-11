@@ -151,8 +151,10 @@ describe("Config Utils", () => {
       const config = loadConfig();
 
       expect(config.transportType).toBe("httpStream");
-      expect(config.target.url).toBe("http://example.com:3000");
-      expect(config.target.transportType).toBe("sse");
+      expect(config.target).toEqual({
+        url: "http://example.com:3000",
+        transportType: "sse",
+      });
     });
 
     it("should load hooks configuration", () => {
