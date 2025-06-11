@@ -122,7 +122,7 @@ export async function runWizard(
           type: "input",
           name: "url",
           message: "Enter the remote MCP server URL:",
-          default: "https://api.my-mcp.com:8000",
+          default: "https://ai.civic.com/hub/mcp",
           validate: (input) => {
             try {
               new URL(input);
@@ -179,144 +179,145 @@ export async function runWizard(
     // Interactive hook selection
     console.log(chalk.blue("\n🪝 Select hooks to add to your proxy:\n"));
 
-    const { selectedBuiltInHooks } = await inquirer.prompt([
-      {
-        type: "checkbox",
-        name: "selectedBuiltInHooks",
-        message: "Select hooks (use Space to toggle, Enter to continue):",
-        choices: builtInHookNames.map((name) => ({
+    let selectingHooks = true;
+    while (selectingHooks) {
+      const availableChoices = [
+        ...builtInHookNames.map((name) => ({
           name,
           value: name,
         })),
-      },
-    ]);
+        { name: "➕ Add Custom Hook URL...", value: "custom" },
+        { name: "✅ Done selecting hooks", value: "done" },
+      ];
 
-    // Add selected built-in hooks
-    for (const hookName of selectedBuiltInHooks) {
-      selectedHooks.push({
-        type: "built-in",
-        name: hookName,
-      });
-    }
-
-    // Ask about custom hooks
-    let addCustom = true;
-    while (addCustom) {
-      const { wantCustom } = await inquirer.prompt([
+      const { selectedHook } = await inquirer.prompt([
         {
-          type: "confirm",
-          name: "wantCustom",
-          message: "Would you like to add a custom hook URL?",
-          default: false,
+          type: "list",
+          name: "selectedHook",
+          message: `Select a hook to add (${selectedHooks.length} selected):`,
+          choices: availableChoices,
         },
       ]);
 
-      if (!wantCustom) {
-        addCustom = false;
-        break;
+      if (selectedHook === "done") {
+        selectingHooks = false;
+      } else if (selectedHook === "custom") {
+        // Custom hook flow
+        const { customUrl, customAlias } = await inquirer.prompt([
+          {
+            type: "input",
+            name: "customUrl",
+            message: "Enter the custom hook URL:",
+            validate: (input) => {
+              try {
+                new URL(input);
+                return true;
+              } catch {
+                return "Please enter a valid URL";
+              }
+            },
+          },
+          {
+            type: "input",
+            name: "customAlias",
+            message: "Enter a friendly name for this hook:",
+            default: (answers: { customUrl: string }) => {
+              try {
+                return new URL(answers.customUrl).hostname;
+              } catch {
+                return "custom-hook";
+              }
+            },
+            validate: (input) =>
+              input.trim().length > 0 || "Hook name is required",
+          },
+        ]);
+
+        selectedHooks.push({
+          type: "custom",
+          alias: customAlias,
+          url: customUrl,
+        });
+        console.log(chalk.green(`✓ Added custom hook: ${customAlias}`));
+      } else {
+        // Built-in hook selected
+        selectedHooks.push({
+          type: "built-in",
+          name: selectedHook as BuiltInHookName,
+        });
+        console.log(chalk.green(`✓ Added hook: ${selectedHook}`));
       }
-
-      const { customUrl, customAlias } = await inquirer.prompt([
-        {
-          type: "input",
-          name: "customUrl",
-          message: "Enter the custom hook URL:",
-          validate: (input) => {
-            try {
-              new URL(input);
-              return true;
-            } catch {
-              return "Please enter a valid URL";
-            }
-          },
-        },
-        {
-          type: "input",
-          name: "customAlias",
-          message: "Enter a friendly name for this hook:",
-          default: (answers: { customUrl: string }) => {
-            try {
-              return new URL(answers.customUrl).hostname;
-            } catch {
-              return "custom-hook";
-            }
-          },
-          validate: (input) =>
-            input.trim().length > 0 || "Hook name is required",
-        },
-      ]);
-
-      selectedHooks.push({
-        type: "custom",
-        alias: customAlias,
-        url: customUrl,
-      });
     }
   }
 
   // Step 4: Hook ordering
   if (selectedHooks.length > 1) {
-    console.log(chalk.blue("\n🔄 Order your hooks (executed in sequence):\n"));
+    console.log(chalk.blue("\n🔄 Configure hook execution order:\n"));
 
-    let ordering = true;
     const orderedHooks = [...selectedHooks];
+    let ordering = true;
 
     while (ordering) {
-      console.log(chalk.gray("Current order:"));
+      // Display current order
+      console.log(chalk.gray("\nCurrent order:"));
       orderedHooks.forEach((hook, index) => {
         const name = hook.type === "built-in" ? hook.name : hook.alias;
         console.log(chalk.gray(`  ${index + 1}. ${name}`));
       });
 
-      const { action } = await inquirer.prompt([
+      const choices = orderedHooks.map((hook, index) => {
+        const name = hook.type === "built-in" ? hook.name : hook.alias;
+        return {
+          name: `${index + 1}. ${name}`,
+          value: index,
+        };
+      });
+      choices.push({
+        name: chalk.green("✓ Continue with this order"),
+        value: -1,
+      });
+
+      const { selectedHook } = await inquirer.prompt([
         {
           type: "list",
-          name: "action",
-          message: "What would you like to do?",
-          choices: [
-            { name: "Move a hook up/down", value: "move" },
-            { name: "Continue with this order", value: "continue" },
-          ],
+          name: "selectedHook",
+          message: "Select a hook to move (or continue):",
+          choices,
         },
       ]);
 
-      if (action === "continue") {
+      if (selectedHook === -1) {
         ordering = false;
       } else {
-        const { hookToMove } = await inquirer.prompt([
-          {
-            type: "list",
-            name: "hookToMove",
-            message: "Which hook would you like to move?",
-            choices: orderedHooks.map((hook, index) => ({
-              name: `${index + 1}. ${hook.type === "built-in" ? hook.name : hook.alias}`,
-              value: index,
-            })),
-          },
-        ]);
+        // Ask to move up or down
+        const moveChoices = [];
+
+        if (selectedHook > 0) {
+          moveChoices.push({ name: "↑ Move up", value: "up" });
+        }
+
+        if (selectedHook < orderedHooks.length - 1) {
+          moveChoices.push({ name: "↓ Move down", value: "down" });
+        }
+
+        moveChoices.push({ name: chalk.yellow("✗ Cancel"), value: "cancel" });
 
         const { direction } = await inquirer.prompt([
           {
             type: "list",
             name: "direction",
-            message: "Move it:",
-            choices: [
-              { name: "Up", value: "up", disabled: hookToMove === 0 },
-              {
-                name: "Down",
-                value: "down",
-                disabled: hookToMove === orderedHooks.length - 1,
-              },
-            ],
+            message: `Move "${orderedHooks[selectedHook].type === "built-in" ? orderedHooks[selectedHook].name : orderedHooks[selectedHook].alias}":`,
+            choices: moveChoices,
           },
         ]);
 
-        // Perform the move
-        const [movedHook] = orderedHooks.splice(hookToMove, 1);
-        const newIndex = direction === "up" ? hookToMove - 1 : hookToMove + 1;
-        orderedHooks.splice(newIndex, 0, movedHook);
-
-        console.log(chalk.green("\n✓ Hook moved!\n"));
+        if (direction !== "cancel") {
+          const [movedHook] = orderedHooks.splice(selectedHook, 1);
+          const newIndex =
+            direction === "up" ? selectedHook - 1 : selectedHook + 1;
+          orderedHooks.splice(newIndex, 0, movedHook);
+          console.log(chalk.green("\n✓ Hook moved!"));
+        }
       }
     }
 

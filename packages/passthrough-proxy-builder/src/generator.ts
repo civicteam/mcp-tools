@@ -240,36 +240,13 @@ function showSummary(config: MCPHooksConfig, projectDirectory: string): void {
     });
   }
 
-  // Files Generated
-  console.log(chalk.yellow("\n📁 Files Generated:"));
-  console.log(thinLine);
-  console.log(chalk.gray(`   ./${projectDirectory}/`));
-  console.log(chalk.gray("   ├── mcphooks.config.json") + chalk.green(" ✓"));
-  console.log(chalk.gray("   ├── Dockerfile") + chalk.green(" ✓"));
-  console.log(chalk.gray("   ├── docker-compose.yml") + chalk.green(" ✓"));
-  console.log(chalk.gray("   └── .dockerignore") + chalk.green(" ✓"));
-
-  // Docker Commands
-  console.log(chalk.yellow("\n🐳 Docker Commands:"));
-  console.log(thinLine);
-  console.log(chalk.gray("   Quick start with Docker Compose:"));
-  console.log(`   ${chalk.cyan("$")} ${chalk.white(`cd ${projectDirectory}`)}`);
-  console.log(`   ${chalk.cyan("$")} ${chalk.white("docker compose up")}`);
-  console.log(chalk.gray("\n   Or build and run manually:"));
-  console.log(
-    `   ${chalk.cyan("$")} ${chalk.white("docker build -t mcp-proxy .")}`,
-  );
-  console.log(
-    `   ${chalk.cyan("$")} ${chalk.white(`docker run -p ${config.proxy.port}:${config.proxy.port} mcp-proxy`)}`,
-  );
-
   // Next Steps
   console.log(chalk.yellow("\n🚀 Next Steps:"));
   console.log(thinLine);
   console.log(chalk.white("   1. Review the generated configuration files"));
   console.log(
     chalk.white("   2. Start the proxy with: ") +
-      chalk.cyan("docker compose up"),
+      chalk.cyan(`cd ${projectDirectory} && docker compose up`),
   );
   console.log(chalk.white("   3. Configure your MCP client to connect to:"));
   console.log(chalk.green(`      http://localhost:${config.proxy.port}`));
