@@ -10,19 +10,16 @@
 
 import type { ToolCall } from "@civic/hook-common";
 import type { Context } from "fastmcp";
-import { createTargetClient } from "../client/client.js";
 import { getHookClients } from "../hooks/manager.js";
 import {
   processRequestThroughHooks,
   processResponseThroughHooks,
 } from "../hooks/processor.js";
-import type { ClientFactory } from "../types/client.js";
 import type { Config } from "../utils/config.js";
 import { logger } from "../utils/logger.js";
 import {
   DEFAULT_SESSION_ID,
-  type SessionData,
-  getOrCreateSession,
+  getOrCreateSessionForRequest,
 } from "../utils/session.js";
 import { type AuthSessionData, getDiscoveredTools } from "./server.js";
 
@@ -35,11 +32,7 @@ import { type AuthSessionData, getDiscoveredTools } from "./server.js";
  * If hooks are configured, tool calls will be sent to the hooks for processing
  * before being forwarded to the target server.
  */
-export function createPassthroughHandler(
-  config: Config,
-  toolName: string,
-  getSessionForRequest: (sessionId: string) => Promise<SessionData>,
-) {
+export function createPassthroughHandler(config: Config, toolName: string) {
   return async function passthrough(
     args: unknown,
     context: Context<AuthSessionData>,
@@ -48,7 +41,7 @@ export function createPassthroughHandler(
     const sessionId = session?.id || DEFAULT_SESSION_ID;
 
     // Get or create session with target client
-    const sessionData = await getSessionForRequest(sessionId);
+    const sessionData = await getOrCreateSessionForRequest(sessionId, config);
 
     // Find the tool definition from cached tools
     const discoveredTools = getDiscoveredTools();

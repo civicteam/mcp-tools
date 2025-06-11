@@ -13,7 +13,6 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 import { FastMCP, type Tool as FastMCPTool } from "fastmcp";
 import type { ZodType, ZodTypeDef } from "zod";
-import { createTargetClient } from "../client/client.js";
 import { getHookClients } from "../hooks/manager.js";
 import {
   processToolsListRequestThroughHooks,
@@ -26,7 +25,7 @@ import { extractToolParameters } from "../utils/schemaConverter.js";
 import {
   DEFAULT_SESSION_ID,
   generateSessionId,
-  getOrCreateSession,
+  getOrCreateSessionForRequest,
 } from "../utils/session.js";
 import { createPassthroughHandler } from "./passthrough.js";
 
@@ -80,23 +79,11 @@ export function createServer(
 export async function discoverAndRegisterTools(
   server: FastMCP<AuthSessionData>,
   config: Config,
-  clientFactory?: ClientFactory,
 ): Promise<void> {
-  const getOrCreateSessionForRequest = async (sessionId: string) => {
-    // Get or create session with target client
-    const sessionData = await getOrCreateSession(sessionId, () =>
-      clientFactory
-        ? clientFactory(config.target, sessionId, config.clientInfo)
-        : createTargetClient(config.target, sessionId, config.clientInfo),
-    );
-
-    // Increment request counter
-    sessionData.requestCount += 1;
-
-    return sessionData;
-  };
-
-  const sessionData = await getOrCreateSessionForRequest(DEFAULT_SESSION_ID);
+  const sessionData = await getOrCreateSessionForRequest(
+    DEFAULT_SESSION_ID,
+    config,
+  );
 
   // Create tools/list request
   const toolsListRequest: ToolsListRequest = {
@@ -168,11 +155,7 @@ export async function discoverAndRegisterTools(
   // Register each tool as a passthrough with its own handler
   for (const tool of discoveredTools) {
     // Create a passthrough handler specifically for this tool
-    const toolHandler = createPassthroughHandler(
-      config,
-      tool.name,
-      getOrCreateSessionForRequest,
-    );
+    const toolHandler = createPassthroughHandler(config, tool.name);
 
     // Extract parameters from the tool definition
     const parameters = extractToolParameters(tool);
