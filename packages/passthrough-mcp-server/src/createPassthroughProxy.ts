@@ -11,6 +11,7 @@ import { getServerTransportConfig } from "./server/transport.js";
 import type { ClientFactory } from "./types/client.js";
 import type { Config } from "./utils/config.js";
 import { logger } from "./utils/logger.js";
+import { clearAllSessions, setSessionClientFactory } from "./utils/session.js";
 
 export type PassthroughProxyOptions = Config & {
   /**
@@ -98,11 +99,14 @@ export async function createPassthroughProxy(
 ): Promise<PassthroughProxy> {
   const { clientFactory, autoStart = true, ...config } = options;
 
+  // Configure the session client factory
+  setSessionClientFactory(clientFactory);
+
   // Create the server
   const server = createServer(config.serverInfo);
 
   // Discover and register tools from the target server
-  await discoverAndRegisterTools(server, config, clientFactory);
+  await discoverAndRegisterTools(server, config);
 
   // Get transport configuration based on transport type
   const transportConfig =
@@ -139,6 +143,9 @@ export async function createPassthroughProxy(
       logger.warn("Server is not started");
       return;
     }
+
+    // stop all clients.
+    await clearAllSessions();
 
     await server.stop();
     isStarted = false;

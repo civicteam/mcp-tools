@@ -155,6 +155,7 @@ describe("createPassthroughProxy", () => {
       async (): Promise<PassthroughClient> => ({
         listTools: vi.fn(),
         callTool: vi.fn(),
+        close: vi.fn(),
       }),
     );
 
@@ -166,7 +167,6 @@ describe("createPassthroughProxy", () => {
     expect(discoverAndRegisterTools).toHaveBeenCalledWith(
       expect.any(Object),
       mockConfig,
-      mockClientFactory,
     );
   });
 
@@ -209,7 +209,7 @@ describe("createPassthroughProxy", () => {
       transportType: "stdio",
       target: {
         url: "http://localhost:33000",
-        type: "stream",
+        transportType: "httpStream",
       },
     };
 
@@ -233,7 +233,7 @@ describe("createPassthroughProxy", () => {
 
     await expect(
       createPassthroughProxy({
-        config: mockConfig,
+        ...mockConfig,
       }),
     ).rejects.toThrow("Start failed");
   });

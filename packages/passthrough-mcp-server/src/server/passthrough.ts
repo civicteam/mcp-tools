@@ -10,17 +10,18 @@
 
 import type { ToolCall } from "@civic/hook-common";
 import type { Context } from "fastmcp";
-import { createTargetClient } from "../client/client.js";
 import { getHookClients } from "../hooks/manager.js";
 import {
   processRequestThroughHooks,
   processResponseThroughHooks,
 } from "../hooks/processor.js";
-import type { ClientFactory } from "../types/client.js";
 import type { Config } from "../utils/config.js";
 import { logger } from "../utils/logger.js";
-import { getOrCreateSession } from "../utils/session.js";
-import { getDiscoveredTools } from "./server.js";
+import {
+  DEFAULT_SESSION_ID,
+  getOrCreateSessionForRequest,
+} from "../utils/session.js";
+import { type AuthSessionData, getDiscoveredTools } from "./server.js";
 
 /**
  * Create a passthrough handler for a specific tool
@@ -31,27 +32,16 @@ import { getDiscoveredTools } from "./server.js";
  * If hooks are configured, tool calls will be sent to the hooks for processing
  * before being forwarded to the target server.
  */
-export function createPassthroughHandler(
-  config: Config,
-  toolName: string,
-  clientFactory?: ClientFactory,
-) {
+export function createPassthroughHandler(config: Config, toolName: string) {
   return async function passthrough(
     args: unknown,
-    context: Context<{ id: string }>,
+    context: Context<AuthSessionData>,
   ): Promise<unknown> {
     const { session } = context;
-    const sessionId = session?.id || "default";
+    const sessionId = session?.id || DEFAULT_SESSION_ID;
 
     // Get or create session with target client
-    const sessionData = await getOrCreateSession(sessionId, () =>
-      clientFactory
-        ? clientFactory(config.target, sessionId, config.clientInfo)
-        : createTargetClient(config.target, sessionId, config.clientInfo),
-    );
-
-    // Increment request counter
-    sessionData.requestCount += 1;
+    const sessionData = await getOrCreateSessionForRequest(sessionId, config);
 
     // Find the tool definition from cached tools
     const discoveredTools = getDiscoveredTools();
