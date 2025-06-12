@@ -179,30 +179,49 @@ export async function runWizard(
     // Interactive hook selection
     console.log(chalk.blue("\n🪝 Select hooks to add to your proxy:\n"));
 
-    let selectingHooks = true;
-    while (selectingHooks) {
-      const availableChoices = [
-        ...builtInHookNames.map((name) => ({
+    // Step 1: Select built-in hooks with checkbox
+    const { selectedBuiltInHooks } = await inquirer.prompt([
+      {
+        type: "checkbox",
+        name: "selectedBuiltInHooks",
+        message:
+          "Select built-in hooks (use Space to toggle, Enter to continue):",
+        choices: builtInHookNames.map((name) => ({
           name,
           value: name,
         })),
-        { name: "➕ Add Custom Hook URL...", value: "custom" },
-        { name: "✅ Done selecting hooks", value: "done" },
-      ];
+      },
+    ]);
 
-      const { selectedHook } = await inquirer.prompt([
-        {
-          type: "list",
-          name: "selectedHook",
-          message: `Select a hook to add (${selectedHooks.length} selected):`,
-          choices: availableChoices,
-        },
-      ]);
+    // Add selected built-in hooks
+    for (const hookName of selectedBuiltInHooks) {
+      selectedHooks.push({
+        type: "built-in",
+        name: hookName as BuiltInHookName,
+      });
+    }
 
-      if (selectedHook === "done") {
-        selectingHooks = false;
-      } else if (selectedHook === "custom") {
-        // Custom hook flow
+    if (selectedBuiltInHooks.length > 0) {
+      console.log(
+        chalk.green(
+          `✓ Added ${selectedBuiltInHooks.length} built-in hook${selectedBuiltInHooks.length > 1 ? "s" : ""}`,
+        ),
+      );
+    }
+
+    // Step 2: Ask about custom hooks
+    const { wantsCustomHooks } = await inquirer.prompt([
+      {
+        type: "confirm",
+        name: "wantsCustomHooks",
+        message: "Would you like to add custom hooks?",
+        default: false,
+      },
+    ]);
+
+    if (wantsCustomHooks) {
+      let addingCustomHooks = true;
+      while (addingCustomHooks) {
         const { customUrl, customAlias } = await inquirer.prompt([
           {
             type: "input",
@@ -239,13 +258,19 @@ export async function runWizard(
           url: customUrl,
         });
         console.log(chalk.green(`✓ Added custom hook: ${customAlias}`));
-      } else {
-        // Built-in hook selected
-        selectedHooks.push({
-          type: "built-in",
-          name: selectedHook as BuiltInHookName,
-        });
-        console.log(chalk.green(`✓ Added hook: ${selectedHook}`));
+
+        const { addAnother } = await inquirer.prompt([
+          {
+            type: "confirm",
+            name: "addAnother",
+            message: "Would you like to add another custom hook?",
+            default: false,
+          },
+        ]);
+
+        if (!addAnother) {
+          addingCustomHooks = false;
+        }
       }
     }
   }
