@@ -175,7 +175,9 @@ async function example5_customClientFactory() {
     console.log(`Creating client ${clientId} for ${clientConfig.url}`);
 
     // Import the default client creator
-    const { createTargetClient } = await import("../src/client/client.js");
+    const { createTargetClient } = await import(
+      "../src/client/RemoteClient.js"
+    );
 
     const client = await createTargetClient(clientConfig, clientId, clientInfo);
 

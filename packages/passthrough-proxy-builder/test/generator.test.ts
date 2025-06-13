@@ -1,4 +1,4 @@
-import { access, mkdir, readFile, rm } from "node:fs/promises";
+import { access, mkdir, readFile, readdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { MCPHooksConfig } from "../src/config";
@@ -49,13 +49,10 @@ describe("generator", () => {
         access(join(projectPath, "mcphooks.config.json")),
       ).resolves.toBeUndefined();
       await expect(
-        access(join(projectPath, "Dockerfile")),
-      ).resolves.toBeUndefined();
-      await expect(
         access(join(projectPath, "docker-compose.yml")),
       ).resolves.toBeUndefined();
       await expect(
-        access(join(projectPath, ".dockerignore")),
+        access(join(projectPath, "README.md")),
       ).resolves.toBeUndefined();
 
       // Verify config content
@@ -68,13 +65,10 @@ describe("generator", () => {
       expect(savedConfig.proxy.port).toBe(3000);
       expect(savedConfig.hooks).toHaveLength(2);
 
-      // Verify Dockerfile content
-      const dockerfile = await readFile(
-        join(projectPath, "Dockerfile"),
-        "utf-8",
-      );
-      expect(dockerfile).toContain("FROM node:20-alpine");
-      expect(dockerfile).toContain("EXPOSE 3000");
+      // Verify README content
+      const readme = await readFile(join(projectPath, "README.md"), "utf-8");
+      expect(readme).toContain("MCP Proxy Configuration");
+      expect(readme).toContain("**Proxy Port**: 3000");
 
       // Verify docker-compose content
       const dockerCompose = await readFile(
@@ -87,13 +81,9 @@ describe("generator", () => {
         "TARGET_SERVER_COMMAND=npx some-mcp-server",
       );
 
-      // Verify .dockerignore
-      const dockerignore = await readFile(
-        join(projectPath, ".dockerignore"),
-        "utf-8",
-      );
-      expect(dockerignore).toContain("node_modules");
-      expect(dockerignore).toContain(".git");
+      // Verify no extra files are created
+      const files = await readdir(projectPath);
+      expect(files).toHaveLength(3); // Only config, docker-compose, and README
     });
 
     it("should handle remote target configuration", async () => {
@@ -112,12 +102,14 @@ describe("generator", () => {
 
       await generateProject(config, projectName);
 
-      const dockerfile = await readFile(
-        join(process.cwd(), projectName, "Dockerfile"),
+      const dockerCompose = await readFile(
+        join(process.cwd(), projectName, "docker-compose.yml"),
         "utf-8",
       );
-      expect(dockerfile).toContain("EXPOSE 8080");
-      expect(dockerfile).toContain("EXPOSE 8080");
+      expect(dockerCompose).toContain("8080:8080");
+      expect(dockerCompose).toContain(
+        "TARGET_SERVER_URL=https://api.example.com",
+      );
     });
 
     it("should handle custom hooks in configuration", async () => {

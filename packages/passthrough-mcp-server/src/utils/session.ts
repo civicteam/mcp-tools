@@ -8,7 +8,7 @@
 
 import type { PassthroughClient } from "../types/client.js";
 
-export interface SessionData {
+interface SessionData {
   id: string;
   targetClient: PassthroughClient;
   requestCount: number;

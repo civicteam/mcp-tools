@@ -161,7 +161,7 @@ docker compose up
 
 - **Target Server**: ${config.target.command ? `Local command: ${config.target.command}` : `Remote URL: ${config.target.url}`}
 - **Proxy Port**: ${config.proxy.port}
-- **Transport**: ${config.proxy.transport || "httpStream"}
+- **Transport**: httpStream
 
 ## Hooks
 

@@ -46,6 +46,6 @@ export { getHookClients } from "./hooks/manager.js";
 export { createHookClient, createHookClients } from "./hooks/utils.js";
 
 // Export utility functions that users might need
-export { createTargetClient } from "./client/client.js";
+export { createTargetClient } from "./client/RemoteClient.js";
 export { loadConfig } from "./utils/config.js";
 export { getDiscoveredTools } from "./server/server.js";

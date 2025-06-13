@@ -23,7 +23,7 @@ export type TargetConfig =
       command?: never;
     };
 
-export interface ProxyConfig {
+interface ProxyConfig {
   port: number;
 }
 

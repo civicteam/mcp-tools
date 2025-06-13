@@ -201,24 +201,6 @@ importers:
 
   packages/passthrough-proxy-builder:
     dependencies:
-      '@civic/audit-hook':
-        specifier: workspace:*
-        version: link:../audit-hook
-      '@civic/custom-description-hook':
-        specifier: workspace:*
-        version: link:../custom-description-hook
-      '@civic/explain-hook':
-        specifier: workspace:*
-        version: link:../explain-hook
-      '@civic/guardrail-hook':
-        specifier: workspace:*
-        version: link:../guardrail-hook
-      '@civic/passthrough-mcp-server':
-        specifier: workspace:*
-        version: link:../passthrough-mcp-server
-      '@civic/simple-log-hook':
-        specifier: workspace:*
-        version: link:../simple-log-hook
       chalk:
         specifier: ^5.3.0
         version: 5.4.1

@@ -123,13 +123,10 @@ describe("passthrough-proxy-builder", () => {
         access(join(projectPath, "mcphooks.config.json")),
       ).resolves.toBeUndefined();
       await expect(
-        access(join(projectPath, "Dockerfile")),
-      ).resolves.toBeUndefined();
-      await expect(
         access(join(projectPath, "docker-compose.yml")),
       ).resolves.toBeUndefined();
       await expect(
-        access(join(projectPath, ".dockerignore")),
+        access(join(projectPath, "README.md")),
       ).resolves.toBeUndefined();
     });
 

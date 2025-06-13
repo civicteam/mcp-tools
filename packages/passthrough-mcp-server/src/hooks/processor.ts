@@ -13,7 +13,7 @@ import type {
 import type { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
 import { logger } from "../utils/logger.js";
 
-export interface ProcessRequestResult {
+interface ProcessRequestResult {
   toolCall: ToolCall;
   wasRejected: boolean;
   rejectionResponse?: unknown;
@@ -21,7 +21,7 @@ export interface ProcessRequestResult {
   lastProcessedIndex: number;
 }
 
-export interface ProcessResponseResult {
+interface ProcessResponseResult {
   response: unknown;
   wasRejected: boolean;
   rejectionResponse?: unknown;

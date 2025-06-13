@@ -10,7 +10,7 @@
 
 import type { ToolCall } from "@civic/hook-common";
 import type { Context } from "fastmcp";
-import { createTargetClient } from "../client/client.js";
+import { createTargetClient } from "../client/RemoteClient.js";
 import { getHookClients } from "../hooks/manager.js";
 import {
   processRequestThroughHooks,

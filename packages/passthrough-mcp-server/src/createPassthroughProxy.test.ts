@@ -5,8 +5,10 @@
 import type { FastMCP } from "fastmcp";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPassthroughProxy } from "./createPassthroughProxy.js";
+import { createServer, discoverAndRegisterTools } from "./server/server.js";
 import type { PassthroughClient } from "./types/client.js";
 import type { Config } from "./utils/config.js";
+import { logger } from "./utils/logger.js";
 
 // Mock the dependencies
 vi.mock("./server/server.js", () => ({
@@ -60,13 +62,12 @@ describe("createPassthroughProxy", () => {
   });
 
   it("should create and auto-start the proxy by default", async () => {
-    const { createServer } = await import("./server/server.js");
     const mockServer = {
       start: vi.fn(),
       stop: vi.fn(),
       name: "test-server",
     };
-    (createServer as any).mockReturnValue(mockServer);
+    vi.mocked(createServer).mockReturnValue(mockServer as any);
 
     const proxy = await createPassthroughProxy({
       ...mockConfig,
@@ -78,13 +79,12 @@ describe("createPassthroughProxy", () => {
   });
 
   it("should not auto-start when autoStart is false", async () => {
-    const { createServer } = await import("./server/server.js");
     const mockServer = {
       start: vi.fn(),
       stop: vi.fn(),
       name: "test-server",
     };
-    (createServer as any).mockReturnValue(mockServer);
+    vi.mocked(createServer).mockReturnValue(mockServer as any);
 
     const proxy = await createPassthroughProxy({
       ...mockConfig,
@@ -96,13 +96,12 @@ describe("createPassthroughProxy", () => {
   });
 
   it("should allow manual start after creation", async () => {
-    const { createServer } = await import("./server/server.js");
     const mockServer = {
       start: vi.fn(),
       stop: vi.fn(),
       name: "test-server",
     };
-    (createServer as any).mockReturnValue(mockServer);
+    vi.mocked(createServer).mockReturnValue(mockServer as any);
 
     const proxy = await createPassthroughProxy({
       ...mockConfig,
@@ -120,13 +119,12 @@ describe("createPassthroughProxy", () => {
   });
 
   it("should handle stop correctly", async () => {
-    const { createServer } = await import("./server/server.js");
     const mockServer = {
       start: vi.fn(),
       stop: vi.fn(),
       name: "test-server",
     };
-    (createServer as any).mockReturnValue(mockServer);
+    vi.mocked(createServer).mockReturnValue(mockServer as any);
 
     const proxy = await createPassthroughProxy({
       ...mockConfig,
@@ -141,15 +139,12 @@ describe("createPassthroughProxy", () => {
   });
 
   it("should use custom client factory when provided", async () => {
-    const { createServer, discoverAndRegisterTools } = await import(
-      "./server/server.js"
-    );
     const mockServer = {
       start: vi.fn(),
       stop: vi.fn(),
       name: "test-server",
     };
-    (createServer as any).mockReturnValue(mockServer);
+    vi.mocked(createServer).mockReturnValue(mockServer as any);
 
     const mockClientFactory = vi.fn(
       async (): Promise<PassthroughClient> => ({
@@ -171,13 +166,12 @@ describe("createPassthroughProxy", () => {
   });
 
   it("should handle hooks configuration", async () => {
-    const { createServer } = await import("./server/server.js");
     const mockServer = {
       start: vi.fn(),
       stop: vi.fn(),
       name: "test-server",
     };
-    (createServer as any).mockReturnValue(mockServer);
+    vi.mocked(createServer).mockReturnValue(mockServer as any);
 
     const configWithHooks: Config = {
       ...mockConfig,
@@ -195,21 +189,19 @@ describe("createPassthroughProxy", () => {
   });
 
   it("should log appropriate messages for different transport types", async () => {
-    const { createServer } = await import("./server/server.js");
-    const { logger } = await import("./utils/logger.js");
     const mockServer = {
       start: vi.fn(),
       stop: vi.fn(),
       name: "test-server",
     };
-    (createServer as any).mockReturnValue(mockServer);
+    vi.mocked(createServer).mockReturnValue(mockServer as any);
 
     // Test stdio transport
     const stdioConfig: Config = {
       transportType: "stdio",
       target: {
         url: "http://localhost:33000",
-        type: "stream",
+        transportType: "httpStream",
       },
     };
 
@@ -223,17 +215,16 @@ describe("createPassthroughProxy", () => {
   });
 
   it("should handle errors during startup", async () => {
-    const { createServer } = await import("./server/server.js");
     const mockServer = {
       start: vi.fn().mockRejectedValue(new Error("Start failed")),
       stop: vi.fn(),
       name: "test-server",
     };
-    (createServer as any).mockReturnValue(mockServer);
+    vi.mocked(createServer).mockReturnValue(mockServer as any);
 
     await expect(
       createPassthroughProxy({
-        config: mockConfig,
+        ...mockConfig,
       }),
     ).rejects.toThrow("Start failed");
   });

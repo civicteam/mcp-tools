@@ -13,7 +13,7 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 import { FastMCP, type Tool as FastMCPTool } from "fastmcp";
 import type { ZodType, ZodTypeDef } from "zod";
-import { createTargetClient } from "../client/client.js";
+import { createTargetClient } from "../client/RemoteClient.js";
 import { getHookClients } from "../hooks/manager.js";
 import {
   processToolsListRequestThroughHooks,

@@ -5,9 +5,10 @@ export const DOCKER_COMPOSE_TEMPLATE = `version: '3.8'
 
 services:
   mcp-proxy:
+    # TODO: Update to civicteam/passthrough-bundle:latest once created
     image: civicteam/passthrough-mcp-server:0.3.0
     container_name: mcp-proxy
-<% if (config.proxy.transport === "stdio") { -%>
+<% if (false) { -%>
     # Stdio mode configuration
     command: ["node", "dist/cli.js", "--stdio"]
     stdin_open: true
@@ -22,7 +23,7 @@ services:
     environment:
       - NODE_ENV=production
       - CONFIG_FILE=/app/config/mcphooks.config.json
-<% if (config.proxy.transport !== "stdio") { -%>
+<% if (true) { -%>
       - PORT=<%= config.proxy.port %>
 <% } -%>
 <% if (config.target.command) { -%>
@@ -33,7 +34,7 @@ services:
 <% if (config.hooks && config.hooks.length > 0) { -%>
       - HOOKS=<%= config.hooks.map(h => h.url || h.name).join(',') %>
 <% } -%>
-    restart: <%= config.proxy.transport === "stdio" ? "no" : "unless-stopped" %>
+    restart: unless-stopped
     # Uncomment to persist logs
     # volumes:
     #   - ./logs:/app/logs

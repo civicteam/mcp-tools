@@ -15,9 +15,7 @@ import { logger } from "./logger.js";
  * Takes a JSON Schema object and converts it to an equivalent Zod schema
  * that can be used with FastMCP tool definitions.
  */
-export function convertJsonSchemaToZod(
-  jsonSchema: Tool["inputSchema"],
-): z.ZodType {
+function convertJsonSchemaToZod(jsonSchema: Tool["inputSchema"]): z.ZodType {
   // Handle empty or invalid schema
   if (!jsonSchema || typeof jsonSchema !== "object") {
     return z.object({});
