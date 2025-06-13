@@ -69,19 +69,7 @@ export async function generateProject(
       throw new Error(`Failed to write config file: ${getErrorMessage(error)}`);
     }
 
-    // Step 2: Generate Dockerfile
-    console.log(chalk.blue("\n🐳 Generating Dockerfile..."));
-    const dockerfilePath = join(outputDir, "Dockerfile");
-    try {
-      await generateDockerfile(dockerfilePath, config);
-      console.log(chalk.green("✓ Created Dockerfile"));
-    } catch (error) {
-      throw new Error(
-        `Failed to generate Dockerfile: ${getErrorMessage(error)}`,
-      );
-    }
-
-    // Step 3: Generate docker-compose.yml
+    // Step 2: Generate docker-compose.yml
     console.log(chalk.blue("\n🐳 Generating docker-compose.yml..."));
     const dockerComposePath = join(outputDir, "docker-compose.yml");
     try {
@@ -93,16 +81,18 @@ export async function generateProject(
       );
     }
 
-    // Step 4: Create .dockerignore
-    console.log(chalk.blue("\n📄 Creating .dockerignore..."));
-    const dockerignorePath = join(outputDir, ".dockerignore");
+    // Step 3: Create README
+    console.log(chalk.blue("\n📄 Creating README.md..."));
+    const readmePath = join(outputDir, "README.md");
     try {
-      await writeFile(dockerignorePath, generateDockerIgnore(), "utf-8");
-      console.log(chalk.green("✓ Created .dockerignore"));
-    } catch (error) {
-      throw new Error(
-        `Failed to create .dockerignore: ${getErrorMessage(error)}`,
+      await writeFile(
+        readmePath,
+        generateReadme(config, projectDirectory),
+        "utf-8",
       );
+      console.log(chalk.green("✓ Created README.md"));
+    } catch (error) {
+      throw new Error(`Failed to create README.md: ${getErrorMessage(error)}`);
     }
 
     // Step 5: Show summary and instructions
@@ -153,12 +143,62 @@ export async function generateProject(
   }
 }
 
-async function generateDockerfile(
-  path: string,
+function generateReadme(
   config: MCPHooksConfig,
-): Promise<void> {
-  const dockerfile = ejs.render(DOCKERFILE_TEMPLATE, { config });
-  await writeFile(path, dockerfile, "utf-8");
+  projectDirectory: string,
+): string {
+  return `# MCP Proxy Configuration
+
+This directory contains the configuration for your MCP passthrough proxy.
+
+## Quick Start
+
+\`\`\`bash
+docker compose up
+\`\`\`
+
+## Configuration
+
+- **Target Server**: ${config.target.command ? `Local command: ${config.target.command}` : `Remote URL: ${config.target.url}`}
+- **Proxy Port**: ${config.proxy.port}
+- **Transport**: ${config.proxy.transport || "httpStream"}
+
+## Hooks
+
+${
+  config.hooksOrder.length === 0
+    ? "No hooks configured."
+    : config.hooksOrder
+        .map((hook, index) => {
+          if (hook.type === "built-in") {
+            return `${index + 1}. ${hook.name}`;
+          }
+          return `${index + 1}. ${hook.alias} (${hook.url})`;
+        })
+        .join("\n")
+}
+
+## Using the Proxy
+
+Configure your MCP client to connect to:
+- URL: \`http://localhost:${config.proxy.port}\`
+
+## Customization
+
+You can modify \`mcphooks.config.json\` to change the proxy configuration.
+
+## Troubleshooting
+
+View logs:
+\`\`\`bash
+docker compose logs -f
+\`\`\`
+
+Stop the proxy:
+\`\`\`bash
+docker compose down
+\`\`\`
+`;
 }
 
 async function generateDockerCompose(
@@ -167,24 +207,6 @@ async function generateDockerCompose(
 ): Promise<void> {
   const dockerCompose = ejs.render(DOCKER_COMPOSE_TEMPLATE, { config });
   await writeFile(path, dockerCompose, "utf-8");
-}
-
-function generateDockerIgnore(): string {
-  return `node_modules
-.git
-.gitignore
-*.log
-.DS_Store
-.env
-.env.*
-dist
-build
-coverage
-.vscode
-.idea
-*.swp
-*.swo
-`;
 }
 
 function showSummary(config: MCPHooksConfig, projectDirectory: string): void {

@@ -52,7 +52,10 @@
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "prepack": "pnpm run build",
-    "prepublishOnly": "pnpm run lint && pnpm run typecheck && CI=1 pnpm run test && pnpm run build"
+    "prepublishOnly": "pnpm run lint && pnpm run typecheck && CI=1 pnpm run test && pnpm run build",
+    "docker:build": "docker build -t civicteam/passthrough-mcp-server:latest .",
+    "docker:tag": "docker tag civicteam/passthrough-mcp-server:latest civicteam/passthrough-mcp-server:$(node -p \"require('./package.json').version\")",
+    "docker:push": "pnpm run docker:tag && docker push civicteam/passthrough-mcp-server:latest && docker push civicteam/passthrough-mcp-server:$(node -p \"require('./package.json').version\")"
   },
   "engines": {
     "node": ">=18.0.0"

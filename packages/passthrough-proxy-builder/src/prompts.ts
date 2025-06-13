@@ -278,71 +278,81 @@ export async function runWizard(
   // Step 4: Hook ordering
   if (selectedHooks.length > 1) {
     console.log(chalk.blue("\n🔄 Configure hook execution order:\n"));
+    console.log(
+      chalk.gray(
+        "Use ↑/↓ to navigate, Enter to select a hook, Enter again to move it",
+      ),
+    );
 
     const orderedHooks = [...selectedHooks];
     let ordering = true;
+    let selectedIndex = -1; // -1 means no hook is selected
 
     while (ordering) {
-      // Display current order
-      console.log(chalk.gray("\nCurrent order:"));
-      orderedHooks.forEach((hook, index) => {
-        const name = hook.type === "built-in" ? hook.name : hook.alias;
-        console.log(chalk.gray(`  ${index + 1}. ${name}`));
-      });
-
+      // Create choices array with visual indicators
       const choices = orderedHooks.map((hook, index) => {
         const name = hook.type === "built-in" ? hook.name : hook.alias;
+        const prefix = index === selectedIndex ? "▶ " : "  ";
+        const suffix = index === selectedIndex ? " ◀" : "";
         return {
-          name: `${index + 1}. ${name}`,
+          name: `${prefix}${index + 1}. ${name}${suffix}`,
           value: index,
         };
       });
+
+      // Add continue option
       choices.push({
         name: chalk.green("✓ Continue with this order"),
         value: -1,
       });
 
-      const { selectedHook } = await inquirer.prompt([
+      const { action } = await inquirer.prompt([
         {
           type: "list",
-          name: "selectedHook",
-          message: "Select a hook to move (or continue):",
+          name: "action",
+          message:
+            selectedIndex === -1
+              ? "Select a hook to move:"
+              : "Select destination:",
           choices,
+          default: selectedIndex === -1 ? 0 : selectedIndex,
         },
       ]);
 
-      if (selectedHook === -1) {
+      if (action === -1) {
+        // User chose to continue
         ordering = false;
+      } else if (selectedIndex === -1) {
+        // No hook selected, so select this one
+        selectedIndex = action;
       } else {
-        // Ask to move up or down
-        const moveChoices = [];
+        // A hook is already selected, so this is the destination
+        if (action !== selectedIndex) {
+          // Move the hook
+          const movedHook = orderedHooks[selectedIndex];
+          // Remove from old position first
+          orderedHooks.splice(selectedIndex, 1);
 
-        if (selectedHook > 0) {
-          moveChoices.push({ name: "↑ Move up", value: "up" });
+          // When user clicks "N. HookName", they want their hook at position N
+          // 'action' is the 0-based index of what they clicked (N-1)
+          // After removal, we need to insert at the right position
+          const targetPosition = action + 1; // Convert to 1-based position
+
+          // Calculate insertion index
+          let insertAt: number;
+          if (selectedIndex < action) {
+            // Moving down: target position stays the same after removal
+            // Position N = index N-1 in the new array
+            insertAt = targetPosition - 1;
+          } else {
+            // Moving up: insertion point is same as clicked index
+            insertAt = action;
+          }
+
+          // Insert at the new position
+          orderedHooks.splice(insertAt, 0, movedHook);
         }
-
-        if (selectedHook < orderedHooks.length - 1) {
-          moveChoices.push({ name: "↓ Move down", value: "down" });
-        }
-
-        moveChoices.push({ name: chalk.yellow("✗ Cancel"), value: "cancel" });
-
-        const { direction } = await inquirer.prompt([
-          {
-            type: "list",
-            name: "direction",
-            message: `Move "${orderedHooks[selectedHook].type === "built-in" ? orderedHooks[selectedHook].name : orderedHooks[selectedHook].alias}":`,
-            choices: moveChoices,
-          },
-        ]);
-
-        if (direction !== "cancel") {
-          const [movedHook] = orderedHooks.splice(selectedHook, 1);
-          const newIndex =
-            direction === "up" ? selectedHook - 1 : selectedHook + 1;
-          orderedHooks.splice(newIndex, 0, movedHook);
-          console.log(chalk.green("\n✓ Hook moved!"));
-        }
+        selectedIndex = -1; // Deselect after moving
       }
     }
 
