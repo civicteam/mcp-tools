@@ -168,6 +168,43 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@20.17.50)(@vitest/ui@3.2.2)
 
+  packages/passthrough-bundle:
+    dependencies:
+      '@civic/audit-hook':
+        specifier: workspace:*
+        version: link:../audit-hook
+      '@civic/custom-description-hook':
+        specifier: workspace:*
+        version: link:../custom-description-hook
+      '@civic/explain-hook':
+        specifier: workspace:*
+        version: link:../explain-hook
+      '@civic/guardrail-hook':
+        specifier: workspace:*
+        version: link:../guardrail-hook
+      '@civic/hook-common':
+        specifier: workspace:*
+        version: link:../hook-common
+      '@civic/passthrough-mcp-server':
+        specifier: workspace:*
+        version: link:../passthrough-mcp-server
+      '@civic/simple-log-hook':
+        specifier: workspace:*
+        version: link:../simple-log-hook
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.0
+        version: 20.17.50
+      tsx:
+        specifier: ^4.19.4
+        version: 4.19.4
+      typescript:
+        specifier: ^5.2.2
+        version: 5.8.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@20.17.50)
+
   packages/passthrough-mcp-server:
     dependencies:
       '@civic/hook-common':
@@ -3837,6 +3874,41 @@ snapshots:
     optionalDependencies:
       '@types/node': 20.17.50
       fsevents: 2.3.3
+
+  vitest@2.1.9(@types/node@20.17.50):
+    dependencies:
+      '@vitest/expect': 2.1.9
+      '@vitest/mocker': 2.1.9(vite@5.4.19(@types/node@20.17.50))
+      '@vitest/pretty-format': 2.1.9
+      '@vitest/runner': 2.1.9
+      '@vitest/snapshot': 2.1.9
+      '@vitest/spy': 2.1.9
+      '@vitest/utils': 2.1.9
+      chai: 5.2.0
+      debug: 4.4.1
+      expect-type: 1.2.1
+      magic-string: 0.30.17
+      pathe: 1.1.2
+      std-env: 3.9.0
+      tinybench: 2.9.0
+      tinyexec: 0.3.2
+      tinypool: 1.0.2
+      tinyrainbow: 1.2.0
+      vite: 5.4.19(@types/node@20.17.50)
+      vite-node: 2.1.9(@types/node@20.17.50)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 20.17.50
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - msw
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
 
   vitest@2.1.9(@types/node@20.17.50)(@vitest/ui@3.2.2):
     dependencies:

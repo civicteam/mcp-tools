@@ -5,8 +5,7 @@ export const DOCKER_COMPOSE_TEMPLATE = `version: '3.8'
 
 services:
   mcp-proxy:
-    # TODO: Update to civicteam/passthrough-bundle:latest once created
-    image: civicteam/passthrough-mcp-server:0.3.0
+    image: civicteam/passthrough-bundle:0.1.0
     container_name: mcp-proxy
 <% if (false) { -%>
     # Stdio mode configuration

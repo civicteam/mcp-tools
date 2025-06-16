@@ -1,0 +1,69 @@
+{
+  "name": "@civic/passthrough-bundle",
+  "version": "0.1.0",
+  "description": "Bundle package that combines passthrough-mcp-server with hook loading capabilities",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "proxy",
+    "passthrough",
+    "bundle",
+    "hooks"
+  ],
+  "homepage": "https://github.com/civicteam/mcp-tools/tree/main/packages/passthrough-bundle",
+  "bugs": {
+    "url": "https://github.com/civicteam/mcp-tools/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/civicteam/mcp-tools.git",
+    "directory": "packages/passthrough-bundle"
+  },
+  "license": "MIT",
+  "author": "Civic Technologies, Inc.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "bin": {
+    "passthrough-bundle": "./dist/cli.js"
+  },
+  "files": ["dist/", "README.md", "LICENSE", "CHANGELOG.md"],
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsc",
+    "postbuild": "chmod +x dist/cli.js",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --fix .",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "docker:build": "docker build -t civicteam/passthrough-bundle .",
+    "docker:tag": "docker tag civicteam/passthrough-bundle civicteam/passthrough-bundle:$npm_package_version",
+    "docker:push": "docker push civicteam/passthrough-bundle:latest && docker push civicteam/passthrough-bundle:$npm_package_version",
+    "prepack": "pnpm run build",
+    "prepublishOnly": "pnpm run lint && pnpm run typecheck && CI=1 pnpm run test && pnpm run build"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "@civic/audit-hook": "workspace:*",
+    "@civic/custom-description-hook": "workspace:*",
+    "@civic/explain-hook": "workspace:*",
+    "@civic/guardrail-hook": "workspace:*",
+    "@civic/hook-common": "workspace:*",
+    "@civic/passthrough-mcp-server": "workspace:*",
+    "@civic/simple-log-hook": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.2.2",
+    "vitest": "^2.1.8"
+  }
+}
