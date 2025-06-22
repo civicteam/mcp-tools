@@ -178,3 +178,5 @@ export class GuardrailHook implements Hook {
     };
   }
 }
+
+export default GuardrailHook;

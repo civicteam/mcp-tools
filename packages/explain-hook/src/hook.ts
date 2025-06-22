@@ -120,3 +120,5 @@ export class ExplainHook extends AbstractHook {
     };
   }
 }
+
+export default ExplainHook;

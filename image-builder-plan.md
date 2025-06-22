@@ -75,55 +75,67 @@ packages/passthrough-bundle/
 ## Implementation Steps
 
 ### Phase 0: Initial Cleanup
-1. Remove obsolete Docker files from passthrough-mcp-server (Dockerfile, docker-compose.example.yml, etc.)
-2. Run `npx knip` to identify dead code across the project
-3. Remove any unused dependencies and files
-4. Run `pnpm lint` and fix any issues
-5. Run `pnpm build` at top level to ensure everything still builds
+1. ✅ Remove obsolete Docker files from passthrough-mcp-server (Dockerfile, docker-compose.example.yml, etc.)
+2. ✅ Run `npx knip` to identify dead code across the project
+3. ✅ Remove any unused dependencies and files
+4. ✅ Run `pnpm lint` and fix any issues
+5. ✅ Run `pnpm build` at top level to ensure everything still builds
 
 ### Phase 1: Clean up passthrough-mcp-server
-1. Remove `BUILTIN_HOOKS` constant
-2. Rename client.ts to RemoteClient.ts and update all imports
-3. Keep existing config structure and CLI working
-4. Ensure hooks can be passed as either:
+1. ✅ Remove `BUILTIN_HOOKS` constant
+2. ✅ Rename client.ts to RemoteClient.ts and update all imports
+3. ✅ Keep existing config structure and CLI working
+4. ✅ Ensure hooks can be passed as either:
    - URL strings (creates RemoteHookClient) - existing behavior
    - HookClient instances (used directly) - new capability
-5. Run `npx knip` to check for dead code
-6. Run `pnpm lint` and `pnpm build` at top level
-7. Test both CLI and programmatic usage
+5. ✅ Run `npx knip` to check for dead code
+6. ✅ Run `pnpm lint` and `pnpm build` at top level
+7. ✅ Test both CLI and programmatic usage
 
 ### Phase 2: Update passthrough-proxy-builder
-1. Ensure generated configs only use hook names
-2. Remove any hook URL mappings
-3. Update docker-compose template to reference new Docker image from passthrough-bundle
-4. Run `npx knip` to check for dead code
-5. Run `pnpm lint` and `pnpm build` at top level
-6. Test that generated configs work with the new system
+1. ✅ Ensure generated configs only use hook names
+2. ✅ Remove any hook URL mappings
+3. ✅ Update docker-compose template to reference new Docker image from passthrough-bundle
+4. ✅ Run `npx knip` to check for dead code
+5. ✅ Run `pnpm lint` and `pnpm build` at top level
+6. ✅ Test that generated configs work with the new system
 
 ### Phase 3: Create passthrough-bundle package
-1. Create new package with proper structure
-2. Use `pnpm add` to add dependencies (NOT manual package.json edits):
-   - `pnpm add @civic/passthrough-mcp-server` (workspace dependency)
-   - `pnpm add @civic/simple-log-hook` (and other hooks)
-3. Run `pnpm install` at top level after adding dependencies
-4. Implement naming convention for hook loading
-5. Create hook loader that:
-   - Reads configuration
-   - Loads built-in hooks via dynamic import
-   - Creates RemoteHookClient for custom hooks
-   - Returns array of HookClient instances
-6. Create main entry point that orchestrates everything
-7. Build Docker image with proper multi-stage build
-8. Run `pnpm lint` and `pnpm build` at top level
-9. Test the complete system
+1. ✅ Create new package with proper structure
+2. ✅ Use `pnpm add` to add dependencies (NOT manual package.json edits):
+   - ✅ `pnpm add @civic/passthrough-mcp-server` (workspace dependency)
+   - ✅ `pnpm add @civic/simple-log-hook` (and other hooks)
+3. ✅ Run `pnpm install` at top level after adding dependencies
+4. ✅ Implement naming convention for hook loading
+5. ✅ Create hook loader that:
+   - ✅ Reads configuration
+   - ✅ Loads built-in hooks via dynamic import
+   - ✅ Creates RemoteHookClient for custom hooks
+   - ✅ Returns array of HookClient instances
+6. ✅ Create main entry point that orchestrates everything
+7. ✅ Build Docker image with proper multi-stage build
+8. ✅ Run `pnpm lint` and `pnpm build` at top level
+9. ✅ Test the complete system
+
+### Phase 3.5: Update Hook Packages to Export Classes
+1. ✅ Update each hook package to export its class from a `/hook` subpath:
+   - ✅ @civic/simple-log-hook: Export SimpleLogHook from `@civic/simple-log-hook/hook`
+   - ✅ @civic/audit-hook: Export AuditHook from `@civic/audit-hook/hook`
+   - ✅ @civic/guardrail-hook: Export GuardrailHook from `@civic/guardrail-hook/hook`
+   - ✅ @civic/custom-description-hook: Export CustomDescriptionHook from `@civic/custom-description-hook/hook`
+   - ✅ @civic/explain-hook: Export ExplainHook from `@civic/explain-hook/hook`
+2. ✅ Update package.json exports field in each hook package
+3. ✅ Update passthrough-bundle to use dynamic imports with LocalHookClient
+4. ✅ Remove the temporary port mapping workaround from hookLoader.ts
+5. ✅ Test that all hooks load correctly as LocalHookClient instances
 
 ### Phase 4: Final Cleanup and CI/CD
-1. Run `npx knip` across entire project one final time
-2. Remove any remaining dead code
-3. Update CI/CD scripts for new Docker image
-4. Update Docker Hub publishing to use passthrough-bundle image
-5. Update all documentation
-6. Final `pnpm lint` and `pnpm build` at top level
+1. ❌ Run `npx knip` across entire project one final time
+2. ❌ Remove any remaining dead code
+3. ❌ Update CI/CD scripts for new Docker image
+4. ❌ Update Docker Hub publishing to use passthrough-bundle image
+5. ❌ Update all documentation
+6. ❌ Final `pnpm lint` and `pnpm build` at top level
 
 ## Best Practices Throughout Implementation
 

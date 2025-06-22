@@ -87,3 +87,5 @@ export class AuditHook implements Hook {
     };
   }
 }
+
+export default AuditHook;

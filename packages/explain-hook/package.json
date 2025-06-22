@@ -14,7 +14,10 @@
   "main": "./dist/index.js",
   "type": "module",
   "files": ["dist", "README.md", "package.json"],
-  "exports": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./hook": "./dist/hook.js"
+  },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",

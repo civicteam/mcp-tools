@@ -108,3 +108,5 @@ export class CustomDescriptionHook extends AbstractHook {
     };
   }
 }
+
+export default CustomDescriptionHook;

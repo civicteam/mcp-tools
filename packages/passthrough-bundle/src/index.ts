@@ -55,7 +55,7 @@ export async function startPassthroughBundle(): Promise<void> {
   const config = loadConfig();
 
   // Load hooks (both built-in and remote)
-  const hookDefinitions: HookDefinition[] = loadHooks(config.hooks || []);
+  const hookDefinitions: HookDefinition[] = await loadHooks(config.hooks || []);
 
   console.log(`Loaded ${hookDefinitions.length} hook definitions`);
 
