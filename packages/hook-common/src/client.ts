@@ -19,6 +19,10 @@ export interface HookClient {
     response: ListToolsResult,
     originalRequest: ToolsListRequest,
   ): Promise<HookResponse>;
+  processToolException?(
+    error: unknown,
+    originalToolCall: ToolCall,
+  ): Promise<HookResponse>;
 }
 
 /**
@@ -142,6 +146,42 @@ export class RemoteHookClient implements HookClient {
       return {
         response: "continue",
         body: response,
+      };
+    }
+  }
+
+  /**
+   * Process an exception through the hook
+   */
+  async processToolException(
+    error: unknown,
+    originalToolCall: ToolCall,
+  ): Promise<HookResponse> {
+    try {
+      return await this.client.processToolException.mutate({
+        error,
+        originalToolCall,
+      });
+    } catch (clientError) {
+      // Check if it's a "not implemented" error
+      if (
+        clientError instanceof Error &&
+        clientError.message.includes("not implemented")
+      ) {
+        // Hook doesn't support this method, continue (don't handle exception)
+        return {
+          response: "continue",
+          body: null,
+        };
+      }
+      console.error(
+        `Hook ${this.name} exception processing failed:`,
+        clientError,
+      );
+      // On other errors, continue (don't handle exception)
+      return {
+        response: "continue",
+        body: null,
       };
     }
   }

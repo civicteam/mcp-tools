@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2025-06-26
+
+### Added
+- Added `processToolException` hook for handling callTool exceptions
+- Enhanced error handling capabilities in hook processing pipeline
+
 ## [0.2.0] - 2025-01-09
 
 ### Added

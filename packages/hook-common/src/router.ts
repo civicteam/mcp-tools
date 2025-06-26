@@ -74,6 +74,21 @@ const toolsListRouter = t.router({
     .mutation(async ({ input }) => {
       throw new Error("processToolsListResponse not implemented");
     }),
+
+  /**
+   * Process an exception during tool execution
+   */
+  processToolException: t.procedure
+    .input(
+      z.object({
+        error: z.any(),
+        originalToolCall: ToolCallSchema,
+      }),
+    )
+    .output(HookResponseSchema)
+    .mutation(async ({ input }) => {
+      throw new Error("processToolException not implemented");
+    }),
 });
 
 /**
@@ -146,6 +161,27 @@ export function createHookRouter(hook: Hook) {
         return await hook.processToolsListResponse(
           input.response,
           input.originalRequest,
+        );
+      });
+  }
+
+  if (hook.processToolException) {
+    procedures.processToolException = t.procedure
+      .input(
+        z.object({
+          error: z.any(),
+          originalToolCall: ToolCallSchema,
+        }),
+      )
+      .output(HookResponseSchema)
+      .mutation(async ({ input }) => {
+        // This should never happen since we check for the method existence
+        if (!hook.processToolException) {
+          throw new Error("processToolException not implemented");
+        }
+        return await hook.processToolException(
+          input.error,
+          input.originalToolCall,
         );
       });
   }

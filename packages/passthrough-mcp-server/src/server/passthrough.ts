@@ -12,6 +12,7 @@ import type { ToolCall } from "@civic/hook-common";
 import type { Context } from "fastmcp";
 import { getHookClients } from "../hooks/manager.js";
 import {
+  processExceptionThroughHooks,
   processRequestThroughHooks,
   processResponseThroughHooks,
 } from "../hooks/processor.js";
@@ -95,7 +96,33 @@ export function createPassthroughHandler(config: Config, toolName: string) {
             ? (requestResult.toolCall.arguments as Record<string, unknown>)
             : undefined,
       };
-      response = await sessionData.targetClient.callTool(toolCallWithArgs);
+
+      try {
+        response = await sessionData.targetClient.callTool(toolCallWithArgs);
+      } catch (error) {
+        // Process exception through hooks
+        const exceptionResult = await processExceptionThroughHooks(
+          error,
+          requestResult.toolCall,
+          hookClients,
+        );
+
+        if (exceptionResult.wasHandled) {
+          // Hook handled the exception, use its response
+          response = exceptionResult.response;
+          logger.info(
+            `Exception handled by hook: ${exceptionResult.reason || "No reason provided"}`,
+          );
+        } else {
+          // No hook handled the exception, re-throw it
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          logger.error(
+            `Exception not handled by any hook for tool '${requestResult.toolCall.name}': ${errorMessage}`,
+          );
+          throw error;
+        }
+      }
     } else {
       // Use the rejection response
       response = requestResult.rejectionResponse;

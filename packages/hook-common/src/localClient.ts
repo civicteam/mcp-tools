@@ -112,4 +112,33 @@ export class LocalHookClient implements HookClient {
       };
     }
   }
+
+  /**
+   * Process an exception through the hook
+   */
+  async processToolException(
+    error: unknown,
+    originalToolCall: ToolCall,
+  ): Promise<HookResponse> {
+    try {
+      // Check if hook supports exception processing
+      if (!this.hook.processToolException) {
+        return {
+          response: "continue",
+          body: null,
+        };
+      }
+      return await this.hook.processToolException(error, originalToolCall);
+    } catch (processingError) {
+      console.error(
+        `Hook ${this.name} exception processing failed:`,
+        processingError,
+      );
+      // On error, continue (don't handle exception)
+      return {
+        response: "continue",
+        body: null,
+      };
+    }
+  }
 }
