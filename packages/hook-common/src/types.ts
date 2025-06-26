@@ -84,4 +84,12 @@ export interface Hook {
     response: ListToolsResult,
     originalRequest: ToolsListRequest,
   ): Promise<HookResponse>;
+
+  /**
+   * Handle exceptions thrown during tool execution (optional)
+   */
+  processToolException?(
+    error: unknown,
+    originalToolCall: ToolCall,
+  ): Promise<HookResponse>;
 }

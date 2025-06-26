@@ -125,7 +125,7 @@ jobs:
           
           # Check for successful fetch of Civic docs
           # Look for JSON with type: "user" containing tool_result with "Getting Started with Civic"
-          if grep -q '"type": "user"' test-output.txt && grep -q '"type": "tool_result"' test-output.txt && grep -q "Getting Started with Civic" test-output.txt; then
+          if grep -q '"type": "user"' test-output.txt && grep -q '"type": "tool_result"' test-output.txt && grep -q "Civic Docs home page" test-output.txt; then
             echo "✅ Integration test passed - found expected tool_result with Civic content"
             exit 0
           else

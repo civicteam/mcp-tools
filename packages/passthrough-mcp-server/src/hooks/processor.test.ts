@@ -1,6 +1,7 @@
 import type { HookResponse, ToolCall } from "@civic/hook-common";
 import { describe, expect, it, vi } from "vitest";
 import {
+  processExceptionThroughHooks,
   processRequestThroughHooks,
   processResponseThroughHooks,
 } from "./processor.js";
@@ -242,6 +243,265 @@ describe("Hook Processor", () => {
         rejectionResponse: null,
         lastProcessedIndex: 0,
       });
+    });
+  });
+
+  describe("processExceptionThroughHooks", () => {
+    it("should process exception through empty hook chain", async () => {
+      const error = new Error("Test error");
+      const toolCall: ToolCall = {
+        name: "fetch",
+        arguments: { url: "https://example.com" },
+      };
+
+      const result = await processExceptionThroughHooks(error, toolCall, []);
+
+      expect(result.wasHandled).toBe(false);
+      expect(result.response).toBeNull();
+      expect(result.lastProcessedIndex).toBe(-1);
+    });
+
+    it("should handle Error instances", async () => {
+      const error = new Error(
+        "Error POSTing to endpoint (HTTP 400): Bad Request",
+      );
+      const toolCall: ToolCall = { name: "fetch", arguments: {} };
+
+      const mockHook = {
+        name: "error-handler",
+        processRequest: vi.fn(),
+        processResponse: vi.fn(),
+        processToolException: vi.fn().mockResolvedValue({
+          response: "abort",
+          body: {
+            content: [
+              {
+                type: "text",
+                text: "Handled HTTP 400 error gracefully",
+              },
+            ],
+          },
+          reason: "Converted error to user-friendly message",
+        } as HookResponse),
+      };
+
+      const result = await processExceptionThroughHooks(error, toolCall, [
+        mockHook as Parameters<typeof processExceptionThroughHooks>[2][0],
+      ]);
+
+      expect(result.wasHandled).toBe(true);
+      expect(result.response).toEqual({
+        content: [
+          {
+            type: "text",
+            text: "Handled HTTP 400 error gracefully",
+          },
+        ],
+      });
+      expect(result.reason).toBe("Converted error to user-friendly message");
+      expect(mockHook.processToolException).toHaveBeenCalledWith(
+        error,
+        toolCall,
+      );
+    });
+
+    it("should handle specific HTTP error from streamableHttp.ts", async () => {
+      const httpError = new Error(
+        'Error POSTing to endpoint (HTTP 400): {"jsonrpc":"2.0","error":{"code":-32000,"message":"Bad Request: No valid session ID provided or not an initialize request"},"id":null}',
+      );
+      const toolCall: ToolCall = { name: "call_external_api", arguments: {} };
+
+      const mockHook = {
+        name: "http-error-handler",
+        processRequest: vi.fn(),
+        processResponse: vi.fn(),
+        processToolException: vi.fn().mockResolvedValue({
+          response: "abort",
+          body: {
+            content: [
+              {
+                type: "text",
+                text: "Authentication required. Please initialize your session first.",
+              },
+            ],
+          },
+          reason: "Handled session initialization error",
+        } as HookResponse),
+      };
+
+      const result = await processExceptionThroughHooks(httpError, toolCall, [
+        mockHook as Parameters<typeof processExceptionThroughHooks>[2][0],
+      ]);
+
+      expect(result.wasHandled).toBe(true);
+      expect(result.response.content[0].text).toBe(
+        "Authentication required. Please initialize your session first.",
+      );
+      expect(mockHook.processToolException).toHaveBeenCalledWith(
+        httpError,
+        toolCall,
+      );
+    });
+
+    it("should handle non-Error values (unknown type)", async () => {
+      const error = "String error message";
+      const toolCall: ToolCall = { name: "fetch", arguments: {} };
+
+      const mockHook = {
+        name: "string-error-handler",
+        processRequest: vi.fn(),
+        processResponse: vi.fn(),
+        processToolException: vi.fn().mockResolvedValue({
+          response: "abort",
+          body: { message: "Handled string error" },
+          reason: "Converted string to structured error",
+        } as HookResponse),
+      };
+
+      const result = await processExceptionThroughHooks(error, toolCall, [
+        mockHook as Parameters<typeof processExceptionThroughHooks>[2][0],
+      ]);
+
+      expect(result.wasHandled).toBe(true);
+      expect(result.response).toEqual({ message: "Handled string error" });
+      expect(mockHook.processToolException).toHaveBeenCalledWith(
+        error,
+        toolCall,
+      );
+    });
+
+    it("should skip hooks that don't support exception handling", async () => {
+      const error = new Error("Test error");
+      const toolCall: ToolCall = { name: "fetch", arguments: {} };
+
+      const hookWithoutExceptionHandling = {
+        name: "basic-hook",
+        processRequest: vi.fn(),
+        processResponse: vi.fn(),
+      };
+
+      const hookWithExceptionHandling = {
+        name: "exception-hook",
+        processRequest: vi.fn(),
+        processResponse: vi.fn(),
+        processToolException: vi.fn().mockResolvedValue({
+          response: "abort",
+          body: "Handled",
+          reason: "Exception processed",
+        } as HookResponse),
+      };
+
+      const result = await processExceptionThroughHooks(error, toolCall, [
+        hookWithoutExceptionHandling,
+        hookWithExceptionHandling,
+      ] as Parameters<typeof processExceptionThroughHooks>[2]);
+
+      expect(result.wasHandled).toBe(true);
+      expect(
+        hookWithExceptionHandling.processToolException,
+      ).toHaveBeenCalledWith(error, toolCall);
+    });
+
+    it("should stop processing when first hook handles exception", async () => {
+      const error = new Error("Test error");
+      const toolCall: ToolCall = { name: "fetch", arguments: {} };
+
+      const hook1 = {
+        name: "hook1",
+        processRequest: vi.fn(),
+        processResponse: vi.fn(),
+        processToolException: vi.fn().mockResolvedValue({
+          response: "abort",
+          body: "Handled by hook1",
+          reason: "First handler",
+        } as HookResponse),
+      };
+
+      const hook2 = {
+        name: "hook2",
+        processRequest: vi.fn(),
+        processResponse: vi.fn(),
+        processToolException: vi.fn().mockResolvedValue({
+          response: "abort",
+          body: "Should not be called",
+          reason: "Second handler",
+        } as HookResponse),
+      };
+
+      const result = await processExceptionThroughHooks(error, toolCall, [
+        hook1,
+        hook2,
+      ] as Parameters<typeof processExceptionThroughHooks>[2]);
+
+      expect(result.wasHandled).toBe(true);
+      expect(result.response).toBe("Handled by hook1");
+      expect(result.lastProcessedIndex).toBe(0);
+      expect(hook1.processToolException).toHaveBeenCalled();
+      expect(hook2.processToolException).not.toHaveBeenCalled();
+    });
+
+    it("should continue to next hook if current hook returns continue", async () => {
+      const error = new Error("Test error");
+      const toolCall: ToolCall = { name: "fetch", arguments: {} };
+
+      const hook1 = {
+        name: "hook1",
+        processRequest: vi.fn(),
+        processResponse: vi.fn(),
+        processToolException: vi.fn().mockResolvedValue({
+          response: "continue",
+          body: null,
+          reason: "Not my type of error",
+        } as HookResponse),
+      };
+
+      const hook2 = {
+        name: "hook2",
+        processRequest: vi.fn(),
+        processResponse: vi.fn(),
+        processToolException: vi.fn().mockResolvedValue({
+          response: "abort",
+          body: "Handled by hook2",
+          reason: "This is my error type",
+        } as HookResponse),
+      };
+
+      const result = await processExceptionThroughHooks(error, toolCall, [
+        hook1,
+        hook2,
+      ] as Parameters<typeof processExceptionThroughHooks>[2]);
+
+      expect(result.wasHandled).toBe(true);
+      expect(result.response).toBe("Handled by hook2");
+      expect(result.lastProcessedIndex).toBe(1);
+      expect(hook1.processToolException).toHaveBeenCalled();
+      expect(hook2.processToolException).toHaveBeenCalled();
+    });
+
+    it("should handle object errors", async () => {
+      const error = { code: 500, message: "Internal server error" };
+      const toolCall: ToolCall = { name: "fetch", arguments: {} };
+
+      const mockHook = {
+        name: "object-error-handler",
+        processRequest: vi.fn(),
+        processResponse: vi.fn(),
+        processToolException: vi.fn().mockResolvedValue({
+          response: "abort",
+          body: { message: "Handled object error" },
+          reason: "Converted object error",
+        } as HookResponse),
+      };
+
+      const result = await processExceptionThroughHooks(error, toolCall, [
+        mockHook as Parameters<typeof processExceptionThroughHooks>[2][0],
+      ]);
+
+      expect(result.wasHandled).toBe(true);
+      expect(mockHook.processToolException).toHaveBeenCalledWith(
+        error,
+        toolCall,
+      );
     });
   });
 });

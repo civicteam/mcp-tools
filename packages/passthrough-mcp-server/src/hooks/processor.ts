@@ -29,6 +29,13 @@ export interface ProcessResponseResult {
   lastProcessedIndex: number;
 }
 
+export interface ProcessExceptionResult {
+  wasHandled: boolean;
+  response?: unknown;
+  reason?: string;
+  lastProcessedIndex: number;
+}
+
 /**
  * Process a tool call through a chain of hooks for request validation
  */
@@ -242,6 +249,63 @@ export async function processToolsListResponseThroughHooks(
     wasRejected,
     rejectionResponse,
     rejectionReason,
+    lastProcessedIndex,
+  };
+}
+
+/**
+ * Process an exception through a chain of hooks
+ */
+export async function processExceptionThroughHooks(
+  error: unknown,
+  toolCall: ToolCall,
+  hooks: HookClient[],
+): Promise<ProcessExceptionResult> {
+  let response: unknown = null;
+  let wasHandled = false;
+  let reason: string | undefined;
+  let lastProcessedIndex = -1;
+
+  for (let i = 0; i < hooks.length && !wasHandled; i++) {
+    const hook = hooks[i];
+
+    // Check if hook supports exception processing
+    if (!hook.processToolException) {
+      logger.info(
+        `Hook ${i + 1} (${hook.name}) does not support exception processing, skipping`,
+      );
+      continue;
+    }
+
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.info(
+      `Processing exception through hook ${i + 1} (${hook.name}) for tool '${toolCall.name}': ${errorMessage}`,
+    );
+
+    const hookResponse: HookResponse = await hook.processToolException(
+      error,
+      toolCall,
+    );
+    lastProcessedIndex = i;
+
+    if (hookResponse.response === "continue") {
+      logger.info(
+        `Hook ${i + 1} did not handle the exception for tool '${toolCall.name}'`,
+      );
+    } else {
+      wasHandled = true;
+      response = hookResponse.body;
+      reason = hookResponse.reason;
+      logger.info(
+        `Hook ${i + 1} handled exception for tool '${toolCall.name}': ${hookResponse.reason || "No reason provided"}`,
+      );
+    }
+  }
+
+  return {
+    wasHandled,
+    response,
+    reason,
     lastProcessedIndex,
   };
 }
