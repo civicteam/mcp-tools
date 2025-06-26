@@ -1,0 +1,13 @@
+{
+  "prompt": "use the passthrough MCP server to find out the username of the current user",
+  "allowedTools": ["mcp__passthrough-mcp-server__whoami"],
+  "mcpServers": {
+    "passthrough-mcp-server": {
+      "type": "httpStream",
+
+      "env": {
+        "TARGET_SERVER_URL": "http://localhost:33008/stream"
+      }
+    }
+  }
+}

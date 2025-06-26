@@ -1,83 +1,59 @@
 /**
- * Server Module
+ * Stdio Handler Module
  *
- * Responsible for creating the FastMCP server instance and registering
- * tools discovered from the target server. Dynamically discovers and
- * registers all available tools from the target server.
+ * Provides MCP server implementation for stdio transport using the
+ * @modelcontextprotocol/sdk instead of FastMCP. Since stdio doesn't
+ * support authentication, we use a simplified approach.
  */
 
 import type { ToolsListRequest } from "@civic/hook-common";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import type {
+  CallToolResult,
   ListToolsResult,
   Tool as MCPTool,
 } from "@modelcontextprotocol/sdk/types.js";
-import { FastMCP, type Tool as FastMCPTool } from "fastmcp";
-import type { ZodType, ZodTypeDef } from "zod";
 import { getHookClients } from "../hooks/manager.js";
 import {
   processToolsListRequestThroughHooks,
   processToolsListResponseThroughHooks,
 } from "../hooks/processor.js";
-import type { ClientFactory } from "../types/client.js";
 import type { Config } from "../utils/config.js";
 import { logger } from "../utils/logger.js";
-import { extractToolParameters } from "../utils/schemaConverter.js";
 import {
   DEFAULT_SESSION_ID,
-  generateSessionId,
   getOrCreateSessionForRequest,
 } from "../utils/session.js";
 import { createPassthroughHandler } from "./passthrough.js";
 
 /**
- * AuthSessionData of the FastMCP. This is only defined for http-streaming and sse, NOT for stdio
+ * Create and configure an MCP server for stdio transport
  */
-export interface AuthSessionData {
-  id: string;
-  [key: string]: unknown; // Add index signature to satisfy Record<string, unknown>
-}
-
-interface ServerInfo {
-  name: string;
-  version: `${number}.${number}.${number}`;
-}
-
-type FastMCPToolHandler = FastMCPTool<
-  AuthSessionData,
-  ZodType<unknown, ZodTypeDef, unknown>
->["execute"];
-
-// Store discovered tools in memory
-let discoveredTools: MCPTool[] = [];
-
-/**
- * Get the list of discovered tools
- */
-export function getDiscoveredTools(): MCPTool[] {
-  return discoveredTools;
-}
-/**
- * Create a FastMCP server instance
- */
-export function createServer(
-  serverInfo?: ServerInfo,
-): FastMCP<AuthSessionData> {
-  return new FastMCP<AuthSessionData>({
-    name: serverInfo?.name || "passthrough-mcp-server",
-    version: serverInfo?.version ?? "0.0.1",
-    authenticate: async () => {
-      return {
-        id: generateSessionId(),
-      };
-    },
+export async function createStdioServer(config: Config): Promise<{
+  server: McpServer;
+  transport: StdioServerTransport;
+}> {
+  // Create the server
+  const server = new McpServer({
+    name: config.serverInfo?.name || "passthrough-mcp-server",
+    version: config.serverInfo?.version || "0.0.1",
   });
+
+  // Discover and register tools
+  await discoverAndRegisterTools(server, config);
+
+  // Create the transport
+  const transport = new StdioServerTransport();
+
+  return { server, transport };
 }
 
 /**
  * Discover and register tools from the target server
  */
-export async function discoverAndRegisterTools(
-  server: FastMCP<AuthSessionData>,
+async function discoverAndRegisterTools(
+  server: McpServer,
   config: Config,
 ): Promise<void> {
   const sessionData = await getOrCreateSessionForRequest(
@@ -146,7 +122,7 @@ export async function discoverAndRegisterTools(
   }
 
   // Store tools in memory (potentially modified by hooks)
-  discoveredTools = toolsListResponse.tools;
+  const discoveredTools = toolsListResponse.tools;
 
   logger.info(
     `Discovered ${discoveredTools.length} tools from target server (after hook processing)`,
@@ -157,16 +133,24 @@ export async function discoverAndRegisterTools(
     // Create a passthrough handler specifically for this tool
     const toolHandler = createPassthroughHandler(config, tool.name);
 
-    // Extract parameters from the tool definition
-    const parameters = extractToolParameters(tool);
+    // Extract the JSON schema from the tool definition
+    const inputSchema = tool.inputSchema || {};
 
-    server.addTool({
-      name: tool.name,
-      description:
-        tool.description || `Passthrough to ${tool.name} on target server`,
-      parameters,
-      execute: toolHandler as FastMCPToolHandler,
-    });
+    // Register the tool
+    server.tool(
+      tool.name,
+      tool.description || `Passthrough to ${tool.name} on target server`,
+      inputSchema,
+      async (args): Promise<CallToolResult> => {
+        // For stdio, we don't have session/auth context, so we pass empty context
+        const context = {
+          authHeaders: {},
+          sessionId: DEFAULT_SESSION_ID,
+        };
+
+        return toolHandler(args, context) as Promise<CallToolResult>;
+      },
+    );
 
     logger.info(`Registered passthrough for tool: ${tool.name}`);
   }

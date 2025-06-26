@@ -40,6 +40,7 @@ export function setSessionClientFactory(
 async function createClientForSession(
   sessionId: string,
   config: Config,
+  authHeaders?: Record<string, string>,
 ): Promise<PassthroughClient> {
   if (!config) {
     throw new Error(
@@ -49,7 +50,12 @@ async function createClientForSession(
 
   return clientFactory
     ? clientFactory(config.target, sessionId, config.clientInfo)
-    : createTargetClient(config.target, sessionId, config.clientInfo);
+    : createTargetClient(
+        config.target,
+        sessionId,
+        config.clientInfo,
+        authHeaders,
+      );
 }
 
 /**
@@ -58,9 +64,14 @@ async function createClientForSession(
 export async function getOrCreateSession(
   sessionId: string,
   config: Config,
+  authHeaders?: Record<string, string>,
 ): Promise<SessionData> {
   if (!sessions.has(sessionId)) {
-    const targetClient = await createClientForSession(sessionId, config);
+    const targetClient = await createClientForSession(
+      sessionId,
+      config,
+      authHeaders,
+    );
     sessions.set(sessionId, {
       id: sessionId,
       targetClient,
@@ -81,9 +92,10 @@ export async function getOrCreateSession(
 export async function getOrCreateSessionForRequest(
   sessionId: string,
   config: Config,
+  authHeaders?: Record<string, string>,
 ): Promise<SessionData> {
   // Get or create session with target client
-  const sessionData = await getOrCreateSession(sessionId, config);
+  const sessionData = await getOrCreateSession(sessionId, config, authHeaders);
 
   // Increment request counter
   sessionData.requestCount += 1;

@@ -42,3 +42,6 @@ temp/
 
 # Package manager
 .pnpm-store/
+
+# Serena files
+.serena/

@@ -62,16 +62,15 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.0",
-    "fastmcp": "^1.25.0",
     "@civic/hook-common": "workspace:^",
+    "@modelcontextprotocol/sdk": "^1.13.0",
     "zod": "^3.24.3"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
+    "@vitest/coverage-v8": "^2.1.8",
     "tsx": "^4.19.4",
     "typescript": "^5.2.2",
-    "vitest": "^2.1.8",
-    "@vitest/coverage-v8": "^2.1.8"
+    "vitest": "^2.1.8"
   }
 }

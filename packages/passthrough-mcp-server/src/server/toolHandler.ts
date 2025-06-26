@@ -1,14 +1,16 @@
 /**
- * Passthrough Handler Module (tRPC-based)
+ * Tool Handler Module
  *
- * Implements the core passthrough functionality that redirects tool execution
- * requests from the MCP server to the target MCP client. Maintains session context
- * and creates a specific handler for each tool.
- *
- * Uses tRPC-based hooks instead of MCP for hook communication.
+ * Creates handlers for individual tools that process requests through hooks
+ * and forward them to the target server.
  */
 
 import type { ToolCall } from "@civic/hook-common";
+import type {
+  CallToolRequest,
+  CallToolResult,
+  Tool as MCPTool,
+} from "@modelcontextprotocol/sdk/types.js";
 import { getHookClients } from "../hooks/manager.js";
 import {
   processRequestThroughHooks,
@@ -22,51 +24,38 @@ import {
 } from "../utils/session.js";
 import type { ToolContext } from "./types.js";
 
-/**
- * Create a passthrough handler for a specific tool
- *
- * This is a curried function that captures the tool name at registration time
- * and returns a handler function that can be used to process tool calls.
- *
- * If hooks are configured, tool calls will be sent to the hooks for processing
- * before being forwarded to the target server.
- */
-export function createPassthroughHandler(config: Config, toolName: string) {
-  return async function passthrough(
-    args: unknown,
-    context: ToolContext,
-  ): Promise<unknown> {
-    const sessionId = context.sessionId || DEFAULT_SESSION_ID;
+export function createToolHandler(
+  config: Config,
+  tool: MCPTool,
+  context?: ToolContext,
+) {
+  return async function handleToolCall(
+    request: CallToolRequest,
+  ): Promise<CallToolResult> {
+    // Extract session ID from request context if available
+    const sessionId = context?.sessionId || DEFAULT_SESSION_ID;
 
     // Get or create session with target client
-    const sessionData = await getOrCreateSessionForRequest(sessionId, config);
-
-    // Create tool call for hooks processing
-    const toolDefinition = {
-      name: toolName,
-      description: `Tool ${toolName}`,
-      inputSchema: {
-        type: "object" as const,
-        properties: {},
-      },
-    };
+    const sessionData = await getOrCreateSessionForRequest(
+      sessionId,
+      config,
+      context?.authHeaders,
+    );
 
     // Create the tool call object with metadata and tool definition
     const toolCall: ToolCall = {
-      name: toolName,
-      arguments: args,
+      name: request.params.name,
+      arguments: request.params.arguments,
       metadata: {
         sessionId,
         timestamp: new Date().toISOString(),
         source: "passthrough-server",
       },
-      toolDefinition: toolDefinition
-        ? {
-            name: toolDefinition.name,
-            description: toolDefinition.description,
-            inputSchema: toolDefinition.inputSchema,
-          }
-        : undefined,
+      toolDefinition: {
+        name: tool.name,
+        description: tool.description,
+        inputSchema: tool.inputSchema,
+      },
     };
 
     // Get hook clients
@@ -79,7 +68,7 @@ export function createPassthroughHandler(config: Config, toolName: string) {
     );
 
     // Initialize response
-    let response: unknown;
+    let response: CallToolResult;
 
     // If no hook rejected and we should call the target service
     if (!requestResult.wasRejected) {
@@ -99,8 +88,24 @@ export function createPassthroughHandler(config: Config, toolName: string) {
       };
       response = await sessionData.targetClient.callTool(toolCallWithArgs);
     } else {
-      // Use the rejection response
-      response = requestResult.rejectionResponse;
+      // Use the rejection response - ensure it's a proper CallToolResult
+      if (
+        requestResult.rejectionResponse &&
+        typeof requestResult.rejectionResponse === "object" &&
+        "content" in requestResult.rejectionResponse
+      ) {
+        response = requestResult.rejectionResponse as CallToolResult;
+      } else {
+        // Create a default rejection response
+        response = {
+          content: [
+            {
+              type: "text",
+              text: requestResult.rejectionReason || "Request rejected by hook",
+            },
+          ],
+        };
+      }
       logger.info(
         "Request rejected by hook, skipping target service call. Using rejection response.",
       );
@@ -127,16 +132,22 @@ export function createPassthroughHandler(config: Config, toolName: string) {
           content: [
             {
               type: "text",
-              text: responseResult.rejectionResponse,
+              text: String(
+                responseResult.rejectionResponse ||
+                  responseResult.rejectionReason ||
+                  "Response rejected by hook",
+              ),
             },
           ],
         };
       } else {
-        response = responseResult.response;
+        response = responseResult.response as CallToolResult;
       }
     }
 
-    logger.info(`Response for tool '${toolName}': ${JSON.stringify(response)}`);
+    logger.info(
+      `Response for tool '${tool.name}': ${JSON.stringify(response)}`,
+    );
     return response;
   };
 }

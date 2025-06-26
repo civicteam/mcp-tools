@@ -8,6 +8,10 @@ A Model Context Protocol (MCP) server that passes all requests through to anothe
 - Configurable to connect to different backend MCP servers
 - Supports various transport methods for MCP (HTTP SSE, HTTP Stream, Stdio)
 - tRPC-based hook system for request/response interception and modification
+- **MCP Authorization spec compliant**: Properly handles authentication and authorization
+- **401 passthrough**: For httpStream and SSE transports, passes through 401 responses from target servers
+- **Non-MCP request proxying**: Routes non-MCP requests directly to the target server
+- **Authorization header forwarding**: Passes authorization headers from incoming requests to the target server
 - Comprehensive test coverage with modular, testable architecture
 
 ## Usage
@@ -55,6 +59,7 @@ The server can be configured through environment variables:
 - `TARGET_SERVER_URL`: URL of the target MCP server to connect to
 - `TARGET_SERVER_TRANSPORT`: Transport type for connecting to the target server (httpStream, sse)
 - `HOOKS`: Comma-separated list of tRPC hook server URLs for middleware processing
+- `MCP_ENDPOINT`: Custom endpoint for MCP requests (default: /mcp)
 
 #### Hook Middleware
 
@@ -77,6 +82,22 @@ Each hook can:
 2. Reject the tool call, preventing it from reaching the target server
 
 This is useful for implementing validation, security checks, audit logging, or transformations.
+
+### Authorization Support
+
+The passthrough server is fully compliant with the MCP authorization specification:
+
+#### 401 Passthrough
+For `httpStream` and `sse` transports, the server checks if the target MCP server returns a 401 response. If it does, the 401 response is passed through directly to the client, allowing proper authentication flows.
+
+#### Request Routing
+- **MCP requests** (on `/mcp` endpoint): Handled by the MCP protocol handler
+- **Non-MCP requests** (all other paths): Proxied directly to the target server
+
+This allows the passthrough server to work seamlessly with MCP servers that implement OAuth or other authentication mechanisms.
+
+#### Authorization Header Forwarding
+Any authorization headers present in incoming requests are automatically forwarded to the target server, ensuring that authentication credentials are properly passed through the proxy chain.
 
 ## Programmatic Usage
 
@@ -201,7 +222,7 @@ Creates and optionally starts a passthrough MCP proxy server.
 
 **Returns:**
 A `PassthroughProxy` object with:
-- `server`: The underlying FastMCP server instance
+- `server`: The underlying HTTP server instance
 - `start()`: Method to start the server (if not auto-started)
 - `stop()`: Method to stop the server
 
@@ -263,9 +284,9 @@ See the `examples/` directory for additional working examples of programmatic us
 ## Implementation
 
 This server uses:
-- **fastMCP**: For the MCP server implementation
-- **@modelcontextprotocol/sdk**: For the MCP client to connect to target servers
+- **@modelcontextprotocol/sdk**: Direct MCP SDK usage for both server and client implementation
 - **tRPC**: For communication with hook servers
+- **Custom HTTP proxy**: For routing and authorization compliance
 
 ### Architecture
 
@@ -273,8 +294,11 @@ The codebase is organized into small, focused modules with single responsibiliti
 
 - **hooks/manager.ts** - Manages hook client instances and caching
 - **hooks/processor.ts** - Processes tool calls through hook chains
-- **server/passthrough.ts** - Main passthrough handler orchestration
-- **utils/session.ts** - Session management and client connections
+- **server/authProxy.ts** - HTTP proxy server for routing MCP and non-MCP requests
+- **server/mcpHandler.ts** - MCP protocol handler with 401 passthrough support
+- **server/mcpServerAuth.ts** - Creates MCP servers with authorization context
+- **server/toolHandler.ts** - Handles individual tool calls with hook processing
+- **utils/session.ts** - Session management and client connections with auth support
 - **utils/config.ts** - Configuration parsing and validation
 
 Each module has accompanying unit tests located alongside the source files for easy maintenance and testing.

@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- MCP Authorization specification compliance
+  - 401 response passthrough for httpStream and SSE transports
+  - Authorization header forwarding to target servers
+  - Non-MCP request proxying (all non-/mcp paths routed directly to target)
+- Custom HTTP proxy server implementation replacing FastMCP
+- Per-request MCP server instances following stateless pattern
+- Session-based authorization context management
+- Configurable MCP endpoint (default: /mcp)
+
+### Changed
+- **BREAKING**: Migrated from FastMCP to direct MCP SDK usage
+- **BREAKING**: Default MCP endpoint changed from /stream to /mcp
+- Updated to @modelcontextprotocol/sdk version 1.13.0
+- Refactored server architecture for authorization support
+- Enhanced session management to include authorization headers
+
+### Fixed
+- Proper handling of authorization flows for OAuth-enabled MCP servers
+- Type safety improvements throughout the codebase
+
 ## [0.2.0] - 2025-01-09
 
 ### Added
