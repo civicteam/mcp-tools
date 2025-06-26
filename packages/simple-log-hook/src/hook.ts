@@ -10,10 +10,21 @@ import {
   type ToolCall,
 } from "@civic/hook-common";
 
+export interface SimpleLogConfig {
+  logLevel?: "verbose" | "normal";
+  prefix?: string;
+}
+
 /**
  * Minimal hook implementation that logs to console
  */
-export class SimpleLogHook extends AbstractHook {
+class SimpleLogHook extends AbstractHook {
+  private config: SimpleLogConfig | null = null;
+
+  constructor() {
+    super();
+  }
+
   /**
    * The name of this hook
    */
@@ -21,8 +32,25 @@ export class SimpleLogHook extends AbstractHook {
     return "SimpleLogHook";
   }
 
+  /**
+   * Configure the hook with optional settings
+   */
+  configure(config: SimpleLogConfig | null): void {
+    this.config = config;
+    if (config) {
+      console.log(`SimpleLogHook: Configured with settings`, config);
+    }
+  }
+
   async processRequest(toolCall: ToolCall): Promise<HookResponse> {
-    console.log(`[REQUEST] ${toolCall.name}`, toolCall.arguments);
+    const prefix = this.config?.prefix || "";
+    const logPrefix = prefix ? `${prefix} ` : "";
+    
+    if (this.config?.logLevel === "verbose") {
+      console.log(`${logPrefix}[REQUEST] ${toolCall.name}`, JSON.stringify(toolCall.arguments, null, 2));
+    } else {
+      console.log(`${logPrefix}[REQUEST] ${toolCall.name}`, toolCall.arguments);
+    }
 
     // Call parent implementation to continue with unmodified tool call
     return super.processRequest(toolCall);
@@ -32,7 +60,14 @@ export class SimpleLogHook extends AbstractHook {
     response: unknown,
     originalToolCall: ToolCall,
   ): Promise<HookResponse> {
-    console.log(`[RESPONSE] ${originalToolCall.name}`, response);
+    const prefix = this.config?.prefix || "";
+    const logPrefix = prefix ? `${prefix} ` : "";
+    
+    if (this.config?.logLevel === "verbose") {
+      console.log(`${logPrefix}[RESPONSE] ${originalToolCall.name}`, JSON.stringify(response, null, 2));
+    } else {
+      console.log(`${logPrefix}[RESPONSE] ${originalToolCall.name}`, response);
+    }
 
     // Call parent implementation to continue with unmodified response
     return super.processResponse(response, originalToolCall);

@@ -10,7 +10,7 @@
 import * as process from "node:process";
 import { createHookRouter } from "@civic/hook-common";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
-import { GuardrailHook } from "./hook.js";
+import GuardrailHook from "./hook.js";
 
 // Configuration
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT) : 33005;

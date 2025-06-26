@@ -1,11 +1,10 @@
 // Dockerfile is no longer needed when using the official image
 export const DOCKERFILE_TEMPLATE = "";
 
-export const DOCKER_COMPOSE_TEMPLATE = `version: '3.8'
-
+export const DOCKER_COMPOSE_TEMPLATE = `
 services:
   mcp-proxy:
-    image: civicteam/passthrough-bundle:0.1.0
+    image: civicteam/passthrough-bundle:latest
     container_name: mcp-proxy
 <% if (false) { -%>
     # Stdio mode configuration

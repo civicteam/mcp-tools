@@ -8,7 +8,7 @@
 import * as process from "node:process";
 import { createHookRouter } from "@civic/hook-common";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
-import { SimpleLogHook } from "./hook.js";
+import SimpleLogHook from "./hook.js";
 
 // Configuration
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT) : 33006;

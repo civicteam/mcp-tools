@@ -15,7 +15,6 @@
     "start:stdio": "node dist/index.js --stdio"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.0",
     "fastmcp": "^1.25.0",
     "turndown": "^7.1.2",
     "zod": "^3.24.3"

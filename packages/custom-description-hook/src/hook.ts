@@ -4,9 +4,6 @@
  * Replaces tool descriptions based on configuration
  */
 
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
-import process from "node:process";
 import {
   AbstractHook,
   type HookResponse,
@@ -20,12 +17,16 @@ interface ToolDescription {
   toolDescription: string;
 }
 
-interface Config {
+export interface CustomDescriptionConfig {
   toolDescriptions: ToolDescription[];
 }
 
-export class CustomDescriptionHook extends AbstractHook {
-  private config: Config | null = null;
+class CustomDescriptionHook extends AbstractHook {
+  private config: CustomDescriptionConfig | null = null;
+
+  constructor() {
+    super();
+  }
 
   /**
    * The name of this hook
@@ -34,34 +35,20 @@ export class CustomDescriptionHook extends AbstractHook {
     return "CustomDescriptionHook";
   }
 
-  async loadConfig(): Promise<void> {
-    if (this.config) return; // Already loaded
-
-    let configContent: string;
-
-    // Check for --config argument
-    const configArgIndex = process.argv.indexOf("--config");
-    const configFile =
-      configArgIndex !== -1
-        ? process.argv[configArgIndex + 1]
-        : "./config.json";
-
-    // Check if stdin has data
-    if (!process.stdin.isTTY && process.stdin.readable) {
-      configContent = "";
-      for await (const chunk of process.stdin) {
-        configContent += chunk;
-      }
+  /**
+   * Configure the hook with tool description replacements
+   */
+  configure(config: CustomDescriptionConfig | null): void {
+    this.config = config;
+    if (config) {
+      console.log(
+        `CustomDescriptionHook: Configured with ${config.toolDescriptions.length} tool description replacements`,
+      );
     } else {
-      // Read from file
-      const configPath = resolve(configFile);
-      configContent = await readFile(configPath, "utf-8");
+      console.log(
+        `CustomDescriptionHook: No configuration provided - hook will pass through without modifications`,
+      );
     }
-
-    this.config = JSON.parse(configContent) as Config;
-    console.log(
-      `Loaded ${this.config.toolDescriptions.length} tool description replacements`,
-    );
   }
 
   /**
@@ -71,10 +58,8 @@ export class CustomDescriptionHook extends AbstractHook {
     response: ListToolsResult,
     _originalRequest: ToolsListRequest,
   ): Promise<HookResponse> {
-    // Load config if not already loaded
-    await this.loadConfig();
-
-    if (!this.config) {
+    // If no config, pass through unchanged
+    if (!this.config || this.config.toolDescriptions.length === 0) {
       return {
         response: "continue",
         body: response,

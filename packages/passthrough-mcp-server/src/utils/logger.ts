@@ -5,7 +5,7 @@
  * Can be configured to redirect all output to console.error for stdio mode
  */
 
-export interface Logger {
+interface Logger {
   info: (message: string) => void;
   error: (message: string) => void;
   warn: (message: string) => void;

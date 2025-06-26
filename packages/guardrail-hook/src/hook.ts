@@ -4,17 +4,33 @@
  * Implements the Hook interface for request validation and guardrails
  */
 
-import type { Hook, HookResponse, ToolCall } from "@civic/hook-common";
+import { AbstractHook, type HookResponse, type ToolCall } from "@civic/hook-common";
 
-export class GuardrailHook implements Hook {
-  // Example: Domain allowlist for fetch-docs MCP server
-  // This is specific to fetch-docs and demonstrates how to restrict URL fetching
-  // You can customize or remove this based on your MCP server's needs
-  private allowedDomains: string[] = [
-    "example.com",
-    "github.com",
-    "raw.githubusercontent.com",
-  ];
+export interface GuardrailConfig {
+  allowedDomains?: string[];
+  blockedTools?: string[];
+  sensitivePatterns?: string[];
+  enableDestructiveOperationCheck?: boolean;
+}
+
+class GuardrailHook extends AbstractHook {
+  private config: GuardrailConfig | null = null;
+  
+  // Default configuration
+  private defaultConfig: GuardrailConfig = {
+    allowedDomains: [
+      "example.com",
+      "github.com",
+      "raw.githubusercontent.com",
+    ],
+    blockedTools: [],
+    sensitivePatterns: ["password", "secret", "token"],
+    enableDestructiveOperationCheck: true,
+  };
+
+  constructor() {
+    super();
+  }
 
   /**
    * The name of this hook
@@ -24,46 +40,73 @@ export class GuardrailHook implements Hook {
   }
 
   /**
+   * Configure the hook with guardrail settings
+   */
+  configure(config: GuardrailConfig | null): void {
+    this.config = config;
+    if (config) {
+      console.log(`GuardrailHook: Configured with custom settings`);
+    } else {
+      console.log(`GuardrailHook: Using default configuration`);
+    }
+  }
+
+  private getConfig(): GuardrailConfig {
+    return this.config || this.defaultConfig;
+  }
+
+  /**
    * Process an incoming tool call request
    */
   async processRequest(toolCall: ToolCall): Promise<HookResponse> {
     const { name, arguments: toolArgs } = toolCall;
+    const config = this.getConfig();
 
-    // Check for disallowed tools or operations
-    if (
-      name.toLowerCase().includes("delete") ||
-      name.toLowerCase().includes("remove")
-    ) {
+    // Check for explicitly blocked tools
+    if (config.blockedTools && config.blockedTools.includes(name)) {
       return {
         response: "abort",
-        body: `Tool call to '${name}' was blocked by guardrails: destructive operations are not allowed`,
-        reason: "Destructive operation detected",
+        body: `Tool call to '${name}' was blocked by guardrails: tool is in blocklist`,
+        reason: "Tool is explicitly blocked",
       };
     }
 
-    // Check for sensitive data in arguments (simple example)
+    // Check for destructive operations if enabled
+    if (config.enableDestructiveOperationCheck) {
+      if (
+        name.toLowerCase().includes("delete") ||
+        name.toLowerCase().includes("remove")
+      ) {
+        return {
+          response: "abort",
+          body: `Tool call to '${name}' was blocked by guardrails: destructive operations are not allowed`,
+          reason: "Destructive operation detected",
+        };
+      }
+    }
+
+    // Check for sensitive data in arguments
     const argsStr = JSON.stringify(toolArgs).toLowerCase();
-    if (
-      argsStr.includes("password") ||
-      argsStr.includes("secret") ||
-      argsStr.includes("token")
-    ) {
-      return {
-        response: "abort",
-        body: `Tool call to '${name}' was blocked by guardrails: sensitive data detected in arguments`,
-        reason: "Sensitive data detected",
-      };
+    const sensitivePatterns = config.sensitivePatterns || [];
+    for (const pattern of sensitivePatterns) {
+      if (argsStr.includes(pattern.toLowerCase())) {
+        return {
+          response: "abort",
+          body: `Tool call to '${name}' was blocked by guardrails: sensitive data detected in arguments`,
+          reason: "Sensitive data detected",
+        };
+      }
     }
 
-    // Example: Domain validation for fetch-docs MCP server
-    // This demonstrates how to restrict which domains the fetch-docs tool can access
-    // Customize this logic based on your specific MCP server's requirements
+    // Domain validation for URL-based tools
     if (
-      name.toLowerCase().includes("fetch") ||
-      name.toLowerCase().includes("http") ||
-      name.toLowerCase().includes("request")
+      config.allowedDomains &&
+      config.allowedDomains.length > 0 &&
+      (name.toLowerCase().includes("fetch") ||
+        name.toLowerCase().includes("http") ||
+        name.toLowerCase().includes("request"))
     ) {
-      // Validate URLs are from allowed domains (fetch-docs specific example)
+      // Validate URLs are from allowed domains
       if (
         typeof toolArgs === "object" &&
         toolArgs !== null &&
@@ -74,7 +117,7 @@ export class GuardrailHook implements Hook {
           const url = new URL(toolArgs.url);
 
           if (
-            !this.allowedDomains.some((domain) => url.hostname.endsWith(domain))
+            !config.allowedDomains.some((domain) => url.hostname.endsWith(domain))
           ) {
             return {
               response: "abort",

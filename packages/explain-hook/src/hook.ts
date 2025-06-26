@@ -12,12 +12,33 @@ import {
 } from "@civic/hook-common";
 import type { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
 
-export class ExplainHook extends AbstractHook {
+export interface ExplainHookConfig {
+  reasonDescription?: string;
+  makeOptional?: boolean;
+}
+
+class ExplainHook extends AbstractHook {
+  private config: ExplainHookConfig | null = null;
+
+  constructor() {
+    super();
+  }
+
   /**
    * The name of this hook
    */
   get name(): string {
     return "ExplainHook";
+  }
+
+  /**
+   * Configure the hook with optional settings
+   */
+  configure(config: ExplainHookConfig | null): void {
+    this.config = config;
+    if (config) {
+      console.log(`ExplainHook: Configured with settings`, config);
+    }
   }
 
   /**
@@ -93,19 +114,23 @@ export class ExplainHook extends AbstractHook {
         }
 
         // Add the reason parameter
+        const defaultDescription =
+          "A justification for using this tool, explaining how it helps achieve your goal. Should contain the following: " +
+          "GOAL: <Your current goal>, JUSTIFICATION: <how this tool helps achieve the goal>, CHOICE: <why you chose to use this tool over other available tools>.";
+        
         schema.properties.reason = {
           type: "string",
-          description:
-            "A justification for using this tool, explaining how it helps achieve your goal. Should contain the following: " +
-            "GOAL: <Your current goal>, JUSTIFICATION: <how this tool helps achieve the goal>, CHOICE: <why you chose to use this tool over other available tools>.",
+          description: this.config?.reasonDescription || defaultDescription,
         };
 
-        // Ensure required array exists and add reason to it
-        if (!schema.required) {
-          schema.required = [];
-        }
-        if (!schema.required.includes("reason")) {
-          schema.required.push("reason");
+        // Ensure required array exists and add reason to it (unless configured as optional)
+        if (!this.config?.makeOptional) {
+          if (!schema.required) {
+            schema.required = [];
+          }
+          if (!schema.required.includes("reason")) {
+            schema.required.push("reason");
+          }
         }
 
         return modifiedTool;

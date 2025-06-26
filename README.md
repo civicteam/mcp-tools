@@ -131,8 +131,11 @@ This monorepo contains everything you need to add a middleware layer to MCP:
 **@civic/passthrough-mcp-server**
 The main proxy server that intercepts MCP traffic and routes it through your hooks. This is the foundation that makes everything else possible.
 
+**@civic/passthrough-bundle**
+All-in-one Docker image that includes the passthrough server and all built-in hooks. The easiest way to get started with MCP hooks in production. Hooks are loaded dynamically based on configuration, providing better performance than remote hooks.
+
 **@civic/passthrough-proxy-builder**
-CLI tool that generates Docker-based MCP proxy configurations with your choice of hooks. Create a production-ready proxy in minutes without writing any code.
+CLI tool that generates Docker-based MCP proxy configurations with your choice of hooks. Create a production-ready proxy in minutes without writing any code. Generates configurations that work with passthrough-bundle.
 
 **@civic/hook-common**
 Shared utilities and TypeScript types for building hooks. Provides the `AbstractHook` base class that makes creating new hooks straightforward.
@@ -210,7 +213,7 @@ This interactive wizard will:
 1. Ask about your target MCP server (local command or remote URL)
 2. Let you select which hooks to enable
 3. Allow you to order hooks for request processing
-4. Generate a complete Docker configuration
+4. Generate a complete Docker configuration using the passthrough-bundle image
 
 After the wizard completes:
 
@@ -219,7 +222,7 @@ cd my-proxy
 docker compose up
 ```
 
-Your proxy is now running with all selected hooks active!
+Your proxy is now running with all selected hooks active! The generated configuration uses the `civicteam/passthrough-bundle` Docker image, which includes all built-in hooks for optimal performance.
 
 #### Non-Interactive Usage
 

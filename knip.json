@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignore": [
+    "packages/passthrough-mcp-server/examples/**"
+  ],
+  "ignoreDependencies": [
+    "@civic/audit-hook",
+    "@civic/custom-description-hook",
+    "@civic/explain-hook",
+    "@civic/guardrail-hook",
+    "@civic/simple-log-hook"
+  ]
+}

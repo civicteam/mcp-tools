@@ -4,17 +4,58 @@
  * Implements the Hook interface for audit logging
  */
 
-import type { Hook, HookResponse, ToolCall } from "@civic/hook-common";
+import { AbstractHook, type HookResponse, type ToolCall } from "@civic/hook-common";
+import { CompositeAuditLogger } from "./audit/composite-logger.js";
+import { ConsoleAuditLogger } from "./audit/console-logger.js";
+import { FileAuditLogger } from "./audit/file-logger.js";
 import type { AuditEntry, AuditLogger } from "./audit/types.js";
 
-export class AuditHook implements Hook {
-  constructor(private auditLogger: AuditLogger) {}
+export interface AuditHookConfig {
+  loggers?: Array<"console" | "file" | { custom: AuditLogger }>;
+  fileLogPath?: string;
+}
+
+class AuditHook extends AbstractHook {
+  private auditLogger: AuditLogger;
+
+  constructor() {
+    super();
+    // Default to console logger
+    this.auditLogger = new ConsoleAuditLogger();
+  }
 
   /**
    * The name of this hook
    */
   get name(): string {
     return "AuditHook";
+  }
+
+  /**
+   * Configure the hook with audit settings
+   */
+  configure(config: AuditHookConfig | null): void {
+    if (!config || !config.loggers || config.loggers.length === 0) {
+      // Use default console logger
+      this.auditLogger = new ConsoleAuditLogger();
+      console.log("AuditHook: Using default console logger");
+      return;
+    }
+
+    const loggers: AuditLogger[] = [];
+    
+    for (const loggerConfig of config.loggers) {
+      if (loggerConfig === "console") {
+        loggers.push(new ConsoleAuditLogger());
+      } else if (loggerConfig === "file") {
+        loggers.push(new FileAuditLogger(config.fileLogPath || "./audit.log"));
+      } else if (typeof loggerConfig === "object" && "custom" in loggerConfig) {
+        loggers.push(loggerConfig.custom);
+      }
+    }
+
+    this.auditLogger = loggers.length === 1 ? loggers[0] : new CompositeAuditLogger(loggers);
+    console.log(`AuditHook: Configured with ${loggers.length} logger(s)`);
   }
 
   /**

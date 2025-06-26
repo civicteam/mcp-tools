@@ -12,7 +12,7 @@ import * as process from "node:process";
 import type { Hook } from "@civic/hook-common";
 import { configureLoggerForStdio, logger } from "./logger.js";
 
-export type TransportType = "stdio" | "sse" | "httpStream";
+type TransportType = "stdio" | "sse" | "httpStream";
 
 // Base configuration with discriminated union based on transport type
 export type BaseConfig =

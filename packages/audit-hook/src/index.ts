@@ -14,12 +14,9 @@ import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import dotenv from "dotenv";
 import {
   type AuditLogger,
-  CompositeAuditLogger,
-  ConsoleAuditLogger,
-  FileAuditLogger,
   PostgresAuditLogger,
 } from "./audit/index.js";
-import { AuditHook } from "./hook.js";
+import AuditHook from "./hook.js";
 
 // Load environment variables from .env file if it exists
 dotenv.config();
@@ -30,26 +27,24 @@ const LOG_FILE = process.env.LOG_FILE || path.join(process.cwd(), "audit.log");
 const POSTGRES_URL = process.env.POSTGRES_URL;
 const ENABLE_CONSOLE_LOGGER = process.env.ENABLE_CONSOLE_LOGGER === "true";
 
-// Create the composite audit logger
-const compositeLogger = new CompositeAuditLogger();
+// Create the audit hook
+const auditHook = new AuditHook();
+
+// Configure based on environment
+const loggers: Array<"console" | "file" | { custom: AuditLogger }> = [];
 
 // Always add file logger by default
-compositeLogger.addLogger(new FileAuditLogger(LOG_FILE));
+loggers.push("file");
 
 // Add console logger if enabled
 if (ENABLE_CONSOLE_LOGGER) {
-  compositeLogger.addLogger(
-    new ConsoleAuditLogger({
-      verbose: process.env.NODE_ENV !== "production",
-      useColors: true,
-    }),
-  );
+  loggers.push("console");
 }
 
 // Add Postgres logger if connection string is provided
 if (POSTGRES_URL) {
-  compositeLogger.addLogger(
-    new PostgresAuditLogger({
+  loggers.push({
+    custom: new PostgresAuditLogger({
       connectionConfig: {
         connectionString: POSTGRES_URL,
       },
@@ -57,14 +52,14 @@ if (POSTGRES_URL) {
       batchInserts: process.env.NODE_ENV === "production",
       batchSize: 20,
     }),
-  );
+  });
 }
 
-// Use the composite logger for all auditing
-const auditLogger: AuditLogger = compositeLogger;
-
-// Create the audit hook
-const auditHook = new AuditHook(auditLogger);
+// Configure the hook
+auditHook.configure({
+  loggers,
+  fileLogPath: LOG_FILE,
+});
 
 // Create the tRPC router
 const router = createHookRouter(auditHook);
