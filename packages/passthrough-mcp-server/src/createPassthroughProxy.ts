@@ -9,17 +9,11 @@ import crypto from "node:crypto";
 import { createAuthProxyServer } from "./server/authProxy.js";
 import { createMCPHandler } from "./server/mcpHandler.js";
 import { createStdioServer } from "./server/stdioHandler.js";
-import type { ClientFactory } from "./types/client.js";
 import type { Config } from "./utils/config.js";
 import { logger } from "./utils/logger.js";
-import { clearAllSessions, setSessionClientFactory } from "./utils/session.js";
+
 
 export type PassthroughProxyOptions = Config & {
-  /**
-   * Optional custom client factory for creating target clients
-   */
-  clientFactory?: ClientFactory;
-
   /**
    * Whether to start the server immediately after creation
    * @default true
@@ -98,14 +92,13 @@ export interface PassthroughProxy {
 export async function createPassthroughProxy(
   options: PassthroughProxyOptions,
 ): Promise<PassthroughProxy> {
-  const { clientFactory, autoStart = true, ...config } = options;
+  const { autoStart = true, ...config } = options;
 
-  // Configure the session client factory
-  setSessionClientFactory(clientFactory);
 
-  // For stdio transport, use the MCP SDK implementation
+
+  // For stdio transport, use the message handler
   if (config.transportType === "stdio") {
-    const { server, transport } = await createStdioServer(config);
+    const { transport, messageHandler } = await createStdioServer(config);
 
     let isStarted = false;
 
@@ -115,7 +108,6 @@ export async function createPassthroughProxy(
         return;
       }
 
-      await server.connect(transport);
       await transport.start();
       isStarted = true;
 
@@ -130,9 +122,8 @@ export async function createPassthroughProxy(
         return;
       }
 
-      await clearAllSessions();
+
       await transport.close();
-      await server.close();
       isStarted = false;
       logger.info("Passthrough MCP Server stopped");
     };
@@ -141,7 +132,7 @@ export async function createPassthroughProxy(
       await start();
     }
 
-    return { server: server as unknown, start, stop };
+    return { server: transport as unknown, start, stop };
   }
 
   // For HTTP-based transports, use new auth-compliant implementation
@@ -196,7 +187,6 @@ export async function createPassthroughProxy(
       return;
     }
 
-    await clearAllSessions();
 
     await new Promise<void>((resolve, reject) => {
       httpServer.close((err) => {

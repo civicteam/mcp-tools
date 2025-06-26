@@ -68,4 +68,3 @@ app.listen(PORT, () => {
   );
   console.log("\nMCP clients will authenticate directly with Civic Auth!");
 });
-

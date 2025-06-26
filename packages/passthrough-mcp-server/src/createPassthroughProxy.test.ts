@@ -37,10 +37,12 @@ vi.mock("./server/authProxy.js", () => ({
 }));
 
 vi.mock("./server/stdioHandler.js", () => ({
-  createStdioServer: vi.fn(() => Promise.resolve({
-    server: mockMcpServer,
-    transport: mockStdioTransport,
-  })),
+  createStdioServer: vi.fn(() =>
+    Promise.resolve({
+      server: mockMcpServer,
+      transport: mockStdioTransport,
+    }),
+  ),
 }));
 
 vi.mock("./utils/logger.js", () => ({

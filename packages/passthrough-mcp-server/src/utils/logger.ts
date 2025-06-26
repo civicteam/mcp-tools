@@ -44,9 +44,10 @@ export function configureLoggerForStdio(): void {
 /**
  * Get the logger instance
  */
-export function getLogger(): Logger {
+function getLogger(): Logger {
   return currentLogger;
 }
+
 
 /**
  * Convenience export for direct logging

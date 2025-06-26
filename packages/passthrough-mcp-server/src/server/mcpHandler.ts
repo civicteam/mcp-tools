@@ -1,19 +1,17 @@
 /**
  * MCP Protocol Handler Module
  *
- * Implements MCP server functionality using the MCP SDK directly.
- * Simply passes MCP requests to the target client with auth headers if present.
+ * Implements stateless HTTP proxying for MCP protocol messages.
+ * Transparently passes all MCP requests to the target server with auth headers.
  */
 
-import crypto from "node:crypto";
 import type http from "node:http";
-import { Readable } from "node:stream";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import type { JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
 import type { Config } from "../utils/config.js";
+import { messageFromError } from "../utils/error.js";
 import { logger } from "../utils/logger.js";
-import { createMCPServerWithAuth } from "./mcpServerAuth.js";
+import { MessageHandler } from "./messageHandler.js";
 
 export interface MCPHandlerOptions {
   config: Config;
@@ -25,63 +23,93 @@ export interface MCPHandlerOptions {
  */
 export async function createMCPHandler(options: MCPHandlerOptions) {
   const { config } = options;
+  const messageHandler = new MessageHandler(config);
 
   // Create handler function for HTTP requests
   return async function handleMCPRequest(
     req: http.IncomingMessage & { auth?: AuthInfo },
     res: http.ServerResponse,
   ): Promise<void> {
-    // Extract authorization headers if present
-    const authHeaders: Record<string, string> = {};
-    if (req.headers.authorization) {
-      authHeaders.authorization = req.headers.authorization;
-    }
+    logger.info(`[MCPHandler] Incoming HTTP request: ${req.method} ${req.url}`);
+    logger.info(`[MCPHandler] Headers: ${JSON.stringify(req.headers)}`);
 
-    // Buffer the request body
-    const chunks: Buffer[] = [];
-    for await (const chunk of req) {
-      chunks.push(chunk);
-    }
-    const requestBody = Buffer.concat(chunks);
+    try {
+      // Only handle POST requests
+      if (req.method !== "POST") {
+        res.writeHead(405, { "Content-Type": "text/plain" });
+        res.end("Method Not Allowed");
+        return;
+      }
 
-    // Create a new readable stream from the buffered body
-    const bufferedReq = Object.assign(Readable.from(requestBody), {
-      method: req.method,
-      headers: req.headers,
-      url: req.url,
-      socket: req.socket,
-      httpVersion: req.httpVersion,
-      auth: req.auth,
-    }) as http.IncomingMessage & { auth?: AuthInfo };
+      // Buffer the request body
+      const chunks: Buffer[] = [];
+      for await (const chunk of req) {
+        chunks.push(chunk);
+      }
+      const requestBody = Buffer.concat(chunks);
+      logger.info(`[MCPHandler] Request body: ${requestBody.toString()}`);
 
-    // Create a new MCP server for this request
-    const { server } = await createMCPServerWithAuth({
-      config,
-      authHeaders,
-    });
+      // Parse JSON-RPC message
+      let message: JSONRPCMessage;
+      try {
+        message = JSON.parse(requestBody.toString()) as JSONRPCMessage;
+      } catch (error) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            jsonrpc: "2.0",
+            error: {
+              code: -32700,
+              message: "Parse error",
+            },
+            id: null,
+          }),
+        );
+        return;
+      }
 
-    // Handle MCP request through httpStream transport
-    if (config.transportType === "httpStream") {
-      const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: options.sessionIdGenerator || (() => crypto.randomUUID()),
+      // Extract relevant headers to forward
+      const forwardHeaders: Record<string, string> = {};
+
+      // Always forward these headers if present
+      const headersToForward = [
+        "authorization",
+        "mcp-session-id",
+        "accept",
+        "accept-language",
+        "user-agent",
+      ];
+
+      for (const header of headersToForward) {
+        const value = req.headers[header];
+        if (value && typeof value === "string") {
+          forwardHeaders[header] = value;
+        }
+      }
+
+      // Process the message through the handler
+      const response = await messageHandler.handle(message, forwardHeaders);
+
+      // Send the response
+      res.writeHead(200, {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache",
       });
-
-      // Connect the server to the transport
-      await server.connect(transport);
-
-      // Handle the request
-      await transport.handleRequest(bufferedReq, res);
-    } else {
-      // For non-httpStream transports, return an error
-      res.writeHead(400);
-      res.end("Only httpStream transport is supported for HTTP requests");
+      res.end(JSON.stringify(response));
+    } catch (error) {
+      logger.error(`[MCPHandler] Unhandled error: ${messageFromError(error)}`);
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          jsonrpc: "2.0",
+          error: {
+            code: -32603,
+            message: "Internal error",
+            data: messageFromError(error),
+          },
+          id: null,
+        }),
+      );
     }
-
-    // Clean up after request
-    res.on("close", () => {
-      server
-        .close()
-        .catch((err: unknown) => logger.error(`Error closing server: ${err}`));
-    });
   };
 }

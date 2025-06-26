@@ -46,6 +46,7 @@ export type Config = BaseConfig & {
     name: string;
     version: string;
   };
+  authToken?: string; // Optional auth token for stdio transport
 };
 
 /**

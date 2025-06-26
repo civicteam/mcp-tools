@@ -49,7 +49,7 @@ export function createAuthProxyServer(
 /**
  * Proxies a request directly to the target server
  */
-export async function proxyToTarget(
+async function proxyToTarget(
   req: http.IncomingMessage,
   res: http.ServerResponse,
   targetUrl: URL,
