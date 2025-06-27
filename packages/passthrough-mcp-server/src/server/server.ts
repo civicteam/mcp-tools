@@ -6,13 +6,14 @@
  * registers all available tools from the target server.
  */
 
-import type { ToolsListRequest } from "@civic/hook-common";
+import type { HookContext, ToolsListRequest } from "@civic/hook-common";
 import type {
   ListToolsResult,
   Tool as MCPTool,
 } from "@modelcontextprotocol/sdk/types.js";
 import { FastMCP, type Tool as FastMCPTool } from "fastmcp";
 import type { ZodType, ZodTypeDef } from "zod";
+import { PassthroughServerHookContext } from "../context/PassthroughServerHookContext.js";
 import { getHookClients } from "../hooks/manager.js";
 import {
   processToolsListRequestThroughHooks,
@@ -24,6 +25,7 @@ import { logger } from "../utils/logger.js";
 import { extractToolParameters } from "../utils/schemaConverter.js";
 import {
   DEFAULT_SESSION_ID,
+  clearSession,
   generateSessionId,
   getOrCreateSessionForRequest,
 } from "../utils/session.js";
@@ -89,7 +91,7 @@ export async function discoverAndRegisterTools(
   const toolsListRequest: ToolsListRequest = {
     method: "tools/list",
     metadata: {
-      sessionId: "discovery",
+      sessionId: DEFAULT_SESSION_ID,
       timestamp: new Date().toISOString(),
       source: "passthrough-server",
     },
@@ -98,10 +100,26 @@ export async function discoverAndRegisterTools(
   // Get hook clients
   const hookClients = getHookClients(config);
 
+  // Create hook context
+  const hookContext: HookContext = new PassthroughServerHookContext({
+    sessionId: DEFAULT_SESSION_ID,
+    targetClient: sessionData.targetClient,
+    recreateTargetClient: async () => {
+      // Clear current session and recreate it
+      await clearSession(DEFAULT_SESSION_ID);
+      const newSessionData = await getOrCreateSessionForRequest(
+        DEFAULT_SESSION_ID,
+        config,
+      );
+      return newSessionData.targetClient;
+    },
+  });
+
   // Process the tools/list request through hooks
   const requestResult = await processToolsListRequestThroughHooks(
     toolsListRequest,
     hookClients,
+    hookContext,
   );
 
   // If request was rejected by a hook
@@ -134,6 +152,7 @@ export async function discoverAndRegisterTools(
       requestResult.request,
       hookClients,
       startIndex,
+      hookContext,
     );
 
     if (responseResult.wasRejected) {

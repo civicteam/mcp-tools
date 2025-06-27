@@ -51,6 +51,14 @@ export type HookResponse = z.infer<typeof HookResponseSchema>;
 export type ToolCallMetadata = z.infer<typeof ToolCallMetadataSchema>;
 
 /**
+ * Generic hook context interface that can hold typed contextual information
+ */
+export interface HookContext<TData = unknown, TType extends string = string> {
+  readonly contextType: TType;
+  readonly data: TData;
+}
+
+/**
  * Hook interface that all hooks must implement
  */
 export interface Hook {
@@ -62,7 +70,10 @@ export interface Hook {
   /**
    * Process an incoming tool call request
    */
-  processRequest(toolCall: ToolCall): Promise<HookResponse>;
+  processRequest(
+    toolCall: ToolCall,
+    context?: HookContext,
+  ): Promise<HookResponse>;
 
   /**
    * Process a tool call response
@@ -70,12 +81,16 @@ export interface Hook {
   processResponse(
     response: unknown,
     originalToolCall: ToolCall,
+    context?: HookContext,
   ): Promise<HookResponse>;
 
   /**
    * Process a tools/list request (optional)
    */
-  processToolsList?(request: ToolsListRequest): Promise<HookResponse>;
+  processToolsList?(
+    request: ToolsListRequest,
+    context?: HookContext,
+  ): Promise<HookResponse>;
 
   /**
    * Process a tools/list response (optional)
@@ -83,6 +98,7 @@ export interface Hook {
   processToolsListResponse?(
     response: ListToolsResult,
     originalRequest: ToolsListRequest,
+    context?: HookContext,
   ): Promise<HookResponse>;
 
   /**
@@ -91,5 +107,6 @@ export interface Hook {
   processToolException?(
     error: unknown,
     originalToolCall: ToolCall,
+    context?: HookContext,
   ): Promise<HookResponse>;
 }

@@ -43,7 +43,7 @@ describe("Hook Processor", () => {
       expect(result.wasRejected).toBe(false);
       expect(result.toolCall).toEqual(toolCall);
       expect(result.lastProcessedIndex).toBe(0);
-      expect(mockHook.processRequest).toHaveBeenCalledWith(toolCall);
+      expect(mockHook.processRequest).toHaveBeenCalledWith(toolCall, undefined);
     });
 
     it("should handle hook rejection", async () => {
@@ -302,6 +302,7 @@ describe("Hook Processor", () => {
       expect(mockHook.processToolException).toHaveBeenCalledWith(
         error,
         toolCall,
+        undefined,
       );
     });
 
@@ -340,6 +341,7 @@ describe("Hook Processor", () => {
       expect(mockHook.processToolException).toHaveBeenCalledWith(
         httpError,
         toolCall,
+        undefined,
       );
     });
 
@@ -367,6 +369,7 @@ describe("Hook Processor", () => {
       expect(mockHook.processToolException).toHaveBeenCalledWith(
         error,
         toolCall,
+        undefined,
       );
     });
 
@@ -399,7 +402,7 @@ describe("Hook Processor", () => {
       expect(result.wasHandled).toBe(true);
       expect(
         hookWithExceptionHandling.processToolException,
-      ).toHaveBeenCalledWith(error, toolCall);
+      ).toHaveBeenCalledWith(error, toolCall, undefined);
     });
 
     it("should stop processing when first hook handles exception", async () => {
@@ -501,6 +504,7 @@ describe("Hook Processor", () => {
       expect(mockHook.processToolException).toHaveBeenCalledWith(
         error,
         toolCall,
+        undefined,
       );
     });
   });

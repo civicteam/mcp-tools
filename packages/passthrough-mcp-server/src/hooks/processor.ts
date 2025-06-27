@@ -6,6 +6,7 @@
 
 import type {
   HookClient,
+  HookContext,
   HookResponse,
   ToolCall,
   ToolsListRequest,
@@ -42,6 +43,7 @@ export interface ProcessExceptionResult {
 export async function processRequestThroughHooks(
   toolCall: ToolCall,
   hooks: HookClient[],
+  context?: HookContext,
 ): Promise<ProcessRequestResult> {
   let currentToolCall = toolCall;
   let wasRejected = false;
@@ -56,8 +58,10 @@ export async function processRequestThroughHooks(
       `Processing request through hook ${i + 1} (${hook.name}) for tool '${currentToolCall.name}'`,
     );
 
-    const hookResponse: HookResponse =
-      await hook.processRequest(currentToolCall);
+    const hookResponse: HookResponse = await hook.processRequest(
+      currentToolCall,
+      context,
+    );
     lastProcessedIndex = i;
 
     if (hookResponse.response === "continue") {
@@ -92,6 +96,7 @@ export async function processResponseThroughHooks(
   toolCall: ToolCall,
   hooks: HookClient[],
   startIndex: number,
+  context?: HookContext,
 ): Promise<ProcessResponseResult> {
   let currentResponse = response;
   let wasRejected = false;
@@ -109,6 +114,7 @@ export async function processResponseThroughHooks(
     const hookResponse: HookResponse = await hook.processResponse(
       currentResponse,
       toolCall,
+      context,
     );
     lastProcessedIndex = i;
     logger.info(`Response from hook: ${JSON.stringify(hookResponse, null, 2)}`);
@@ -145,6 +151,7 @@ export async function processResponseThroughHooks(
 export async function processToolsListRequestThroughHooks(
   request: ToolsListRequest,
   hooks: HookClient[],
+  context?: HookContext,
 ): Promise<ProcessRequestResult & { request: ToolsListRequest }> {
   let currentRequest = request;
   let wasRejected = false;
@@ -167,8 +174,10 @@ export async function processToolsListRequestThroughHooks(
       `Processing tools/list request through hook ${i + 1} (${hook.name})`,
     );
 
-    const hookResponse: HookResponse =
-      await hook.processToolsList(currentRequest);
+    const hookResponse: HookResponse = await hook.processToolsList(
+      currentRequest,
+      context,
+    );
     lastProcessedIndex = i;
 
     if (hookResponse.response === "continue") {
@@ -202,6 +211,7 @@ export async function processToolsListResponseThroughHooks(
   request: ToolsListRequest,
   hooks: HookClient[],
   startIndex: number,
+  context?: HookContext,
 ): Promise<ProcessResponseResult & { response: ListToolsResult }> {
   let currentResponse = response;
   let wasRejected = false;
@@ -227,6 +237,7 @@ export async function processToolsListResponseThroughHooks(
     const hookResponse: HookResponse = await hook.processToolsListResponse(
       currentResponse,
       request,
+      context,
     );
     lastProcessedIndex = i;
 
@@ -260,6 +271,7 @@ export async function processExceptionThroughHooks(
   error: unknown,
   toolCall: ToolCall,
   hooks: HookClient[],
+  context?: HookContext,
 ): Promise<ProcessExceptionResult> {
   let response: unknown = null;
   let wasHandled = false;
@@ -285,6 +297,7 @@ export async function processExceptionThroughHooks(
     const hookResponse: HookResponse = await hook.processToolException(
       error,
       toolCall,
+      context,
     );
     lastProcessedIndex = i;
 
