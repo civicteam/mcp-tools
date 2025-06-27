@@ -1,6 +1,7 @@
 import type { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
 import type {
   Hook,
+  HookContext,
   HookResponse,
   ToolCall,
   ToolsListRequest,
@@ -20,7 +21,10 @@ export abstract class AbstractHook implements Hook {
    * Process an incoming tool call request.
    * Default implementation passes through without modification.
    */
-  async processRequest(toolCall: ToolCall): Promise<HookResponse> {
+  async processRequest(
+    toolCall: ToolCall,
+    context?: HookContext,
+  ): Promise<HookResponse> {
     return {
       response: "continue",
       body: toolCall,
@@ -34,6 +38,7 @@ export abstract class AbstractHook implements Hook {
   async processResponse(
     response: unknown,
     originalToolCall: ToolCall,
+    context?: HookContext,
   ): Promise<HookResponse> {
     return {
       response: "continue",
@@ -45,7 +50,10 @@ export abstract class AbstractHook implements Hook {
    * Process a tools/list request.
    * Default implementation passes through without modification.
    */
-  async processToolsList?(request: ToolsListRequest): Promise<HookResponse> {
+  async processToolsList?(
+    request: ToolsListRequest,
+    context?: HookContext,
+  ): Promise<HookResponse> {
     return {
       response: "continue",
       body: request,
@@ -59,6 +67,7 @@ export abstract class AbstractHook implements Hook {
   async processToolsListResponse?(
     response: ListToolsResult,
     originalRequest: ToolsListRequest,
+    context?: HookContext,
   ): Promise<HookResponse> {
     return {
       response: "continue",
@@ -73,6 +82,7 @@ export abstract class AbstractHook implements Hook {
   async processToolException?(
     error: unknown,
     originalToolCall: ToolCall,
+    context?: HookContext,
   ): Promise<HookResponse> {
     return {
       response: "continue",

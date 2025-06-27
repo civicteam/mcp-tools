@@ -8,8 +8,9 @@
  * Uses tRPC-based hooks instead of MCP for hook communication.
  */
 
-import type { ToolCall } from "@civic/hook-common";
+import type { HookContext, ToolCall } from "@civic/hook-common";
 import type { Context } from "fastmcp";
+import { PassthroughServerHookContext } from "../context/PassthroughServerHookContext.js";
 import { getHookClients } from "../hooks/manager.js";
 import {
   processExceptionThroughHooks,
@@ -20,6 +21,7 @@ import type { Config } from "../utils/config.js";
 import { logger } from "../utils/logger.js";
 import {
   DEFAULT_SESSION_ID,
+  clearSession,
   getOrCreateSessionForRequest,
 } from "../utils/session.js";
 import { type AuthSessionData, getDiscoveredTools } from "./server.js";
@@ -71,10 +73,26 @@ export function createPassthroughHandler(config: Config, toolName: string) {
     // Get hook clients
     const hookClients = getHookClients(config);
 
+    // Create hook context
+    const hookContext: HookContext = new PassthroughServerHookContext({
+      sessionId,
+      targetClient: sessionData.targetClient,
+      recreateTargetClient: async () => {
+        // Clear current session and recreate it
+        await clearSession(sessionId);
+        const newSessionData = await getOrCreateSessionForRequest(
+          sessionId,
+          config,
+        );
+        return newSessionData.targetClient;
+      },
+    });
+
     // Process requests through hooks
     const requestResult = await processRequestThroughHooks(
       toolCall,
       hookClients,
+      hookContext,
     );
 
     // Initialize response
@@ -105,6 +123,7 @@ export function createPassthroughHandler(config: Config, toolName: string) {
           error,
           requestResult.toolCall,
           hookClients,
+          hookContext,
         );
 
         if (exceptionResult.wasHandled) {
@@ -142,6 +161,7 @@ export function createPassthroughHandler(config: Config, toolName: string) {
         requestResult.toolCall,
         hookClients,
         startIndex,
+        hookContext,
       );
 
       logger.info(`Response result: ${JSON.stringify(responseResult)}`);

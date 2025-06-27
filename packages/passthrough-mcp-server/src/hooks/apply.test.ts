@@ -59,7 +59,7 @@ describe("applyHooks", () => {
         data: { ...mockToolCall, modified: true },
         rejected: false,
       });
-      expect(hook.processRequest).toHaveBeenCalledWith(mockToolCall);
+      expect(hook.processRequest).toHaveBeenCalledWith(mockToolCall, undefined);
     });
 
     it("should apply multiple hooks in order", async () => {
@@ -79,11 +79,17 @@ describe("applyHooks", () => {
         data: { ...mockToolCall, hook1: true, hook2: true },
         rejected: false,
       });
-      expect(hook1.processRequest).toHaveBeenCalledWith(mockToolCall);
-      expect(hook2.processRequest).toHaveBeenCalledWith({
-        ...mockToolCall,
-        hook1: true,
-      });
+      expect(hook1.processRequest).toHaveBeenCalledWith(
+        mockToolCall,
+        undefined,
+      );
+      expect(hook2.processRequest).toHaveBeenCalledWith(
+        {
+          ...mockToolCall,
+          hook1: true,
+        },
+        undefined,
+      );
     });
 
     it("should handle hook rejection", async () => {
@@ -207,10 +213,12 @@ describe("applyHooks", () => {
       expect(hook2.processResponse).toHaveBeenCalledWith(
         mockResponse,
         mockToolCall,
+        undefined,
       );
       expect(hook1.processResponse).toHaveBeenCalledWith(
         { ...mockResponse, hook2: true },
         mockToolCall,
+        undefined,
       );
       expect(result.data).toEqual({ ...mockResponse, hook1: true });
     });

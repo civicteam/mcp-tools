@@ -2,26 +2,40 @@ import type { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
 import type { HookRouter } from "./router.js";
-import type { HookResponse, ToolCall, ToolsListRequest } from "./types.js";
+import type {
+  HookContext,
+  HookResponse,
+  ToolCall,
+  ToolsListRequest,
+} from "./types.js";
 
 /**
  * Hook client interface
  */
 export interface HookClient {
   readonly name: string;
-  processRequest(toolCall: ToolCall): Promise<HookResponse>;
+  processRequest(
+    toolCall: ToolCall,
+    context?: HookContext,
+  ): Promise<HookResponse>;
   processResponse(
     response: unknown,
     originalToolCall: ToolCall,
+    context?: HookContext,
   ): Promise<HookResponse>;
-  processToolsList?(request: ToolsListRequest): Promise<HookResponse>;
+  processToolsList?(
+    request: ToolsListRequest,
+    context?: HookContext,
+  ): Promise<HookResponse>;
   processToolsListResponse?(
     response: ListToolsResult,
     originalRequest: ToolsListRequest,
+    context?: HookContext,
   ): Promise<HookResponse>;
   processToolException?(
     error: unknown,
     originalToolCall: ToolCall,
+    context?: HookContext,
   ): Promise<HookResponse>;
 }
 
@@ -55,7 +69,10 @@ export class RemoteHookClient implements HookClient {
   /**
    * Process a tool call through the hook
    */
-  async processRequest(toolCall: ToolCall): Promise<HookResponse> {
+  async processRequest(
+    toolCall: ToolCall,
+    context?: HookContext,
+  ): Promise<HookResponse> {
     try {
       return await this.client.processRequest.mutate(toolCall);
     } catch (error) {
@@ -74,6 +91,7 @@ export class RemoteHookClient implements HookClient {
   async processResponse(
     response: unknown,
     originalToolCall: ToolCall,
+    context?: HookContext,
   ): Promise<HookResponse> {
     try {
       return await this.client.processResponse.mutate({
@@ -93,7 +111,10 @@ export class RemoteHookClient implements HookClient {
   /**
    * Process a tools/list request through the hook
    */
-  async processToolsList(request: ToolsListRequest): Promise<HookResponse> {
+  async processToolsList(
+    request: ToolsListRequest,
+    context?: HookContext,
+  ): Promise<HookResponse> {
     try {
       return await this.client.processToolsList.mutate(request);
     } catch (error) {
@@ -123,6 +144,7 @@ export class RemoteHookClient implements HookClient {
   async processToolsListResponse(
     response: ListToolsResult,
     originalRequest: ToolsListRequest,
+    context?: HookContext,
   ): Promise<HookResponse> {
     try {
       return await this.client.processToolsListResponse.mutate({
@@ -156,6 +178,7 @@ export class RemoteHookClient implements HookClient {
   async processToolException(
     error: unknown,
     originalToolCall: ToolCall,
+    context?: HookContext,
   ): Promise<HookResponse> {
     try {
       return await this.client.processToolException.mutate({

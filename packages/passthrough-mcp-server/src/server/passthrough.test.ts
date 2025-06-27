@@ -2,7 +2,7 @@
  * Tests for passthrough handler module
  */
 
-import type { ToolCall } from "@civic/hook-common";
+import type { HookContext, HookResponse, ToolCall } from "@civic/hook-common";
 import type { Context } from "fastmcp";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPassthroughHandler } from "./passthrough.js";
@@ -31,6 +31,7 @@ vi.mock("../utils/logger.js", () => ({
 vi.mock("../utils/session.js", () => ({
   DEFAULT_SESSION_ID: "default",
   getOrCreateSessionForRequest: vi.fn(),
+  clearSession: vi.fn(),
 }));
 
 vi.mock("./server.js", () => ({
@@ -128,6 +129,7 @@ describe("createPassthroughHandler", () => {
           arguments: { url: "https://example.com" },
         }),
         [],
+        expect.any(Object),
       );
 
       expect(result).toEqual({
@@ -169,6 +171,7 @@ describe("createPassthroughHandler", () => {
           arguments: { url: "https://example.com" },
         }),
         [],
+        expect.any(Object),
       );
     });
 
@@ -200,6 +203,7 @@ describe("createPassthroughHandler", () => {
           arguments: { url: "https://example.com" },
         }),
         [],
+        expect.any(Object),
       );
 
       expect(result).toEqual({ message: "Handled string error" });
@@ -242,6 +246,7 @@ describe("createPassthroughHandler", () => {
           arguments: { url: "https://example.com" },
         }),
         [],
+        expect.any(Object),
       );
 
       expect(result.content[0].text).toBe(
@@ -288,6 +293,7 @@ describe("createPassthroughHandler", () => {
           arguments: { url: "https://example.com" },
         }),
         [],
+        expect.any(Object),
       );
 
       expect(result.content[0].text).toBe(
@@ -333,6 +339,243 @@ describe("createPassthroughHandler", () => {
       expect(mockSessionData.targetClient.callTool).toHaveBeenCalled();
       expect(processExceptionThroughHooks).not.toHaveBeenCalled();
       expect(result).toEqual({ result: "success", data: "test" });
+    });
+  });
+
+  describe("typed context usage", () => {
+    it("should demonstrate hook using PassthroughServerHookContext for error recovery", async () => {
+      const { processExceptionThroughHooks } = vi.mocked(
+        await import("../hooks/processor.js"),
+      );
+
+      // Import the typed context classes
+      const { PassthroughServerHookContext, getPassthroughServerContext } =
+        await import("../context/PassthroughServerHookContext.js");
+
+      // Create a hook that uses typed context access
+      const mockHookClient = {
+        name: "recovery-hook",
+        processToolException: vi.fn(
+          async (
+            error: unknown,
+            toolCall: ToolCall,
+            context?: HookContext,
+          ): Promise<HookResponse> => {
+            // Safe typed context access
+            const passthroughContext = getPassthroughServerContext(context);
+
+            if (!passthroughContext) {
+              return { response: "continue", body: null };
+            }
+
+            if (
+              error instanceof Error &&
+              error.message.includes("Connection")
+            ) {
+              try {
+                // Type-safe access to passthrough functionality
+                const newClient = await passthroughContext.recreateClient();
+
+                return {
+                  response: "abort",
+                  body: {
+                    content: [
+                      {
+                        type: "text",
+                        text: `Connection recovered for session ${passthroughContext.sessionId}. Please retry.`,
+                      },
+                    ],
+                  },
+                  reason: "Connection recovered",
+                };
+              } catch (recoveryError) {
+                return {
+                  response: "abort",
+                  body: {
+                    content: [
+                      {
+                        type: "text",
+                        text: "Unable to recover connection. Please check your network.",
+                      },
+                    ],
+                  },
+                  reason: "Recovery failed",
+                };
+              }
+            }
+
+            return { response: "continue", body: null };
+          },
+        ),
+      };
+
+      // Setup error scenario
+      const connectionError = new Error("Connection failed");
+      mockSessionData.targetClient.callTool.mockRejectedValue(connectionError);
+
+      // Mock the recreate function to succeed
+      const newMockClient = {
+        callTool: vi.fn(),
+        listTools: vi.fn(),
+        close: vi.fn(),
+      };
+      const { clearSession, getOrCreateSessionForRequest } = vi.mocked(
+        await import("../utils/session.js"),
+      );
+      getOrCreateSessionForRequest.mockResolvedValueOnce(mockSessionData);
+      getOrCreateSessionForRequest.mockResolvedValueOnce({
+        ...mockSessionData,
+        targetClient: newMockClient,
+      });
+
+      // Mock the exception processor to call our hook
+      processExceptionThroughHooks.mockImplementation(
+        async (error, toolCall, hookClients, context) => {
+          const hookResponse = await hookClients[0].processToolException?.(
+            error,
+            toolCall,
+            context,
+          );
+          return {
+            wasHandled: hookResponse?.response === "abort",
+            response: hookResponse?.body,
+            reason: hookResponse?.reason,
+            lastProcessedIndex: 0,
+          };
+        },
+      );
+
+      // Reset response processing to not interfere with exception handling
+      const { processResponseThroughHooks } = vi.mocked(
+        await import("../hooks/processor.js"),
+      );
+      processResponseThroughHooks.mockImplementation(async (response) => ({
+        response,
+        wasRejected: false,
+        lastProcessedIndex: 0,
+      }));
+
+      // Mock hook clients
+      const { getHookClients } = vi.mocked(await import("../hooks/manager.js"));
+      getHookClients.mockReturnValue([mockHookClient]);
+
+      const handler = createPassthroughHandler(mockConfig, "fetch");
+      const result = await handler({ url: "https://example.com" }, mockContext);
+
+      // Verify the hook used typed context properly
+      expect(mockHookClient.processToolException).toHaveBeenCalledWith(
+        connectionError,
+        expect.objectContaining({ name: "fetch" }),
+        expect.any(PassthroughServerHookContext),
+      );
+
+      // Verify the recovery response
+      expect(result).toEqual({
+        content: [
+          {
+            type: "text",
+            text: "Connection recovered for session test-session. Please retry.",
+          },
+        ],
+      });
+
+      // Verify clearSession was called (part of recreateTargetClient)
+      expect(clearSession).toHaveBeenCalledWith("test-session");
+    });
+
+    it("should demonstrate hook using typed context for request enrichment", async () => {
+      // Reset the mock to ensure clean state
+      mockSessionData.targetClient.callTool.mockReset();
+      mockSessionData.targetClient.callTool.mockResolvedValue({
+        result: "success",
+      });
+
+      const { processRequestThroughHooks } = vi.mocked(
+        await import("../hooks/processor.js"),
+      );
+
+      // Import the typed context classes
+      const { PassthroughServerHookContext, getPassthroughServerContext } =
+        await import("../context/PassthroughServerHookContext.js");
+
+      // Create a hook that uses typed context for enrichment
+      const mockHookClient = {
+        name: "enrichment-hook",
+        processRequest: vi.fn(
+          async (
+            toolCall: ToolCall,
+            context?: HookContext,
+          ): Promise<HookResponse> => {
+            // Safe typed context access
+            const passthroughContext = getPassthroughServerContext(context);
+
+            if (!passthroughContext) {
+              return { response: "continue", body: toolCall };
+            }
+
+            // Type-safe access to session ID and target client
+            const sessionId = passthroughContext.sessionId;
+            const targetClient = passthroughContext.getTargetClient<any>();
+
+            // Enrich the tool call with session and client information
+            const enrichedToolCall = {
+              ...toolCall,
+              arguments: {
+                ...toolCall.arguments,
+                _sessionContext: {
+                  sessionId,
+                  hasTargetClient: !!targetClient,
+                  timestamp: new Date().toISOString(),
+                },
+              },
+            };
+
+            return { response: "continue", body: enrichedToolCall };
+          },
+        ),
+      };
+
+      // Mock processRequestThroughHooks to call our hook
+      processRequestThroughHooks.mockImplementation(
+        async (toolCall, hookClients, context) => {
+          const hookResponse = await hookClients[0].processRequest(
+            toolCall,
+            context,
+          );
+          return {
+            toolCall: hookResponse.body as ToolCall,
+            wasRejected: false,
+            lastProcessedIndex: 0,
+          };
+        },
+      );
+
+      // Mock hook clients
+      const { getHookClients } = vi.mocked(await import("../hooks/manager.js"));
+      getHookClients.mockReturnValue([mockHookClient]);
+
+      const handler = createPassthroughHandler(mockConfig, "fetch");
+      await handler({ url: "https://example.com" }, mockContext);
+
+      // Verify the hook was called with typed context
+      expect(mockHookClient.processRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ name: "fetch" }),
+        expect.any(PassthroughServerHookContext),
+      );
+
+      // Verify the final tool call was enriched
+      expect(mockSessionData.targetClient.callTool).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: "fetch",
+          arguments: expect.objectContaining({
+            url: "https://example.com",
+            _sessionContext: expect.objectContaining({
+              sessionId: "test-session",
+              hasTargetClient: true,
+            }),
+          }),
+        }),
+      );
     });
   });
 });
