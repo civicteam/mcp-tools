@@ -10,12 +10,25 @@ import type {
  * Abstract base class for hooks that provides default pass-through implementations
  * for all hook methods. Extend this class to create custom hooks and override
  * only the methods you need.
+ *
+ * @template TConfig The type of configuration this hook accepts
  */
-export abstract class AbstractHook implements Hook {
+export abstract class AbstractHook<TConfig = any> implements Hook {
   /**
    * The name of this hook. Must be implemented by subclasses.
    */
   abstract get name(): string;
+
+  /**
+   * Configure the hook with the provided configuration.
+   * Subclasses should override this to handle their specific configuration.
+   *
+   * @param config The configuration object or null for default configuration
+   */
+  configure(config: TConfig | null): void {
+    // Default implementation does nothing
+    // Subclasses should override this method
+  }
   /**
    * Process an incoming tool call request.
    * Default implementation passes through without modification.

@@ -16,7 +16,6 @@ export type {
   TargetConfig,
   BaseConfig,
   HookDefinition,
-  RemoteHookConfig,
 } from "./utils/config.js";
 export type { ClientFactory, PassthroughClient } from "./types/client.js";
 export type {

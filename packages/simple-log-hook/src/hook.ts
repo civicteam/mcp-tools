@@ -9,21 +9,26 @@ import {
   type HookResponse,
   type ToolCall,
 } from "@civic/hook-common";
+import { z } from "zod";
 
-export interface SimpleLogConfig {
-  logLevel?: "verbose" | "normal";
-  prefix?: string;
-}
+/**
+ * Configuration schema for SimpleLogHook
+ */
+export const configSchema = z.object({
+  logLevel: z
+    .enum(["verbose", "normal"])
+    .describe("Logging verbosity level")
+    .default("normal"),
+  prefix: z.string().describe("Prefix for log messages").optional(),
+});
+
+export type SimpleLogConfig = z.infer<typeof configSchema>;
 
 /**
  * Minimal hook implementation that logs to console
  */
-class SimpleLogHook extends AbstractHook {
+class SimpleLogHook extends AbstractHook<SimpleLogConfig> {
   private config: SimpleLogConfig | null = null;
-
-  constructor() {
-    super();
-  }
 
   /**
    * The name of this hook
@@ -38,16 +43,19 @@ class SimpleLogHook extends AbstractHook {
   configure(config: SimpleLogConfig | null): void {
     this.config = config;
     if (config) {
-      console.log(`SimpleLogHook: Configured with settings`, config);
+      console.log("SimpleLogHook: Configured with settings", config);
     }
   }
 
   async processRequest(toolCall: ToolCall): Promise<HookResponse> {
     const prefix = this.config?.prefix || "";
     const logPrefix = prefix ? `${prefix} ` : "";
-    
+
     if (this.config?.logLevel === "verbose") {
-      console.log(`${logPrefix}[REQUEST] ${toolCall.name}`, JSON.stringify(toolCall.arguments, null, 2));
+      console.log(
+        `${logPrefix}[REQUEST] ${toolCall.name}`,
+        JSON.stringify(toolCall.arguments, null, 2),
+      );
     } else {
       console.log(`${logPrefix}[REQUEST] ${toolCall.name}`, toolCall.arguments);
     }
@@ -62,9 +70,12 @@ class SimpleLogHook extends AbstractHook {
   ): Promise<HookResponse> {
     const prefix = this.config?.prefix || "";
     const logPrefix = prefix ? `${prefix} ` : "";
-    
+
     if (this.config?.logLevel === "verbose") {
-      console.log(`${logPrefix}[RESPONSE] ${originalToolCall.name}`, JSON.stringify(response, null, 2));
+      console.log(
+        `${logPrefix}[RESPONSE] ${originalToolCall.name}`,
+        JSON.stringify(response, null, 2),
+      );
     } else {
       console.log(`${logPrefix}[RESPONSE] ${originalToolCall.name}`, response);
     }

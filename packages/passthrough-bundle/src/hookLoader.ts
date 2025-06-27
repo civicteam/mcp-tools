@@ -5,8 +5,9 @@
  * and creation of hook configurations
  */
 
-import type { Hook } from "@civic/hook-common";
+import type { Hook, HookConfig, RemoteHookConfig } from "@civic/hook-common";
 import type { HookDefinition } from "@civic/passthrough-mcp-server";
+import type { HookInstanceConfig } from "./config/types.js";
 
 /**
  * Map of built-in hook names to their package names
@@ -20,9 +21,12 @@ const HOOK_PACKAGE_MAP: Record<string, string> = {
 };
 
 /**
- * Load a built-in hook by name
+ * Load a built-in hook by name and apply configuration
  */
-async function loadBuiltinHook(hookName: string): Promise<Hook> {
+async function loadBuiltinHook(
+  hookName: string,
+  config?: HookConfig,
+): Promise<Hook> {
   const packageName = HOOK_PACKAGE_MAP[hookName];
   if (!packageName) {
     throw new Error(
@@ -43,19 +47,18 @@ async function loadBuiltinHook(hookName: string): Promise<Hook> {
       );
     }
 
-    // For audit-hook, we need to pass an audit logger
-    // For now, we'll use a simple console logger
-    let hookInstance: Hook;
-    if (hookName === "AuditHook") {
-      // Create a simple console audit logger
-      const consoleAuditLogger = {
-        async log(entry: unknown): Promise<void> {
-          console.log("[AUDIT]", JSON.stringify(entry, null, 2));
-        },
-      };
-      hookInstance = new HookClass(consoleAuditLogger);
-    } else {
-      hookInstance = new HookClass();
+    // Create hook instance with empty constructor
+    const hookInstance: Hook = new HookClass();
+
+    // Apply configuration if the hook has a configure method
+    if (
+      config &&
+      "configure" in hookInstance &&
+      typeof hookInstance.configure === "function"
+    ) {
+      hookInstance.configure(config);
+    } else if (config) {
+      console.warn(`Hook ${hookName} does not support configuration`);
     }
 
     return hookInstance;
@@ -68,29 +71,24 @@ async function loadBuiltinHook(hookName: string): Promise<Hook> {
   }
 }
 
+const isRemoteHookConfig = (
+  hookConfig: HookInstanceConfig,
+): hookConfig is RemoteHookConfig => {
+  return "url" in hookConfig;
+};
+
 /**
  * Create a hook definition from a hook configuration
  */
-export async function createHookDefinition(hookConfig: {
-  name?: string;
-  url?: string;
-}): Promise<HookDefinition> {
-  // If it has a URL, it's a remote hook
-  if (hookConfig.url) {
-    const result: HookDefinition = {
-      url: hookConfig.url,
-    };
-    if (hookConfig.name) {
-      result.name = hookConfig.name;
-    }
-    return result;
-  }
+export async function createHookDefinition(
+  hookConfig: HookInstanceConfig,
+): Promise<HookDefinition> {
+  if (isRemoteHookConfig(hookConfig)) return hookConfig;
 
-  // For built-in hooks, load them dynamically
-  if (hookConfig.name && hookConfig.name in HOOK_PACKAGE_MAP) {
-    const hookInstance = await loadBuiltinHook(hookConfig.name);
+  // For built-in hooks, load them dynamically with configuration
+  if (hookConfig.name in HOOK_PACKAGE_MAP) {
     // Return the Hook instance directly - passthrough-mcp-server will wrap it
-    return hookInstance;
+    return loadBuiltinHook(hookConfig.name, hookConfig.config);
   }
 
   throw new Error(
@@ -105,7 +103,7 @@ export async function createHookDefinition(hookConfig: {
  * Load all hooks from a configuration
  */
 export async function loadHooks(
-  hooksConfig: Array<{ name?: string; url?: string }>,
+  hooksConfig: HookInstanceConfig[],
 ): Promise<HookDefinition[]> {
   const hookDefinitions: HookDefinition[] = [];
 
@@ -115,7 +113,7 @@ export async function loadHooks(
       hookDefinitions.push(definition);
     } catch (error) {
       console.error(
-        `Failed to load hook ${hookConfig.name || hookConfig.url}: ${
+        `Failed to load hook ${hookConfig.name}: ${
           error instanceof Error ? error.message : String(error)
         }`,
       );

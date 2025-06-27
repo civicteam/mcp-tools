@@ -58,7 +58,8 @@
     "@civic/guardrail-hook": "workspace:*",
     "@civic/hook-common": "workspace:*",
     "@civic/passthrough-mcp-server": "workspace:*",
-    "@civic/simple-log-hook": "workspace:*"
+    "@civic/simple-log-hook": "workspace:*",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

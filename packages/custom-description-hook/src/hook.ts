@@ -10,23 +10,33 @@ import {
   type ToolsListRequest,
 } from "@civic/hook-common";
 import type { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
+import { z } from "zod";
 
-interface ToolDescription {
-  server: string;
-  toolName: string;
-  toolDescription: string;
-}
+/**
+ * Schema for a single tool description replacement
+ */
+const toolDescriptionSchema = z.object({
+  server: z
+    .string()
+    .describe("Server name (for documentation, not used in matching)"),
+  toolName: z.string().describe("Name of the tool to modify"),
+  toolDescription: z.string().describe("New description for the tool"),
+});
 
-export interface CustomDescriptionConfig {
-  toolDescriptions: ToolDescription[];
-}
+/**
+ * Configuration schema for CustomDescriptionHook
+ */
+export const configSchema = z.object({
+  toolDescriptions: z
+    .array(toolDescriptionSchema)
+    .describe("List of tool description replacements")
+    .default([]),
+});
 
-class CustomDescriptionHook extends AbstractHook {
+export type CustomDescriptionConfig = z.infer<typeof configSchema>;
+
+class CustomDescriptionHook extends AbstractHook<CustomDescriptionConfig> {
   private config: CustomDescriptionConfig | null = null;
-
-  constructor() {
-    super();
-  }
 
   /**
    * The name of this hook
@@ -46,7 +56,7 @@ class CustomDescriptionHook extends AbstractHook {
       );
     } else {
       console.log(
-        `CustomDescriptionHook: No configuration provided - hook will pass through without modifications`,
+        "CustomDescriptionHook: No configuration provided - hook will pass through without modifications",
       );
     }
   }

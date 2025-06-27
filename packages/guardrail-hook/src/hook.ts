@@ -4,33 +4,47 @@
  * Implements the Hook interface for request validation and guardrails
  */
 
-import { AbstractHook, type HookResponse, type ToolCall } from "@civic/hook-common";
+import {
+  AbstractHook,
+  type HookResponse,
+  type ToolCall,
+} from "@civic/hook-common";
+import { z } from "zod";
 
-export interface GuardrailConfig {
-  allowedDomains?: string[];
-  blockedTools?: string[];
-  sensitivePatterns?: string[];
-  enableDestructiveOperationCheck?: boolean;
-}
+/**
+ * Configuration schema for GuardrailHook
+ */
+export const configSchema = z.object({
+  allowedDomains: z
+    .array(z.string())
+    .describe("List of allowed domains for URL-based tools (e.g., github.com)")
+    .optional(),
+  blockedTools: z
+    .array(z.string())
+    .describe("List of tool names to block completely")
+    .optional(),
+  sensitivePatterns: z
+    .array(z.string())
+    .describe("Patterns to detect sensitive data in tool arguments")
+    .default(["password", "secret", "token"]),
+  enableDestructiveOperationCheck: z
+    .boolean()
+    .describe("Block tools with 'delete' or 'remove' in their names")
+    .default(true),
+});
 
-class GuardrailHook extends AbstractHook {
+export type GuardrailConfig = z.infer<typeof configSchema>;
+
+class GuardrailHook extends AbstractHook<GuardrailConfig> {
   private config: GuardrailConfig | null = null;
-  
+
   // Default configuration
   private defaultConfig: GuardrailConfig = {
-    allowedDomains: [
-      "example.com",
-      "github.com",
-      "raw.githubusercontent.com",
-    ],
+    allowedDomains: ["example.com", "github.com", "raw.githubusercontent.com"],
     blockedTools: [],
     sensitivePatterns: ["password", "secret", "token"],
     enableDestructiveOperationCheck: true,
   };
-
-  constructor() {
-    super();
-  }
 
   /**
    * The name of this hook
@@ -45,9 +59,9 @@ class GuardrailHook extends AbstractHook {
   configure(config: GuardrailConfig | null): void {
     this.config = config;
     if (config) {
-      console.log(`GuardrailHook: Configured with custom settings`);
+      console.log("GuardrailHook: Configured with custom settings");
     } else {
-      console.log(`GuardrailHook: Using default configuration`);
+      console.log("GuardrailHook: Using default configuration");
     }
   }
 
@@ -63,7 +77,7 @@ class GuardrailHook extends AbstractHook {
     const config = this.getConfig();
 
     // Check for explicitly blocked tools
-    if (config.blockedTools && config.blockedTools.includes(name)) {
+    if (config.blockedTools?.includes(name)) {
       return {
         response: "abort",
         body: `Tool call to '${name}' was blocked by guardrails: tool is in blocklist`,
@@ -117,7 +131,9 @@ class GuardrailHook extends AbstractHook {
           const url = new URL(toolArgs.url);
 
           if (
-            !config.allowedDomains.some((domain) => url.hostname.endsWith(domain))
+            !config.allowedDomains.some((domain) =>
+              url.hostname.endsWith(domain),
+            )
           ) {
             return {
               response: "abort",

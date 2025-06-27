@@ -6,7 +6,7 @@
 
 import type { Hook, HookClient } from "@civic/hook-common";
 import { LocalHookClient, RemoteHookClient } from "@civic/hook-common";
-import type { HookDefinition, RemoteHookConfig } from "../utils/config.js";
+import type { HookDefinition } from "../utils/config.js";
 import { logger } from "../utils/logger.js";
 
 /**

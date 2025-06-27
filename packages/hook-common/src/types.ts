@@ -1,7 +1,4 @@
-import {
-  type ListToolsResult,
-  ToolSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+import type { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 
 /**
@@ -22,7 +19,8 @@ export const ToolCallSchema = z.object({
   name: z.string(),
   arguments: z.unknown(),
   metadata: ToolCallMetadataSchema.optional(),
-  toolDefinition: ToolSchema.optional(),
+  // Remove toolDefinition for now to avoid deep type instantiation issues
+  // toolDefinition: ToolSchema.optional(),
 });
 
 /**

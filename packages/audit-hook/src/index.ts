@@ -12,10 +12,7 @@ import * as process from "node:process";
 import { createHookRouter } from "@civic/hook-common";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import dotenv from "dotenv";
-import {
-  type AuditLogger,
-  PostgresAuditLogger,
-} from "./audit/index.js";
+import { type AuditLogger, PostgresAuditLogger } from "./audit/index.js";
 import AuditHook from "./hook.js";
 
 // Load environment variables from .env file if it exists

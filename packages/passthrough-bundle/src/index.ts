@@ -4,25 +4,11 @@
  * Combines passthrough-mcp-server with hook loading capabilities
  */
 
-import { readFileSync } from "node:fs";
 import type { HookDefinition } from "@civic/passthrough-mcp-server";
 import { createPassthroughProxy } from "@civic/passthrough-mcp-server";
+import { loadConfigFromFile } from "./config/loader.js";
+import type { BundleConfig } from "./config/schema";
 import { loadHooks } from "./hookLoader.js";
-
-interface BundleConfig {
-  target: {
-    command?: string;
-    url?: string;
-  };
-  proxy: {
-    port: number;
-    transport: string;
-  };
-  hooks: Array<{
-    name?: string;
-    url?: string;
-  }>;
-}
 
 /**
  * Load configuration from file or environment
@@ -30,15 +16,7 @@ interface BundleConfig {
 function loadConfig(): BundleConfig {
   // Try to load from CONFIG_FILE first
   const configFile = process.env.CONFIG_FILE;
-  if (configFile) {
-    try {
-      const content = readFileSync(configFile, "utf-8");
-      return JSON.parse(content) as BundleConfig;
-    } catch (error) {
-      console.error(`Failed to load config from ${configFile}:`, error);
-      throw error;
-    }
-  }
+  if (configFile) return loadConfigFromFile(configFile);
 
   // Fall back to passthrough-mcp-server's config loading
   // This will throw an error about hooks without URLs, which is expected

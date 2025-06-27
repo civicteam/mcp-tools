@@ -68,13 +68,6 @@ export function createPassthroughHandler(
         timestamp: new Date().toISOString(),
         source: "passthrough-server",
       },
-      toolDefinition: toolDefinition
-        ? {
-            name: toolDefinition.name,
-            description: toolDefinition.description,
-            inputSchema: toolDefinition.inputSchema,
-          }
-        : undefined,
     };
 
     // Get hook clients

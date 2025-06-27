@@ -20,10 +20,11 @@
     "export-logs": "tsx scripts/export-logs.ts"
   },
   "dependencies": {
+    "@civic/hook-common": "workspace:^",
     "@trpc/server": "^11.1.2",
     "dotenv": "^16.3.1",
-    "@civic/hook-common": "workspace:^",
-    "pg": "^8.11.3"
+    "pg": "^8.11.3",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

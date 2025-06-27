@@ -9,7 +9,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import * as process from "node:process";
-import type { Hook } from "@civic/hook-common";
+import type { Hook, RemoteHookConfig } from "@civic/hook-common";
 import { configureLoggerForStdio, logger } from "./logger.js";
 
 type TransportType = "stdio" | "sse" | "httpStream";
@@ -34,11 +34,6 @@ export type TargetConfig =
       transportType: "stdio";
       command: string;
     };
-
-export interface RemoteHookConfig {
-  url: string;
-  name?: string; // Optional name for the hook
-}
 
 export type HookDefinition = RemoteHookConfig | Hook;
 

@@ -8,6 +8,7 @@ import {
 } from "./config.js";
 import { generateProject } from "./generator.js";
 import { type BuiltInHookName, getBuiltInHookNames } from "./hooks.js";
+import { promptHookConfiguration, displayHookConfigSummary } from "./prompts-config.js";
 
 export interface CLIOptions {
   targetMode?: string;
@@ -148,10 +149,19 @@ export async function runWizard(
   if (options?.hooks && options.hooks.length > 0) {
     for (const hookName of options.hooks) {
       if (builtInHookNames.includes(hookName as BuiltInHookName)) {
-        selectedHooks.push({
+        const hookEntry: HookEntry = {
           type: "built-in",
           name: hookName as BuiltInHookName,
-        });
+        };
+        
+        // Prompt for configuration even for CLI-provided hooks
+        const config = await promptHookConfiguration(hookName as BuiltInHookName);
+        if (config) {
+          hookEntry.config = config;
+          displayHookConfigSummary(hookName, config);
+        }
+        
+        selectedHooks.push(hookEntry);
       } else {
         // Treat as custom hook URL
         try {
@@ -193,12 +203,21 @@ export async function runWizard(
       },
     ]);
 
-    // Add selected built-in hooks
+    // Add selected built-in hooks and configure them
     for (const hookName of selectedBuiltInHooks) {
-      selectedHooks.push({
+      const hookEntry: HookEntry = {
         type: "built-in",
         name: hookName as BuiltInHookName,
-      });
+      };
+      
+      // Prompt for configuration
+      const config = await promptHookConfiguration(hookName as BuiltInHookName);
+      if (config) {
+        hookEntry.config = config;
+        displayHookConfigSummary(hookName, config);
+      }
+      
+      selectedHooks.push(hookEntry);
     }
 
     if (selectedBuiltInHooks.length > 0) {

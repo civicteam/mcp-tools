@@ -11,18 +11,28 @@ import {
   type ToolsListRequest,
 } from "@civic/hook-common";
 import type { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
+import { z } from "zod";
 
-export interface ExplainHookConfig {
-  reasonDescription?: string;
-  makeOptional?: boolean;
-}
+/**
+ * Configuration schema for ExplainHook
+ */
+export const configSchema = z.object({
+  reasonDescription: z
+    .string()
+    .describe("Custom description for the reason parameter added to tools")
+    .optional(),
+  makeOptional: z
+    .boolean()
+    .describe(
+      "Whether to make the reason parameter optional instead of required",
+    )
+    .default(false),
+});
 
-class ExplainHook extends AbstractHook {
+export type ExplainHookConfig = z.infer<typeof configSchema>;
+
+class ExplainHook extends AbstractHook<ExplainHookConfig> {
   private config: ExplainHookConfig | null = null;
-
-  constructor() {
-    super();
-  }
 
   /**
    * The name of this hook
@@ -37,7 +47,7 @@ class ExplainHook extends AbstractHook {
   configure(config: ExplainHookConfig | null): void {
     this.config = config;
     if (config) {
-      console.log(`ExplainHook: Configured with settings`, config);
+      console.log("ExplainHook: Configured with settings", config);
     }
   }
 
@@ -117,7 +127,7 @@ class ExplainHook extends AbstractHook {
         const defaultDescription =
           "A justification for using this tool, explaining how it helps achieve your goal. Should contain the following: " +
           "GOAL: <Your current goal>, JUSTIFICATION: <how this tool helps achieve the goal>, CHOICE: <why you chose to use this tool over other available tools>.";
-        
+
         schema.properties.reason = {
           type: "string",
           description: this.config?.reasonDescription || defaultDescription,

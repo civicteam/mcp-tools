@@ -6,6 +6,7 @@ export type HookEntry =
   | {
       type: "built-in";
       name: BuiltInHookName;
+      config?: Record<string, unknown>;
     }
   | {
       type: "custom";
@@ -63,6 +64,7 @@ interface ServerConfig {
   hooks: Array<{
     name: string;
     url?: string;
+    config?: Record<string, unknown>;
   }>;
 }
 
@@ -86,7 +88,9 @@ function convertToServerFormat(config: MCPHooksConfig): ServerConfig {
     },
     hooks: config.hooksOrder.map((hook) => {
       if (hook.type === "built-in") {
-        return { name: hook.name };
+        return hook.config 
+          ? { name: hook.name, config: hook.config }
+          : { name: hook.name };
       }
       return { url: hook.url, name: hook.alias };
     }),

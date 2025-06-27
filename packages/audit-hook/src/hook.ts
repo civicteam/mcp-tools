@@ -4,18 +4,41 @@
  * Implements the Hook interface for audit logging
  */
 
-import { AbstractHook, type HookResponse, type ToolCall } from "@civic/hook-common";
+import {
+  AbstractHook,
+  type HookResponse,
+  type ToolCall,
+} from "@civic/hook-common";
+import { z } from "zod";
 import { CompositeAuditLogger } from "./audit/composite-logger.js";
 import { ConsoleAuditLogger } from "./audit/console-logger.js";
 import { FileAuditLogger } from "./audit/file-logger.js";
 import type { AuditEntry, AuditLogger } from "./audit/types.js";
 
-export interface AuditHookConfig {
-  loggers?: Array<"console" | "file" | { custom: AuditLogger }>;
-  fileLogPath?: string;
-}
+/**
+ * Configuration schema for AuditHook
+ * Note: Custom loggers must be configured programmatically, not through CLI
+ */
+export const configSchema = z.object({
+  loggers: z
+    .array(z.enum(["console", "file"]))
+    .describe("Types of loggers to enable (console, file)")
+    .default(["console"]),
+  fileLogPath: z
+    .string()
+    .describe("Path to the audit log file (when file logger is enabled)")
+    .default("./audit.log"),
+});
 
-class AuditHook extends AbstractHook {
+// Base config from schema (for CLI configuration)
+export type AuditHookConfigBase = z.infer<typeof configSchema>;
+
+// Extended config with programmatic options
+export type AuditHookConfig = Omit<AuditHookConfigBase, "loggers"> & {
+  loggers?: Array<"console" | "file" | { custom: AuditLogger }>;
+};
+
+class AuditHook extends AbstractHook<AuditHookConfig> {
   private auditLogger: AuditLogger;
 
   constructor() {
@@ -43,7 +66,7 @@ class AuditHook extends AbstractHook {
     }
 
     const loggers: AuditLogger[] = [];
-    
+
     for (const loggerConfig of config.loggers) {
       if (loggerConfig === "console") {
         loggers.push(new ConsoleAuditLogger());
@@ -54,7 +77,8 @@ class AuditHook extends AbstractHook {
       }
     }
 
-    this.auditLogger = loggers.length === 1 ? loggers[0] : new CompositeAuditLogger(loggers);
+    this.auditLogger =
+      loggers.length === 1 ? loggers[0] : new CompositeAuditLogger(loggers);
     console.log(`AuditHook: Configured with ${loggers.length} logger(s)`);
   }
 

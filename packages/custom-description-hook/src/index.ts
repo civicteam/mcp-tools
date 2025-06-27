@@ -10,9 +10,7 @@ import { resolve } from "node:path";
 import * as process from "node:process";
 import { createHookRouter } from "@civic/hook-common";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
-import CustomDescriptionHook, {
-  type CustomDescriptionConfig,
-} from "./hook.js";
+import CustomDescriptionHook, { type CustomDescriptionConfig } from "./hook.js";
 
 // Configuration
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT) : 33008;
@@ -43,7 +41,7 @@ async function loadConfig(): Promise<CustomDescriptionConfig | null> {
     return JSON.parse(configContent) as CustomDescriptionConfig;
   } catch (error) {
     console.log(
-      `CustomDescriptionHook: No configuration found or failed to load config - hook will pass through without modifications`,
+      "CustomDescriptionHook: No configuration found or failed to load config - hook will pass through without modifications",
     );
     return null;
   }
